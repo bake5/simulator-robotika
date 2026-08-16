@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deck Lab 1 — LED On Off</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--putih);
+    font-family: var(--font-utama);
+    color: var(--teks);
+  }
+
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding: 6vh 8vw;
+    text-align: center;
+    background: var(--putih);
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 300ms ease, transform 300ms ease;
+    pointer-events: none;
+  }
+
+  .slide.aktif {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    z-index: 1;
+  }
+
+  .slide-oranye {
+    background: var(--oranye);
+    color: #ffffff;
+  }
+
+  .kanal {
+    position: fixed;
+    top: 22px;
+    left: 28px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--teks-lembut);
+    z-index: 5;
+  }
+
+  .slide-oranye .kanal {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .judul-slide {
+    font-size: clamp(2.1rem, 5vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  .subjudul-slide {
+    font-size: clamp(1.05rem, 2.1vw, 1.5rem);
+    font-weight: 400;
+    max-width: 42em;
+    margin: 0;
+    color: var(--teks-lembut);
+  }
+
+  .slide-oranye .subjudul-slide {
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  .ilustrasi {
+    width: min(56vw, 560px);
+    max-width: 100%;
+    display: block;
+  }
+
+  .ilustrasi-besar {
+    width: min(62vw, 620px);
+  }
+
+  .catatan-slide {
+    font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+    color: var(--teks-lembut);
+    max-width: 38em;
+    margin: 0;
+  }
+
+  /* ---------- Navigasi ---------- */
+
+  .tombol-nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--abu-garis);
+    background: var(--putih-kartu);
+    color: var(--teks);
+    box-shadow: var(--bayangan-tipis);
+    font-size: 1.5rem;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background var(--transisi), opacity var(--transisi);
+  }
+
+  .tombol-nav:hover {
+    background: var(--abu-muda);
+  }
+
+  .tombol-nav:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .tombol-nav.kiri { left: 26px; }
+  .tombol-nav.kanan { right: 26px; }
+
+  .indikator-slide {
+    position: fixed;
+    right: 26px;
+    bottom: 22px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--teks-lembut);
+    background: var(--putih-kartu);
+    border: 1px solid var(--abu-garis);
+    border-radius: 999px;
+    padding: 5px 14px;
+    z-index: 10;
+  }
+
+  /* ================= Slide 1 dan 7, LED besar ================= */
+
+  .led-glow {
+    animation: ledGlowBesar 2.8s ease-in-out infinite;
+    transform-origin: 150px 150px;
+  }
+
+  .led-inti {
+    animation: ledIntiBesar 2.8s ease-in-out infinite;
+    transform-origin: 150px 150px;
+  }
+
+  .led-sinar { animation: sinarBesar 2.8s ease-in-out infinite; }
+  .led-sinar:nth-child(2) { animation-delay: 0.15s; }
+  .led-sinar:nth-child(3) { animation-delay: 0.3s; }
+  .led-sinar:nth-child(4) { animation-delay: 0.45s; }
+  .led-sinar:nth-child(5) { animation-delay: 0.6s; }
+  .led-sinar:nth-child(6) { animation-delay: 0.75s; }
+  .led-sinar:nth-child(7) { animation-delay: 0.9s; }
+  .led-sinar:nth-child(8) { animation-delay: 1.05s; }
+
+  @keyframes ledGlowBesar {
+    0%, 100% { opacity: 0.18; transform: scale(0.95); }
+    50% { opacity: 0.4; transform: scale(1.08); }
+  }
+
+  @keyframes ledIntiBesar {
+    0%, 100% { opacity: 0.75; transform: scale(0.97); }
+    50% { opacity: 1; transform: scale(1.03); }
+  }
+
+  @keyframes sinarBesar {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.85; }
+  }
+
+  /* ================= Slide 2, saklar rumah ================= */
+
+  .rocker {
+    animation: rockerToggle 4s ease-in-out infinite;
+    transform-origin: 150px 210px;
+  }
+
+  .lampu-cahaya { animation: lampuKedip 4s ease-in-out infinite; }
+  .lampu-glow { animation: lampuGlowKedip 4s ease-in-out infinite; }
+
+  .label-nyala { animation: labelNyalaMuncul 4s ease-in-out infinite; }
+  .label-mati { animation: labelMatiMuncul 4s ease-in-out infinite; }
+
+  @keyframes rockerToggle {
+    0%, 40% { transform: translateY(-9px); }
+    50%, 90% { transform: translateY(9px); }
+    100% { transform: translateY(-9px); }
+  }
+
+  @keyframes lampuKedip {
+    0%, 40% { opacity: 1; }
+    50%, 90% { opacity: 0.12; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes lampuGlowKedip {
+    0%, 40% { opacity: 0.55; }
+    50%, 90% { opacity: 0; }
+    100% { opacity: 0.55; }
+  }
+
+  @keyframes labelNyalaMuncul {
+    0%, 36% { opacity: 1; transform: translateY(0); }
+    46%, 94% { opacity: 0; transform: translateY(6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes labelMatiMuncul {
+    0%, 36% { opacity: 0; transform: translateY(-6px); }
+    46%, 90% { opacity: 1; transform: translateY(0); }
+    96%, 100% { opacity: 0; transform: translateY(-6px); }
+  }
+
+  /* ================= Slide 3, kartu HIGH LOW ================= */
+
+  .kartu-sinyal {
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .kartu-hl {
+    width: 220px;
+    padding: 28px 20px;
+    border-radius: var(--radius-kartu);
+    opacity: 0;
+  }
+
+  .slide.aktif .kartu-hl {
+    animation: kartuMasuk 620ms ease-out both;
+  }
+
+  .slide.aktif .kartu-high { animation-delay: 120ms; }
+  .slide.aktif .kartu-low { animation-delay: 420ms; }
+
+  @keyframes kartuMasuk {
+    0% { opacity: 0; transform: translateY(22px) scale(0.97); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .kartu-high {
+    background: var(--oranye-muda);
+    border: 1px solid var(--oranye);
+  }
+
+  .kartu-low {
+    background: var(--abu-muda);
+    border: 1px solid var(--abu-garis);
+  }
+
+  .kartu-hl-label {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+
+  .kartu-high .kartu-hl-label { color: var(--oranye); }
+  .kartu-low .kartu-hl-label { color: var(--teks-lembut); }
+
+  .kartu-hl-nilai {
+    font-size: 1rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--teks-lembut);
+    margin: 0 0 18px;
+  }
+
+  .gelombang-tinggi { animation: gelombangNapas 2.4s ease-in-out infinite; }
+
+  @keyframes gelombangNapas {
+    0%, 100% { opacity: 0.7; transform: scaleY(0.92); }
+    50% { opacity: 1; transform: scaleY(1.06); }
+  }
+
+  /* ================= Slide 4, rangkaian ================= */
+
+  .lengan-saklar {
+    animation: lenganSaklar 4s ease-in-out infinite;
+    transform-origin: 108px 60px;
+  }
+
+  .titik-arus {
+    animation: arusFlow 1.1s linear infinite, arusTampak 4s ease-in-out infinite;
+  }
+
+  .led-rangkaian { animation: ledRangkaianKedip 4s ease-in-out infinite; }
+  .led-rangkaian-glow { animation: ledRangkaianGlow 4s ease-in-out infinite; }
+
+  @keyframes lenganSaklar {
+    0%, 40% { transform: rotate(-28deg); }
+    50%, 90% { transform: rotate(0deg); }
+    100% { transform: rotate(-28deg); }
+  }
+
+  @keyframes arusFlow {
+    0% { stroke-dashoffset: 32; }
+    100% { stroke-dashoffset: 0; }
+  }
+
+  /* Lengan saklar rotate(-28deg) di 0-40% berarti TERBUKA, rotate(0deg) di 50-90% berarti TERTUTUP.
+     Arus dan LED harus tampak hanya saat saklar tertutup, jadi fasenya kebalikan dari lenganSaklar. */
+  @keyframes arusTampak {
+    0%, 40% { opacity: 0; }
+    50%, 90% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes ledRangkaianKedip {
+    0%, 40% { opacity: 0.15; }
+    50%, 90% { opacity: 1; }
+    100% { opacity: 0.15; }
+  }
+
+  @keyframes ledRangkaianGlow {
+    0%, 40% { opacity: 0; }
+    50%, 90% { opacity: 0.5; }
+    100% { opacity: 0; }
+  }
+
+  /* ================= Slide 5, sinyal dan gangguan ================= */
+
+  .gelombang-kotak {
+    animation: geserGelombang 6s linear infinite;
+  }
+
+  @keyframes geserGelombang {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-120px); }
+  }
+
+  .garis-gangguan {
+    animation: gangguanGoyang 3.2s ease-in-out infinite;
+  }
+
+  @keyframes gangguanGoyang {
+    0% { transform: translateY(0); }
+    8% { transform: translateY(-3px); }
+    18% { transform: translateY(2px); }
+    29% { transform: translateY(-4px); }
+    41% { transform: translateY(1px); }
+    54% { transform: translateY(-2px); }
+    68% { transform: translateY(3px); }
+    80% { transform: translateY(-1px); }
+    91% { transform: translateY(2px); }
+    100% { transform: translateY(0); }
+  }
+
+  .centang-stabil {
+    animation: centangNapas 3s ease-in-out infinite;
+    transform-origin: 268px 66px;
+  }
+
+  @keyframes centangNapas {
+    0%, 100% { opacity: 0.85; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
+  }
+
+  /* ================= Slide 6, robot dan gelembung sinyal ================= */
+
+  .gelembung-on {
+    animation: gelembungJalanA 2.6s ease-in-out infinite;
+  }
+
+  .gelembung-off {
+    animation: gelembungJalanB 2.6s ease-in-out infinite;
+    animation-delay: 1.3s;
+  }
+
+  @keyframes gelembungJalanA {
+    0% { transform: translate(0, 0); opacity: 0; }
+    12% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translate(0, -95px); opacity: 0; }
+  }
+
+  @keyframes gelembungJalanB {
+    0% { transform: translate(0, 0); opacity: 0; }
+    12% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translate(0, -95px); opacity: 0; }
+  }
+
+  .roda-putar { animation: rodaBerputar 1.6s linear infinite; }
+
+  @keyframes rodaBerputar {
+    0% { transform: scaleY(1); }
+    50% { transform: scaleY(0.82); }
+    100% { transform: scaleY(1); }
+  }
+
+  /* ================= Slide 7, kursor mengklik ================= */
+
+  .kursor-klik {
+    animation: kursorGerak 3.2s ease-in-out infinite;
+  }
+
+  @keyframes kursorGerak {
+    0%, 18% { transform: translate(-26px, -22px); }
+    38%, 58% { transform: translate(0, 0); }
+    100% { transform: translate(-26px, -22px); }
+  }
+
+  .riak-klik {
+    animation: riakMuncul 3.2s ease-in-out infinite;
+    transform-origin: 150px 150px;
+  }
+
+  @keyframes riakMuncul {
+    0%, 40% { opacity: 0; transform: scale(0.6); }
+    52% { opacity: 0.6; transform: scale(1); }
+    70%, 100% { opacity: 0; transform: scale(1.5); }
+  }
+
+  .saklar-tutup-7 {
+    animation: saklarTutupTujuh 3.2s ease-in-out infinite;
+  }
+
+  @keyframes saklarTutupTujuh {
+    0%, 40% { opacity: 0.5; }
+    55%, 100% { opacity: 1; }
+  }
+
+  @media (max-width: 720px) {
+    .tombol-nav { width: 42px; height: 42px; font-size: 1.2rem; }
+    .tombol-nav.kiri { left: 12px; }
+    .tombol-nav.kanan { right: 12px; }
+    .ilustrasi, .ilustrasi-besar { width: 78vw; }
+  }
+</style>
+</head>
+<body>
+
+<span class="kanal">Robotics Vision Journey · Lab 1</span>
+
+<div class="deck">
+
+  <!-- Slide 1 — Pembuka -->
+  <section class="slide slide-oranye aktif" data-slide="1">
+    <svg class="ilustrasi ilustrasi-besar" viewBox="0 0 300 300" role="img" aria-label="Ilustrasi lampu LED besar menyala redup berulang">
+      <g class="led-glow">
+        <circle cx="150" cy="150" r="105" fill="#ffffff" opacity="0.3"/>
+      </g>
+      <g class="led-sinar" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.5">
+        <line x1="150" y1="26" x2="150" y2="52"/>
+      </g>
+      <g class="led-sinar" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.5">
+        <line x1="228" y1="52" x2="210" y2="70"/>
+      </g>
+      <g class="led-sinar" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.5">
+        <line x1="258" y1="150" x2="232" y2="150"/>
+      </g>
+      <g class="led-sinar" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.5">
+        <line x1="228" y1="248" x2="210" y2="230"/>
+      </g>
+      <g class="led-sinar" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.5">
+        <line x1="150" y1="274" x2="150" y2="248"/>
+      </g>
+      <g class="led-sinar" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.5">
+        <line x1="72" y1="248" x2="90" y2="230"/>
+      </g>
+      <g class="led-sinar" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.5">
+        <line x1="42" y1="150" x2="68" y2="150"/>
+      </g>
+      <g class="led-sinar" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.5">
+        <line x1="72" y1="52" x2="90" y2="70"/>
+      </g>
+      <g class="led-inti">
+        <circle cx="150" cy="150" r="66" fill="var(--led-nyala)" stroke="#ffffff" stroke-width="6"/>
+      </g>
+      <g stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.9">
+        <line x1="128" y1="238" x2="128" y2="268"/>
+        <line x1="172" y1="238" x2="172" y2="268"/>
+      </g>
+    </svg>
+    <h1 class="judul-slide">LED On Off</h1>
+    <p class="subjudul-slide">Bahasa paling sederhana yang dipahami mesin</p>
+  </section>
+
+  <!-- Slide 2 — Saklar lampu di rumah -->
+  <section class="slide" data-slide="2">
+    <svg class="ilustrasi" viewBox="0 0 300 340" role="img" aria-label="Ilustrasi saklar dinding dan lampu bergantian nyala mati">
+      <g class="lampu-glow">
+        <circle cx="150" cy="70" r="58" fill="var(--oranye-muda)"/>
+      </g>
+      <line x1="150" y1="10" x2="150" y2="36" stroke="var(--teks-lembut)" stroke-width="4" stroke-linecap="round"/>
+      <g class="lampu-cahaya">
+        <circle cx="150" cy="70" r="36" fill="var(--led-nyala)"/>
+      </g>
+      <circle cx="150" cy="70" r="36" fill="none" stroke="var(--teks)" stroke-width="3"/>
+
+      <rect x="90" y="170" width="120" height="150" rx="18" fill="var(--putih-kartu)" stroke="var(--abu-garis)" stroke-width="3"/>
+      <rect x="120" y="196" width="60" height="98" rx="14" fill="var(--abu-muda)" stroke="var(--teks-lembut)" stroke-width="3"/>
+      <g class="rocker">
+        <rect x="130" y="206" width="40" height="40" rx="10" fill="var(--oranye)"/>
+      </g>
+
+      <text class="label-nyala" x="150" y="330" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="26" fill="var(--oranye)">NYALA</text>
+      <text class="label-mati" x="150" y="330" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="26" fill="var(--teks-lembut)">MATI</text>
+    </svg>
+    <h2 class="judul-slide">Saklar lampu di rumah</h2>
+    <p class="subjudul-slide">Cuma ada dua posisi, tidak ada setengah nyala</p>
+  </section>
+
+  <!-- Slide 3 — HIGH dan LOW -->
+  <section class="slide" data-slide="3">
+    <h2 class="judul-slide">Dua keadaan punya nama</h2>
+    <p class="subjudul-slide">HIGH untuk ada tegangan, LOW untuk tidak ada tegangan</p>
+    <div class="kartu-sinyal">
+      <div class="kartu-hl kartu-high">
+        <svg viewBox="0 0 160 50" width="100%" height="46" aria-hidden="true">
+          <polyline class="gelombang-tinggi" points="4,40 4,10 40,10 40,40 76,40 76,10 112,10 112,40 148,40 148,10"
+            fill="none" stroke="var(--oranye)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p class="kartu-hl-label">HIGH</p>
+        <p class="kartu-hl-nilai">5 V</p>
+      </div>
+      <div class="kartu-hl kartu-low">
+        <svg viewBox="0 0 160 50" width="100%" height="46" aria-hidden="true">
+          <line x1="4" y1="40" x2="148" y2="40" stroke="var(--teks-lembut)" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <p class="kartu-hl-label">LOW</p>
+        <p class="kartu-hl-nilai">0 V</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4 — Rangkaian pertama -->
+  <section class="slide" data-slide="4">
+    <svg class="ilustrasi ilustrasi-besar" viewBox="0 0 340 220" role="img" aria-label="Ilustrasi rangkaian baterai saklar dan LED yang menyala saat saklar tertutup">
+      <!-- kawat dasar -->
+      <path d="M 40 190 L 40 60 L 108 60 M 148 60 L 260 60 L 260 190 L 40 190"
+        fill="none" stroke="var(--abu-garis)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- titik arus mengalir -->
+      <path class="titik-arus" d="M 40 190 L 40 60 L 108 60 M 148 60 L 260 60 L 260 190 L 40 190"
+        fill="none" stroke="var(--oranye)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
+        stroke-dasharray="2 14"/>
+
+      <!-- baterai -->
+      <line x1="24" y1="118" x2="56" y2="118" stroke="var(--teks)" stroke-width="4" stroke-linecap="round"/>
+      <line x1="32" y1="132" x2="48" y2="132" stroke="var(--teks)" stroke-width="8" stroke-linecap="round"/>
+      <text x="40" y="160" text-anchor="middle" font-family="var(--font-utama)" font-weight="600" font-size="15" fill="var(--teks-lembut)">Baterai</text>
+
+      <!-- saklar -->
+      <circle cx="108" cy="60" r="5" fill="var(--teks)"/>
+      <circle cx="148" cy="60" r="5" fill="var(--teks)"/>
+      <line class="lengan-saklar" x1="108" y1="60" x2="146" y2="60" stroke="var(--teks)" stroke-width="5" stroke-linecap="round"/>
+      <text x="128" y="34" text-anchor="middle" font-family="var(--font-utama)" font-weight="600" font-size="15" fill="var(--teks-lembut)">Saklar</text>
+
+      <!-- LED -->
+      <g class="led-rangkaian-glow">
+        <circle cx="260" cy="125" r="40" fill="var(--oranye-muda)"/>
+      </g>
+      <g class="led-rangkaian">
+        <circle cx="260" cy="125" r="24" fill="var(--led-nyala)"/>
+      </g>
+      <circle cx="260" cy="125" r="24" fill="none" stroke="var(--teks)" stroke-width="3"/>
+      <text x="260" y="176" text-anchor="middle" font-family="var(--font-utama)" font-weight="600" font-size="15" fill="var(--teks-lembut)">LED</text>
+    </svg>
+    <h2 class="judul-slide">Rangkaian pertama kita</h2>
+    <p class="catatan-slide">Saklar tertutup arus mengalir LED menyala. Saklar terbuka arus berhenti LED padam</p>
+  </section>
+
+  <!-- Slide 5 — Kenapa dua keadaan itu hebat -->
+  <section class="slide" data-slide="5">
+    <svg class="ilustrasi ilustrasi-besar" viewBox="0 0 300 160" role="img" aria-label="Ilustrasi sinyal kotak dengan gangguan kecil namun pembacaan tetap stabil">
+      <line x1="0" y1="36" x2="300" y2="36" stroke="var(--abu-garis)" stroke-width="2" stroke-dasharray="6 6"/>
+      <line x1="0" y1="112" x2="300" y2="112" stroke="var(--abu-garis)" stroke-width="2" stroke-dasharray="6 6"/>
+
+      <svg viewBox="0 0 300 160" width="300" height="160" style="overflow:visible">
+        <polyline class="gelombang-kotak" points="
+          -40,112 -10,112 -10,36 30,36 30,112 70,112 70,36 110,36 110,112
+          150,112 150,36 190,36 190,112 230,112 230,36 270,36 270,112
+          310,112 310,36 350,36 350,112 390,112 390,36 420,36 420,112"
+          fill="none" stroke="var(--oranye)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+
+      <polyline class="garis-gangguan" points="0,74 20,68 40,80 60,66 80,78 100,70 120,82 140,68 160,76 180,70 200,80 220,68 240,78 260,70 280,80 300,72"
+        fill="none" stroke="var(--teks-lembut)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+
+      <g class="centang-stabil">
+        <circle cx="268" cy="66" r="22" fill="var(--hijau-muda)" stroke="var(--hijau)" stroke-width="3"/>
+        <path d="M 258 66 L 265 73 L 279 58" fill="none" stroke="var(--hijau)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </svg>
+    <h2 class="judul-slide">Kenapa dua keadaan itu hebat</h2>
+    <p class="catatan-slide">Selama gangguannya tidak melewati garis ambang pembacaannya tetap benar</p>
+  </section>
+
+  <!-- Slide 6 — Hubungan dengan robot -->
+  <section class="slide" data-slide="6">
+    <svg class="ilustrasi ilustrasi-besar" viewBox="0 0 320 240" role="img" aria-label="Ilustrasi robot line follower tampak atas dengan sinyal on off mengalir dari sensor ke badan robot">
+      <path d="M 10 210 Q 120 140 160 180 Q 200 220 310 120" fill="none" stroke="var(--lintasan)" stroke-width="10" stroke-linecap="round" opacity="0.5"/>
+
+      <line x1="150" y1="88" x2="150" y2="150" stroke="var(--abu-garis)" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>
+
+      <g transform="translate(150, 55)">
+        <rect x="-38" y="-4" width="16" height="46" rx="6" fill="var(--robot-roda)" class="roda-putar"/>
+        <rect x="22" y="-4" width="16" height="46" rx="6" fill="var(--robot-roda)" class="roda-putar"/>
+        <rect x="-30" y="-26" width="60" height="66" rx="16" fill="var(--robot-badan)"/>
+      </g>
+
+      <circle cx="150" cy="150" r="10" fill="var(--putih-kartu)" stroke="var(--teks)" stroke-width="3"/>
+      <text x="150" y="180" text-anchor="middle" font-family="var(--font-utama)" font-weight="600" font-size="14" fill="var(--teks-lembut)">Sensor</text>
+
+      <g class="gelembung-on">
+        <circle cx="150" cy="150" r="12" fill="var(--oranye)"/>
+        <text x="150" y="154" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="10" fill="#ffffff">ON</text>
+      </g>
+      <g class="gelembung-off">
+        <circle cx="150" cy="150" r="12" fill="var(--abu-garis)"/>
+        <text x="150" y="154" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="9" fill="var(--teks-lembut)">OFF</text>
+      </g>
+    </svg>
+    <h2 class="judul-slide">Hubungannya dengan robot kita</h2>
+    <p class="catatan-slide">Sensor mengirim sinyal on off ribuan kali tiap detik untuk memutuskan arah gerak</p>
+  </section>
+
+  <!-- Slide 7 — Penutup -->
+  <section class="slide slide-oranye" data-slide="7">
+    <svg class="ilustrasi ilustrasi-besar" viewBox="0 0 300 300" role="img" aria-label="Ilustrasi kursor mengklik saklar untuk mencoba simulator">
+      <circle cx="150" cy="150" r="90" fill="#ffffff" opacity="0.12"/>
+      <rect x="98" y="110" width="104" height="80" rx="16" fill="#ffffff" opacity="0.95"/>
+      <rect x="120" y="128" width="60" height="44" rx="10" fill="var(--abu-muda)" stroke="var(--oranye)" stroke-width="3"/>
+      <rect class="saklar-tutup-7" x="130" y="138" width="40" height="24" rx="7" fill="var(--oranye)"/>
+
+      <g class="riak-klik">
+        <circle cx="150" cy="150" r="26" fill="none" stroke="#ffffff" stroke-width="4"/>
+      </g>
+
+      <g class="kursor-klik">
+        <path d="M 150 150 L 150 196 L 162 186 L 170 202 L 178 198 L 170 182 L 186 180 Z" fill="#ffffff" stroke="var(--teks)" stroke-width="2.5" stroke-linejoin="round"/>
+      </g>
+    </svg>
+    <h1 class="judul-slide">Sekarang giliranmu</h1>
+    <p class="subjudul-slide">Buka simulator Lab 1 dan mainkan saklarnya</p>
+  </section>
+
+</div>
+
+<button class="tombol-nav kiri" id="tombolMundur" aria-label="Slide sebelumnya">‹</button>
+<button class="tombol-nav kanan" id="tombolMaju" aria-label="Slide berikutnya">›</button>
+<span class="indikator-slide"><span id="nomorSekarang">1</span> / <span id="totalSlide">7</span></span>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var indeks = 0;
+
+  var tombolMundur = document.getElementById("tombolMundur");
+  var tombolMaju = document.getElementById("tombolMaju");
+  var nomorSekarang = document.getElementById("nomorSekarang");
+
+  document.getElementById("totalSlide").textContent = slides.length;
+
+  function tampilkan(indeksBaru) {
+    if (indeksBaru < 0 || indeksBaru >= slides.length) return;
+    slides[indeks].classList.remove("aktif");
+    indeks = indeksBaru;
+    slides[indeks].classList.add("aktif");
+    nomorSekarang.textContent = indeks + 1;
+    tombolMundur.disabled = indeks === 0;
+    tombolMaju.disabled = indeks === slides.length - 1;
+  }
+
+  function maju() { tampilkan(indeks + 1); }
+  function mundur() { tampilkan(indeks - 1); }
+
+  tombolMaju.addEventListener("click", maju);
+  tombolMundur.addEventListener("click", mundur);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight" || e.key === "PageDown") {
+      e.preventDefault();
+      maju();
+    } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+      e.preventDefault();
+      mundur();
+    }
+  });
+
+  tampilkan(0);
+})();
+</script>
+
+</body>
+</html>
