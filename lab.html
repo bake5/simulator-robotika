@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab · Robotics Vision Journey</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/lab.css">
+</head>
+<body>
+  <header class="kepala-lab">
+    <div class="wadah">
+      <a class="tautan-kembali" href="index.html">← Beranda</a>
+      <div class="info-lab">
+        <h1 id="judulLab">Memuat…</h1>
+        <p class="tujuan" id="tujuanLab"></p>
+      </div>
+      <span class="lencana-selesai" id="lencanaSelesai" hidden>✓ Selesai</span>
+    </div>
+  </header>
+
+  <main class="wadah tata-lab">
+    <div class="kartu kartu-panduan">
+      <h2>Panduan</h2>
+      <div id="isiPanduan"></div>
+      <div id="isiChecklist"></div>
+    </div>
+
+    <div class="baris-utama">
+      <section class="kolom-arena">
+        <div class="kartu">
+          <canvas id="kanvasLab" aria-label="Visualisasi rangkaian lab"></canvas>
+        </div>
+      </section>
+
+      <aside class="kolom-panel">
+        <div class="kotak-selesai" id="kotakSelesai" role="status" aria-live="polite" hidden></div>
+        <div class="kartu">
+          <h2>Kontrol</h2>
+          <div id="isiKontrol"></div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="kartu kartu-koding" id="kartuKoding" hidden>
+      <h2 id="judulKoding">Level 2: Tulis Kode</h2>
+      <p class="deskripsi-koding" id="deskripsiKoding" hidden></p>
+      <div id="isiKoding"></div>
+    </div>
+  </main>
+
+  <script type="module" src="render/aplikasiLab.js"></script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+/* Reset ringan, tipografi, dan komponen umum yang dipakai lintas halaman. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-utama);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--teks);
+  background: var(--putih);
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--oranye);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.wadah {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+/* ---------- Header aplikasi ---------- */
+
+.kepala-app {
+  background: var(--oranye);
+  color: #ffffff;
+  padding-block: 28px 30px;
+}
+
+.kepala-app h1 {
+  font-size: 1.7rem;
+}
+
+.kepala-app .subjudul {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  opacity: 0.92;
+  max-width: 46em;
+}
+
+/* ---------- Tombol ---------- */
+
+.tombol {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-tombol);
+  background: var(--oranye);
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background var(--transisi);
+}
+
+.tombol:hover {
+  background: var(--oranye-hover);
+}
+
+.tombol-sekunder {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 1px solid var(--abu-garis);
+  border-radius: var(--radius-tombol);
+  background: var(--putih-kartu);
+  color: var(--teks);
+  font-weight: 600;
+  transition: background var(--transisi), border-color var(--transisi);
+}
+
+.tombol-sekunder:hover {
+  background: var(--abu-muda);
+}
+
+/* ---------- Kartu umum ---------- */
+
+.kartu {
+  background: var(--putih-kartu);
+  border: 1px solid var(--abu-garis);
+  border-radius: var(--radius-kartu);
+  box-shadow: var(--bayangan-tipis);
+}
+
+/* ---------- Beranda: kisi kartu lab ---------- */
+
+.judul-modul {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 1.15rem;
+  margin: 36px 0 16px;
+}
+
+.progres-modul {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--teks-lembut);
+}
+
+.progres-modul.tuntas {
+  color: var(--hijau);
+}
+
+.kisi-kartu {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.kartu-lab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--putih-kartu);
+  border: 1px solid var(--abu-garis);
+  border-radius: var(--radius-kartu);
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform var(--transisi), border-color var(--transisi);
+}
+
+a.kartu-lab:hover {
+  transform: translateY(-2px);
+  border-color: var(--oranye);
+}
+
+.kartu-lab.nonaktif {
+  opacity: 0.55;
+}
+
+.gambar-kartu {
+  position: relative;
+  display: block;
+  background: var(--abu-muda);
+  aspect-ratio: 4 / 3;
+}
+
+.gambar-kartu img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10px;
+}
+
+.nama-kartu {
+  display: block;
+  padding: 10px 14px 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.nomor-kartu {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--teks-lembut);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lencana-centang {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--hijau);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.chip-segera {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--abu-muda);
+  border: 1px solid var(--abu-garis);
+  color: var(--teks-lembut);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ---------- Kaki halaman ---------- */
+
+.kaki-app {
+  margin-top: 48px;
+  padding-block: 28px;
+  border-top: 1px solid var(--abu-garis);
+  color: var(--teks-lembut);
+  font-size: 0.85rem;
+}
+
+.kaki-app .wadah {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* ---------- Saklar toggle ---------- */
+
+.saklar {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.saklar input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.saklar .lintas {
+  position: relative;
+  width: 56px;
+  height: 32px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--abu-garis);
+  transition: background var(--transisi);
+}
+
+.saklar .lintas::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--putih-kartu);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  transition: transform var(--transisi);
+}
+
+.saklar input:checked + .lintas {
+  background: var(--oranye);
+}
+
+.saklar input:checked + .lintas::after {
+  transform: translateX(24px);
+}
+
+.saklar input:focus-visible + .lintas {
+  outline: 2px solid var(--oranye);
+  outline-offset: 2px;
+}
+
+/* ---------- Slider (dipakai lab-lab berikutnya) ---------- */
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 32px;
+  background: transparent;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--abu-muda);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--oranye);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--abu-muda);
+}
+
+input[type="range"]::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--oranye);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: var(--oranye);
+}
+
+/* ---------- Utilitas ---------- */
+
+/* atribut hidden harus selalu menang atas display kelas mana pun */
+[hidden] {
+  display: none !important;
+}
+
+.hanya-pembaca {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,0 +1,10 @@
+# Repo ini (simulator-robotika) hanya untuk kode simulator yang di-deploy ke
+# GitHub Pages. Materi LMS, deck video, dokumen internal, dan berkas kerja
+# Claude Code sengaja tidak ikut ter-upload.
+.claude/
+CLAUDE.md
+claudecode_simulasi_robotika.zip
+decks/
+docs/
+konten_lms/
+materi/

@@ -1,0 +1,65 @@
+/*
+ * Token desain — SATU-SATUNYA sumber warna, ukuran, dan font.
+ * Seluruh kode (termasuk warna di Canvas lewat warnaToken()) mengambil dari sini.
+ */
+
+/* Plus Jakarta Sans (variable font, self-host) */
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("../assets/fonts/PlusJakartaSans-latin.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("../assets/fonts/PlusJakartaSans-latin-ext.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  /* Dasar */
+  --putih: #fdfdfb;          /* latar halaman, dominan ~70% layar */
+  --putih-kartu: #ffffff;    /* kartu, panel */
+  --abu-garis: #e8e6e1;      /* garis pemisah tipis, kisi grafik */
+  --abu-muda: #f4f3f0;       /* latar sekunder, hover */
+
+  /* Teks */
+  --teks: #3a3f47;           /* abu gelap kebiruan, bukan hitam pekat */
+  --teks-lembut: #7d838c;    /* teks sekunder, keterangan */
+
+  /* Identitas dan aksi — oranye, ~20% layar */
+  --oranye: #f57c2a;
+  --oranye-hover: #e06f22;
+  --oranye-muda: #fdeee0;    /* latar chip, tab aktif, highlight lembut */
+
+  /* Umpan balik positif — hijau */
+  --hijau: #2e9e5b;
+  --hijau-muda: #e4f4ea;
+
+  /* Umpan balik negatif — merah, dipakai paling hemat */
+  --merah: #d64545;
+  --merah-muda: #fbe9e9;
+
+  /* Elemen simulasi */
+  --lintasan: #2b2b2b;       /* garis lintasan di arena */
+  --arena: #ffffff;          /* latar arena */
+  --led-nyala: #f5b32a;      /* kuning-oranye LED aktif */
+  --robot-badan: #f57c2a;
+  --robot-roda: #5a5f66;
+
+  /* Bentuk dan gerak */
+  --font-utama: "Plus Jakarta Sans", system-ui, sans-serif;
+  --radius-kartu: 14px;
+  --radius-tombol: 10px;
+  --bayangan-tipis: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --transisi: 150ms ease-out;
+}

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotics Vision Journey · Simulator Robotika</title>
+  <meta name="description" content="Virtual lab interaktif: dari sensor konvensional menuju persepsi berbasis kamera pada robot line follower.">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/base.css">
+</head>
+<body>
+  <header class="kepala-app">
+    <div class="wadah">
+      <h1>Robotics Vision Journey</h1>
+      <p class="subjudul">
+        16 lab interaktif: dari elektronika dasar, robot dua roda, dan kendali PID,
+        sampai persepsi berbasis kamera. Pilih lab untuk mulai bereksplorasi, tanpa instalasi apa pun.
+      </p>
+    </div>
+  </header>
+
+  <main class="wadah" id="daftarModul">
+    <noscript><p style="padding-block:32px">Simulator ini membutuhkan JavaScript. Silakan aktifkan JavaScript di browser Anda.</p></noscript>
+  </main>
+
+  <footer class="kaki-app">
+    <div class="wadah">
+      <p>
+        Microcredential <em>From Conventional Sensing to Camera-Based Perception in Robotics</em><br>
+        Teknik Elektro FBTI · Universitas Katolik Indonesia Atma Jaya
+      </p>
+      <button type="button" class="tombol-sekunder" id="tombolReset">Reset progres</button>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { daftarModul, daftarLab } from "./labs/daftar.js";
+    import { bacaProgres, resetProgres } from "./util/penyimpanan.js";
+
+    const progres = new Set(bacaProgres());
+    const utama = document.getElementById("daftarModul");
+
+    for (const modul of daftarModul) {
+      const labModul = daftarLab.filter((l) => l.modul === modul.id);
+      const jumlahSelesai = labModul.filter((l) => progres.has(l.id)).length;
+
+      const bagian = document.createElement("section");
+      const judul = document.createElement("h2");
+      judul.className = "judul-modul";
+      judul.textContent = modul.nama;
+
+      const capaian = document.createElement("span");
+      capaian.className = "progres-modul" + (jumlahSelesai === labModul.length ? " tuntas" : "");
+      capaian.textContent = `${jumlahSelesai}/${labModul.length} selesai`;
+      judul.append(capaian);
+
+      const kisi = document.createElement("div");
+      kisi.className = "kisi-kartu";
+
+      for (const lab of labModul) {
+        const kartu = document.createElement(lab.tersedia ? "a" : "div");
+        kartu.className = "kartu-lab" + (lab.tersedia ? "" : " nonaktif");
+        if (lab.tersedia) kartu.href = `lab.html?lab=${lab.id}`;
+
+        const gambar = document.createElement("span");
+        gambar.className = "gambar-kartu";
+        const ilustrasi = document.createElement("img");
+        ilustrasi.src = lab.thumb;
+        ilustrasi.alt = "";
+        ilustrasi.loading = "lazy";
+        gambar.append(ilustrasi);
+
+        if (progres.has(lab.id)) {
+          const centang = document.createElement("span");
+          centang.className = "lencana-centang";
+          centang.textContent = "✓";
+          centang.title = "Selesai";
+          gambar.append(centang);
+        }
+        if (!lab.tersedia) {
+          const chip = document.createElement("span");
+          chip.className = "chip-segera";
+          chip.textContent = "Segera";
+          gambar.append(chip);
+        }
+
+        const nama = document.createElement("span");
+        nama.className = "nama-kartu";
+        const nomor = document.createElement("span");
+        nomor.className = "nomor-kartu";
+        nomor.textContent = `Lab ${lab.id}`;
+        nama.append(nomor, lab.singkat);
+
+        kartu.append(gambar, nama);
+        kisi.append(kartu);
+      }
+
+      bagian.append(judul, kisi);
+      utama.append(bagian);
+    }
+
+    document.getElementById("tombolReset").addEventListener("click", () => {
+      const yakin = confirm("Hapus semua progres lab dan kode tersimpan? Tindakan ini tidak bisa dibatalkan.");
+      if (yakin) {
+        resetProgres();
+        location.reload();
+      }
+    });
+  </script>
+</body>
+</html>
