@@ -24,6 +24,15 @@ import { gambarRobotPID } from "./pidView.js";
 import { gambarKonsepPiksel, gambarThresholding, gambarFrameRegion } from "./kameraView.js";
 import { gambarRobotKamera, gambarEksperimen } from "./kameraRobotView.js";
 
+// Di dalam iframe LMS, tautan "Beranda" cuma membuka daftar 16 lab di luar
+// konteks materi yang sedang dipelajari peserta — disembunyikan supaya peserta
+// tetap fokus ke satu lab yang memang ditugaskan, bukan lompat-lompat sendiri.
+// Dibiarkan tampil saat dibuka langsung (bukan di dalam iframe), misalnya untuk
+// pengembangan lokal atau kalau lab dibuka langsung lewat tautan di luar LMS.
+if (window.self !== window.top) {
+  document.getElementById("tautanKembali")?.remove();
+}
+
 const parameter = new URLSearchParams(location.search);
 const idLab = Number(parameter.get("lab"));
 const info = daftarLab.find((l) => l.id === idLab);
