@@ -75,8 +75,10 @@ export function buatSimulasiLintasan({ namaLintasanAwal = "lurus" } = {}) {
     _sisaWaktuJejak: 0,
     _waktuTanpaGaris: 0,
 
+    _lintasanKustom: null,
+
     get lintasanAktif() {
-      return LINTASAN[this.namaLintasan];
+      return this._lintasanKustom ?? LINTASAN[this.namaLintasan];
     },
 
     get sensorADC() {
@@ -94,7 +96,15 @@ export function buatSimulasiLintasan({ namaLintasanAwal = "lurus" } = {}) {
 
     setLintasan(nama) {
       if (!LINTASAN[nama]) return;
+      this._lintasanKustom = null;
       this.namaLintasan = nama;
+      this.resetPosisi();
+    },
+
+    /** Pakai lintasan hasil bangunan sendiri (Mini Project Capstone) alih-alih salah satu preset di LINTASAN. */
+    setLintasanKustom(lintasan) {
+      this._lintasanKustom = lintasan;
+      this.namaLintasan = "kustom";
       this.resetPosisi();
     },
 

@@ -129,6 +129,84 @@
   }
 }
 
+/* ---------- Mini Project Capstone: kanvas + palet brick + kontrol ---------- */
+
+.baris-proyek {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px 340px;
+  align-items: start;
+  gap: 20px;
+}
+
+.kolom-brick {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kolom-brick .kartu {
+  padding: 18px 20px;
+}
+
+.kolom-brick h2 {
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.palet-brick {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tombol-brick {
+  padding: 10px 14px;
+  border: 1px solid var(--abu-garis);
+  border-radius: var(--radius-tombol);
+  background: var(--abu-muda);
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transisi), border-color var(--transisi);
+}
+
+.tombol-brick:hover {
+  background: var(--oranye-muda);
+  border-color: var(--oranye);
+}
+
+.baris-tombol-brick {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.info-brick {
+  margin: 12px 0 0;
+  font-size: 0.82rem;
+  color: var(--teks-lembut);
+}
+
+@media (max-width: 1100px) {
+  .baris-proyek {
+    grid-template-columns: minmax(0, 1fr) 220px;
+  }
+  .kolom-panel {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 860px) {
+  .baris-proyek {
+    grid-template-columns: 1fr;
+  }
+  .kolom-panel {
+    grid-column: auto;
+  }
+}
+
 /* ---------- Isi panel kontrol ---------- */
 
 .baris-kontrol {

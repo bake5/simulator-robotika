@@ -180,3 +180,84 @@ export const LINTASAN = {
   tajam: buatLintasanTajam(),
   zigzag: buatLintasanZigzag(),
 };
+
+/*
+ * Lintasan dari "brick" (Mini Project Capstone, Modul 5) — bukan lagi
+ * bentuk baku yang sudah ditentukan, peserta sendiri yang menyusun
+ * lintasannya dari lima jenis potongan: lurus, tajam kiri/kanan (radius
+ * sama dengan buatLintasanTajam), halus kiri/kanan (radius sama dengan
+ * buatLintasanOval). Setiap brick disambung dari ujung brick sebelumnya
+ * mengikuti posisi+arah hadap "pena" — persis konsep turtle graphics.
+ */
+export const KATALOG_BRICK = [
+  { id: "lurus", label: "Lurus" },
+  { id: "tajamKiri", label: "Tajam kiri" },
+  { id: "tajamKanan", label: "Tajam kanan" },
+  { id: "halusKiri", label: "Halus kiri" },
+  { id: "halusKanan", label: "Halus kanan" },
+];
+
+const PANJANG_BRICK_LURUS = 70;
+const RADIUS_BRICK_TAJAM = 35; // sama dengan R di buatLintasanTajam
+const RADIUS_BRICK_HALUS = 80; // sama dengan B di buatLintasanOval
+const TITIK_PER_LENGKUNG_BRICK = 10;
+
+/** Satu langkah pena turtle-graphics: dari pose {x,y,sudut} sekarang, hasilkan titik-titik brick berikutnya + pose akhir baru. */
+function langkahBrick(pena, jenisBrick) {
+  const { x, y, sudut } = pena;
+  if (jenisBrick === "lurus") {
+    const akhir = { x: x + PANJANG_BRICK_LURUS * Math.cos(sudut), y: y + PANJANG_BRICK_LURUS * Math.sin(sudut), sudut };
+    return { titik: [{ x: akhir.x, y: akhir.y }], akhir };
+  }
+
+  // Lengkung: arah +1 = belok kiri (sudut hadap bertambah, konvensi CCW yang
+  // sama dengan posisiSensorDiPose), -1 = belok kanan. Pusat lengkung ada di
+  // sisi kiri/kanan robot, radiusnya tergantung tajam/halus.
+  const arah = jenisBrick.endsWith("Kiri") ? 1 : -1;
+  const radius = jenisBrick.startsWith("tajam") ? RADIUS_BRICK_TAJAM : RADIUS_BRICK_HALUS;
+  const sudutKePusat = sudut + arah * (Math.PI / 2);
+  const pusat = { x: x + radius * Math.cos(sudutKePusat), y: y + radius * Math.sin(sudutKePusat) };
+  const thetaAwal = sudutKePusat + Math.PI; // sudut dari pusat balik ke posisi pena sekarang
+
+  const titik = [];
+  for (let i = 1; i <= TITIK_PER_LENGKUNG_BRICK; i++) {
+    const theta = thetaAwal + arah * (Math.PI / 2) * (i / TITIK_PER_LENGKUNG_BRICK);
+    titik.push({ x: pusat.x + radius * Math.cos(theta), y: pusat.y + radius * Math.sin(theta) });
+  }
+  const akhir = { x: titik[titik.length - 1].x, y: titik[titik.length - 1].y, sudut: sudut + arah * (Math.PI / 2) };
+  return { titik, akhir };
+}
+
+/**
+ * Bangun lintasan terbuka dari daftar id brick berurutan. Titik-titiknya
+ * digeser supaya kotak pembatas (bounding box) berpusat di titik (0,0) —
+ * bukan karena posisi brick pertama — supaya tampilan otomatis (lihat
+ * render/lintasanView.js) yang mengasumsikan lintasan berpusat di origin
+ * tetap bekerja tanpa perubahan, berapa pun jauh dan ke arah mana pun
+ * peserta menyusun brick-nya.
+ */
+export function bangunLintasanDariBrick(daftarBrick) {
+  let pena = { x: 0, y: 0, sudut: 0 };
+  const titikMentah = [{ x: 0, y: 0 }];
+  const mulaiMentah = { x: 0, y: 0, sudut: 0 };
+  for (const jenisBrick of daftarBrick) {
+    const hasil = langkahBrick(pena, jenisBrick);
+    titikMentah.push(...hasil.titik);
+    pena = hasil.akhir;
+  }
+
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const t of titikMentah) {
+    minX = Math.min(minX, t.x); maxX = Math.max(maxX, t.x);
+    minY = Math.min(minY, t.y); maxY = Math.max(maxY, t.y);
+  }
+  const geserX = -(minX + maxX) / 2;
+  const geserY = -(minY + maxY) / 2;
+
+  return {
+    nama: "kustom",
+    tertutup: false,
+    titik: titikMentah.map((t) => ({ x: t.x + geserX, y: t.y + geserY })),
+    mulai: { x: mulaiMentah.x + geserX, y: mulaiMentah.y + geserY, sudut: mulaiMentah.sudut },
+  };
+}

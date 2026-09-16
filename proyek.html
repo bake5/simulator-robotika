@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Project Capstone · Robotics Vision Journey</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/lab.css">
+</head>
+<body>
+  <header class="kepala-lab">
+    <div class="wadah">
+      <a class="tautan-kembali" id="tautanKembali" href="index.html">← Beranda</a>
+      <div class="info-lab">
+        <h1>Mini Project Capstone: Rancang Lintasan Sendiri</h1>
+        <p class="tujuan">Bukan lintasan baku — susun sendiri dari brick, pilih sensor, atur kendali, lalu jalankan robotmu sendiri.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="wadah tata-lab">
+    <div class="kartu kartu-panduan">
+      <h2>Panduan</h2>
+      <div id="isiPanduan"></div>
+    </div>
+
+    <div class="baris-proyek">
+      <section class="kolom-arena">
+        <div class="kartu">
+          <canvas id="kanvasLab" aria-label="Visualisasi lintasan dan robot"></canvas>
+        </div>
+      </section>
+
+      <aside class="kolom-brick">
+        <div class="kartu">
+          <h2>Bricks Lintasan</h2>
+          <div id="paletBrick" class="palet-brick"></div>
+          <div class="baris-tombol-brick">
+            <button type="button" class="tombol-sekunder tombol-aksi" id="tombolUndoBrick">Hapus terakhir</button>
+            <button type="button" class="tombol-sekunder tombol-aksi" id="tombolResetBrick">Reset lintasan</button>
+          </div>
+          <p class="info-brick" id="infoBrick"></p>
+        </div>
+      </aside>
+
+      <aside class="kolom-panel">
+        <div class="kartu">
+          <h2>Kontrol</h2>
+          <div id="isiKontrol"></div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="kartu kartu-koding" id="kartuKoding">
+      <h2 id="judulKoding">Level 2 dan 3: Tulis Kode</h2>
+      <p class="deskripsi-koding" id="deskripsiKoding"></p>
+      <div id="isiKoding"></div>
+    </div>
+  </main>
+
+  <script type="module" src="render/aplikasiProyek.js"></script>
+</body>
+</html>
