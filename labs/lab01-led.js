@@ -1,5 +1,5 @@
 /*
- * Lab 1: LED On Off.
+ * Lab 1: LED ON/OFF.
  * Lab paling sederhana, sekaligus contoh pola berkas definisi lab.
  */
 
@@ -7,16 +7,16 @@ import { buatRangkaianLED } from "../engine/rangkaian.js";
 
 export default {
   id: 1,
-  judul: "LED On Off",
-  singkat: "LED On Off",
+  judul: "LED ON/OFF",
+  singkat: "LED ON/OFF",
   modul: 1,
   tujuan: "Memahami sinyal digital HIGH dan LOW.",
 
   panduan: [
-    "Klik saklar untuk menutup rangkaian. Arus mengalir, LED menyala, dan indikator menunjukkan HIGH (5 V).",
-    "Klik saklar lagi untuk membuka rangkaian. LED mati dan indikator kembali ke LOW (0 V).",
-    "Ulangi menyalakan dan mematikan LED masing-masing minimal 3 kali sampai lab ditandai selesai.",
-    "Ini adalah sinyal digital: mikrokontroler hanya mengenal dua keadaan, HIGH dan LOW. Konsep yang sama akan dipakai pada pembacaan sensor garis di lab-lab berikutnya.",
+    "Aktifkan saklar pada panel Kontrol. Amati saklar pada diagram yang kini berada dalam kondisi tertutup. Pada kondisi ini, LED menyala dan indikator berubah menjadi HIGH dengan tegangan 5 V.",
+    "Nonaktifkan saklar. Amati saklar pada diagram yang kini berada dalam kondisi terbuka. Pada kondisi ini, LED padam dan indikator berubah menjadi LOW dengan tegangan 0 V.",
+    "Nyalakan dan padamkan LED masing-masing minimal tiga kali. Jumlah percobaan dapat dilihat pada panel Kontrol. Setelah kedua target tercapai, checklist akan tercentang dan status lab berubah menjadi Selesai.",
+    "Bandingkan kedua kondisi tersebut. Jelaskan hubungan antara posisi saklar, kondisi LED, dan tegangan yang ditampilkan.",
   ],
 
   // renderer merakit tampilan dari daftar komponen ini
@@ -45,6 +45,6 @@ export default {
 
   kriteriaSelesai: [
     { id: "nyala", label: "Nyalakan LED minimal 3 kali", cek: (state) => state.hitungNyala >= 3 },
-    { id: "mati", label: "Matikan LED minimal 3 kali", cek: (state) => state.hitungMati >= 3 },
+    { id: "mati", label: "Padamkan LED minimal 3 kali", cek: (state) => state.hitungMati >= 3 },
   ],
 };
