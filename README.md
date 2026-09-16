@@ -4,7 +4,7 @@ Virtual lab berisi 16 lab interaktif untuk program microcredential **"From Conve
 
 Peserta belajar robot line follower secara bertahap, dari elektronika dasar, driver motor, kinematika robot dua roda, kendali PID, hingga persepsi berbasis kamera, langsung di browser tanpa instalasi apa pun.
 
-## Menjalankan Lokal
+## Menjalankan di Local Environment
 
 Buka `index.html` lewat live server (VS Code extension Live Server, atau `python3 -m http.server`). Tidak ada proses build.
 
