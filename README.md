@@ -1,6 +1,6 @@
-# Simulator Robotika — Robotics Vision Journey
+# Simulator Robotika (Robotics Vision Journey)
 
-Virtual lab berisi 16 lab interaktif untuk program microcredential **"From Conventional Sensing to Camera-Based Perception in Robotics"** — Program Studi Teknik Elektro, Fakultas Bioteknologi dan Teknologi Informasi, Universitas Katolik Indonesia Atma Jaya.
+Virtual lab berisi 16 lab interaktif untuk program microcredential **"From Conventional Sensing to Camera-Based Perception in Robotics"**, Program Studi Teknik Elektro, Fakultas Bioteknologi dan Teknologi Informasi, Universitas Katolik Indonesia Atma Jaya.
 
 Peserta belajar robot line follower secara bertahap, dari elektronika dasar, driver motor, kinematika robot dua roda, kendali PID, hingga persepsi berbasis kamera, langsung di browser tanpa instalasi apa pun.
 
