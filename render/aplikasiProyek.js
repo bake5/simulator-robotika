@@ -25,7 +25,7 @@ const PANDUAN = [
   "Susun lintasanmu sendiri: klik brick di kartu 'Bricks Lintasan' satu per satu (lurus, tajam kiri/kanan, halus kiri/kanan). Setiap klik menyambung brick baru di ujung lintasan yang sedang disusun, seperti menyambung rel kereta. Pakai 'Hapus terakhir' kalau salah pilih, atau 'Reset lintasan' untuk mengulang dari kosong.",
   "Pilih mode sensor: Photodiode (array 8 sensor titik, seperti Modul 3) atau Kamera (frame dibagi 8 region, seperti Modul 4). Kontrak kendali(sensor) sama persis di kedua mode.",
   "Atur Kp, Kd, Ki, kecepatan dasar, dan ambang (khusus mode kamera) sampai robot mengikuti lintasan rancanganmu dengan halus lewat kendali PID bawaan (Level 1).",
-  "Level 2/3: buka kartu kode di bawah. Kode kendali(sensor) yang benar sudah tertulis lengkap di sana (JavaScript maupun Python, sama dengan solusi Lab 11/15/16), ditandai di dalam komentar. Baca dulu kodenya, lalu hapus tanda komentarnya supaya kode itu aktif, dan tekan 'Pakai kode ini' — atau tulis ulang pendekatanmu sendiri dari kode itu sebagai titik awal.",
+  "Level 2/3: buka kartu kode di bawah. Kode kendali(sensor) yang benar sudah tertulis lengkap di sana (JavaScript maupun Python), ditandai di dalam komentar. Baca dulu kodenya, lalu hapus tanda komentarnya supaya kode itu aktif, dan tekan 'Pakai kode ini' — atau tulis ulang pendekatanmu sendiri dari kode itu sebagai titik awal. Bedanya dari solusi PID di Lab 11/15/16: kecepatan dasarnya di sini tidak konstan, otomatis melambat begitu error membesar (lagi menikung tajam) dan mempercepat lagi begitu error mengecil (lurusan) — cocok untuk lintasan buatanmu sendiri yang mungkin mencampur lurusan panjang dan tikungan tajam sekaligus.",
   "Tekan 'Jalankan' untuk menguji rancanganmu dari awal lintasan. Tidak ada kriteria selesai baku di sini — rancangan lintasan, parameter kendali, dan kode adalah milikmu sendiri. Dokumentasikan hasil kerjamu (screenshot/video dan penjelasan) untuk dikumpulkan lewat assignment Mini Project Capstone di LMS.",
 ];
 
@@ -48,15 +48,29 @@ function kendali(sensor) {
   const error = ((posisiIndeks - 3.5) / 3.5) * 100;
 
   // Kode PID yang benar sudah ditulis lengkap di bawah, di dalam komentar
-  // /* ... */, persis sama dengan solusi Lab 11/15/16. Bacalah dulu, lalu
-  // hapus baris "/*" dan baris "*/" di bawah ini supaya kode itu aktif —
-  // atau jadikan titik awal untuk pendekatanmu sendiri.
+  // /* ... */ — mirip solusi Lab 11/15/16, bedanya kecepatan dasarnya di
+  // sini TIDAK konstan (lihat penjelasan di dalam kode di bawah). Bacalah
+  // dulu, lalu hapus baris "/*" dan baris "*/" di bawah ini supaya kode
+  // itu aktif — atau jadikan titik awal untuk pendekatanmu sendiri.
 
   /*
   const Kp = 0.6;
   const Kd = 0.15;
   const Ki = 0;
-  const KECEPATAN_DASAR = 35;
+
+  // Kecepatan dasar mengikuti besar |error| SAAT INI, bukan angka tetap.
+  // Di lintasan buatan sendiri yang mungkin mencampur lurusan panjang dan
+  // tikungan tajam, kecepatan tetap memaksa memilih: cukup cepat di
+  // lurusan tapi keluar jalur di tikungan, atau aman di tikungan tapi
+  // lambat terus di lurusan. Triknya: error kecil berarti robot di tengah
+  // garis (lurusan, atau tikungan yang sedang dikendalikan dengan baik),
+  // error besar berarti sedang menikung tajam dan robot belum sempat
+  // menyesuaikan arah — jadi kecepatan diturunkan otomatis sebanding
+  // dengan besar error itu, dinaikkan lagi begitu error mengecil.
+  const KECEPATAN_MAKS = 60;
+  const KECEPATAN_MIN = 20;
+  const PENGURANGAN_PER_ERROR = 0.5;
+  const KECEPATAN_DASAR = Math.max(KECEPATAN_MIN, KECEPATAN_MAKS - Math.abs(error) * PENGURANGAN_PER_ERROR);
 
   const p = Kp * error;
   integral += error * dt;
@@ -89,16 +103,31 @@ def kendali(sensor):
     error = ((posisi_indeks - 3.5) / 3.5) * 100
 
     # Kode PID yang benar sudah ditulis lengkap di bawah, di antara tanda
-    # kutip tiga (""" ... """), persis sama dengan solusi Lab 11/15/16.
-    # Bacalah dulu, lalu hapus baris yang berisi """ di atas dan di bawah
-    # blok itu supaya kode itu aktif — atau jadikan titik awal untuk
-    # pendekatanmu sendiri.
+    # kutip tiga (""" ... """) — mirip solusi Lab 11/15/16, bedanya
+    # kecepatan dasarnya di sini TIDAK konstan (lihat penjelasan di dalam
+    # kode di bawah). Bacalah dulu, lalu hapus baris yang berisi """ di
+    # atas dan di bawah blok itu supaya kode itu aktif — atau jadikan
+    # titik awal untuk pendekatanmu sendiri.
 
     """
     Kp = 0.6
     Kd = 0.15
     Ki = 0
-    kecepatan_dasar = 35
+
+    # Kecepatan dasar mengikuti besar |error| SAAT INI, bukan angka tetap.
+    # Di lintasan buatan sendiri yang mungkin mencampur lurusan panjang
+    # dan tikungan tajam, kecepatan tetap memaksa memilih: cukup cepat di
+    # lurusan tapi keluar jalur di tikungan, atau aman di tikungan tapi
+    # lambat terus di lurusan. Triknya: error kecil berarti robot di
+    # tengah garis (lurusan, atau tikungan yang sedang dikendalikan
+    # dengan baik), error besar berarti sedang menikung tajam dan robot
+    # belum sempat menyesuaikan arah — jadi kecepatan diturunkan otomatis
+    # sebanding dengan besar error itu, dinaikkan lagi begitu error
+    # mengecil.
+    kecepatan_maks = 60
+    kecepatan_min = 20
+    pengurangan_per_error = 0.5
+    kecepatan_dasar = max(kecepatan_min, kecepatan_maks - abs(error) * pengurangan_per_error)
 
     p = Kp * error
     integral += error * dt
@@ -175,7 +204,7 @@ document.getElementById("tombolResetBrick").addEventListener("click", () => {
 
 // ---- Kartu kode: sama persis pola Lab 16 (JS Level 2 / Python Level 3, solusi lengkap ter-comment) ----
 document.getElementById("deskripsiKoding").textContent =
-  "Kode kendali(sensor) yang benar sudah disediakan di bawah, di dalam komentar (JavaScript memakai /* ... */, Python memakai \"\"\" ... \"\"\"), persis sama dengan solusi Lab 11/15/16. Hapus tanda komentarnya supaya kode itu aktif, atau tulis ulang pendekatanmu sendiri. Fungsi ini menerima array 8 angka ADC dan mengembalikan [kecepatanKiri, kecepatanKanan]. Setelah menekan 'Pakai kode ini', fungsi ini dipanggil berulang sekitar 10 kali per detik selama robot berjalan, menggantikan kendali PID bawaan (Level 1).";
+  "Kode kendali(sensor) yang benar sudah disediakan di bawah, di dalam komentar (JavaScript memakai /* ... */, Python memakai \"\"\" ... \"\"\"), berbasis PID seperti solusi Lab 11/15/16 tapi dengan kecepatan dasar yang menyesuaikan besar error (melambat di tikungan tajam, mempercepat di lurusan) — cocok untuk lintasan buatanmu sendiri yang bisa mencampur keduanya. Hapus tanda komentarnya supaya kode itu aktif, atau tulis ulang pendekatanmu sendiri. Fungsi ini menerima array 8 angka ADC dan mengembalikan [kecepatanKiri, kecepatanKanan]. Setelah menekan 'Pakai kode ini', fungsi ini dipanggil berulang sekitar 10 kali per detik selama robot berjalan, menggantikan kendali PID bawaan (Level 1).";
 
 function pasangKoding(wadah, state) {
   const barisTab = document.createElement("div");
