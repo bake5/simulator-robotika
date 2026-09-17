@@ -24,14 +24,14 @@ export default {
   judul: "Photodiode",
   singkat: "Photodiode",
   modul: 2,
-  tujuan: "Memahami dari mana angka bacaan sensor berasal: cahaya → resistansi → arus → tegangan → ADC 0-1023.",
+  tujuan: "Memahami alur perubahan cahaya menjadi resistansi, arus, tegangan, dan nilai ADC 0 sampai 1023.",
 
   panduan: [
     "Klik dan seret sumber cahaya di kanvas. Makin dekat sumber cahaya ke photodiode, makin terang cahaya yang diterimanya. Slider di panel kanan mengatur seberapa terang sumber cahaya itu sendiri.",
-    "Catatan penting: photodiode sungguhan menghasilkan arus yang sebanding dengan cahaya, bukan mengubah resistansinya sendiri. Resistansi yang berubah karena cahaya adalah ciri komponen lain, yaitu LDR atau photoresistor. Di lab ini, photodiode disederhanakan agar berperilaku seperti LDR: resistansinya (disingkat R_PD) berubah karena cahaya, sehingga rumus pembagi tegangan yang sama persis seperti Lab 3 dan Lab 4 dapat dipakai. Pada lab sebelumnya nilai resistor diatur langsung oleh peserta, sedangkan di lab ini nilai R_PD diatur oleh intensitas cahaya.",
+    "Photodiode sungguhan menghasilkan arus yang sebanding dengan cahaya, bukan mengubah resistansinya sendiri. Resistansi yang berubah karena cahaya adalah ciri komponen lain, yaitu LDR atau photoresistor. Pada lab ini, photodiode disederhanakan agar berperilaku seperti LDR. Resistansinya, yang disingkat R_PD, berubah karena cahaya sehingga rumus pembagi tegangan dari Lab 3 dan Lab 4 dapat digunakan kembali. Pada lab sebelumnya nilai resistor diatur langsung oleh peserta, sedangkan pada lab ini nilai R_PD ditentukan oleh intensitas cahaya.",
     "R_PD lalu masuk ke rangkaian pembagi tegangan dengan rumus yang sama persis seperti Lab 3 dan Lab 4. Lihat kartu rumus pertama. R_PD di sini sengaja dijaga tidak jauh berbeda ordenya dari resistor tetap (10 kΩ) supaya ketiga kondisi mudah dicapai. LDR sungguhan bisa memiliki resistansi gelap yang jauh lebih tinggi.",
-    "Tegangan hasil pembagi itu diukur mikrokontroler lewat ADC (Analog-to-Digital Converter) yang mengubahnya menjadi angka bulat 0-1023. Lihat kartu rumus kedua. Angka inilah yang sebenarnya dibaca kode program, bukan voltase.",
-    "Amati angka ADC pada tiga kondisi: gelap total dengan slider intensitas di 0, sedang, dan terang penuh dengan slider intensitas di maksimum serta sumber cahaya diseret sedekat mungkin ke photodiode. Tahan tiap kondisi sebentar sampai status tercapai berubah menjadi tanda centang.",
+    "Tegangan hasil pembagi diukur oleh mikrokontroler melalui ADC atau Analog-to-Digital Converter, kemudian diubah menjadi angka bulat dari 0 sampai 1023. Lihat kartu rumus kedua. Nilai ADC inilah yang dibaca oleh program, bukan nilai tegangannya secara langsung.",
+    "Amati nilai ADC pada kondisi gelap total, sedang, dan terang penuh. Kondisi gelap diperoleh dengan mengatur intensitas ke 0. Kondisi terang penuh diperoleh dengan mengatur intensitas ke nilai maksimum dan menempatkan sumber cahaya sedekat mungkin dengan photodiode. Pertahankan setiap kondisi sampai statusnya berubah menjadi tanda centang.",
   ],
 
   komponen: { photodiode: true },

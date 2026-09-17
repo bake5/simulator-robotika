@@ -123,7 +123,7 @@ export default {
   },
 
   kriteriaSelesai: [
-    { id: "hitam", label: "Geser sensor ke atas warna hitam", cek: (state) => state.tercapai.hitam },
-    { id: "putih", label: "Geser sensor ke atas warna putih", cek: (state) => state.tercapai.putih },
+    { id: "hitam", label: "Geser permukaan hingga sensor berada di atas warna hitam", cek: (state) => state.tercapai.hitam },
+    { id: "putih", label: "Geser permukaan hingga sensor berada di atas warna putih", cek: (state) => state.tercapai.putih },
   ],
 };
