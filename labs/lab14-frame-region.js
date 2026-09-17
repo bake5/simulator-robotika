@@ -163,7 +163,7 @@ export default {
   panduan: [
     "Seret garis pada frame ke kiri dan ke kanan. Amati region yang dilewati garis dan perubahan delapan batang nilai ADC di bawah frame.",
     "Perhatikan garis putus-putus oranye yang membagi seluruh frame menjadi delapan kolom. Setiap nilai ADC dihitung dari proporsi piksel garis pada satu region, kemudian disesuaikan agar arahnya sama dengan bacaan photodiode pada Lab 7.",
-    "Ubah slider Ambang. Amati bahwa perubahan hasil thresholding ikut mengubah nilai ADC setiap region. Citra biner dari Lab 13 menjadi masukan untuk perhitungan ini.",
+    "Ubah slider Threshold. Amati bahwa perubahan hasil thresholding ikut mengubah nilai ADC setiap region. Citra biner dari Lab 13 menjadi masukan untuk perhitungan ini.",
     "Geser garis hingga mencapai ujung kiri dan ujung kanan. Checklist posisi tercentang setelah kedua batas tersebut dicapai.",
     "Buka bagian coding Level 2 atau Level 3. Aktifkan fungsi hitungRegion(frameBiner) pada JavaScript atau hitung_region(frame_biner) pada Python, lalu jalankan pengujian. Lab selesai setelah fungsi lulus seluruh kasus uji.",
   ],
@@ -177,7 +177,7 @@ export default {
     {
       jenis: "slider",
       id: "ambang",
-      label: "Ambang (threshold)",
+      label: "Threshold",
       min: 0,
       max: 255,
       langkah: 1,

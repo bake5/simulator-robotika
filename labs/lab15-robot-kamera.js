@@ -199,7 +199,7 @@ export default {
 
   panduan: [
     "Pilih lintasan Halus, lalu jalankan robot dengan pengaturan awal. Amati pandangan kamera, pembagian delapan region, grafik error, dan gerak robot pada lintasan.",
-    "Ubah nilai Ambang kamera. Amati bahwa hasil pembacaan region dan gerak robot ikut berubah ketika garis tidak terpisah dengan baik dari lantai.",
+    "Ubah nilai Threshold kamera. Amati bahwa hasil pembacaan region dan gerak robot ikut berubah ketika garis tidak terpisah dengan baik dari lantai.",
     "Atur Kp, Kd, dan Ki seperti pada Lab 11. Amati pengaruh setiap parameter terhadap respons robot, overshoot, dan osilasi.",
     "Pilih lintasan Tajam. Buka bagian coding Level 2 atau Level 3, aktifkan kode kendali(sensor) yang tersedia, lalu pilih Pakai kode ini. Fungsi menerima delapan nilai ADC dari region kamera dan menghasilkan kecepatan roda kiri dan kanan.",
     "Biarkan robot menempuh satu putaran lintasan Tajam. Lab selesai jika robot dikendalikan oleh kode Level 2 atau Level 3 dan keluar jalur kurang dari tiga kali.",
@@ -233,7 +233,7 @@ export default {
       satuan: "%",
       terapkan: (state, nilai) => state.setKecepatanDasar(nilai),
     },
-    { jenis: "slider", id: "ambang", label: "Ambang kamera", min: 0, max: 255, langkah: 1, nilaiAwal: 128, terapkan: (s, v) => s.setAmbang(v) },
+    { jenis: "slider", id: "ambang", label: "Threshold kamera", min: 0, max: 255, langkah: 1, nilaiAwal: 128, terapkan: (s, v) => s.setAmbang(v) },
     { jenis: "slider", id: "kp", label: "Kp (proporsional)", min: 0, max: 3, langkah: 0.05, nilaiAwal: 0.6, terapkan: (s, v) => s.setKp(v) },
     { jenis: "slider", id: "kd", label: "Kd (turunan)", min: 0, max: 3, langkah: 0.05, nilaiAwal: 0.15, terapkan: (s, v) => s.setKd(v) },
     { jenis: "slider", id: "ki", label: "Ki (integral)", min: 0, max: 1, langkah: 0.02, nilaiAwal: 0, terapkan: (s, v) => s.setKi(v) },

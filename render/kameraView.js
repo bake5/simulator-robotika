@@ -122,7 +122,7 @@ function gambarHistogram(ctx, frame, ambang, { x, y, lebar, tinggi, fontUtama })
   ctx.textAlign = "center";
   ctx.fillStyle = warnaAmbang;
   ctx.font = `700 11px ${fontUtama}`;
-  ctx.fillText(`ambang ${Math.round(ambang)}`, xAmbang, y - 4);
+  ctx.fillText(`threshold ${Math.round(ambang)}`, xAmbang, y - 4);
 }
 
 /** Lab 13: frame asli dan hasil biner berdampingan di atas, histogram + garis ambang di bawah. */

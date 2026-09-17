@@ -18,26 +18,26 @@ import { buatRunner } from "../coding/runner.js";
 
 const MARGIN_BERSIH = 10;
 
-const TEMPLATE_JS = `function biner(nilaiPiksel, ambang) {
-  // nilaiPiksel: satu angka grayscale 0-255. ambang: nilai pemisah 0-255
-  // kembalikan 1 kalau piksel dianggap garis (lebih gelap dari ambang), 0 kalau dianggap lantai
-  // contoh: nilaiPiksel = 30 (gelap), ambang = 128 -> garis -> kembalikan 1
+const TEMPLATE_JS = `function biner(nilaiPiksel, threshold) {
+  // nilaiPiksel: satu angka grayscale 0-255. threshold: nilai pemisah 0-255
+  // kembalikan 1 kalau piksel dianggap garis (lebih gelap dari threshold), 0 kalau dianggap lantai
+  // contoh: nilaiPiksel = 30 (gelap), threshold = 128 -> garis -> kembalikan 1
   //
   // Kode yang benar sudah ditulis di bawah, di dalam komentar /* ... */. Hapus
   // baris "/*" dan baris "*/" di bawah ini (dua baris saja) supaya kode itu aktif.
 
   /*
-  return nilaiPiksel < ambang ? 1 : 0;
+  return nilaiPiksel < threshold ? 1 : 0;
   */
 }
 `;
 
 function buatKasusUji() {
   return [
-    { label: "Piksel gelap (30) vs ambang 128", nilaiPiksel: 30, ambang: 128, referensi: binerDariPiksel(30, 128) },
-    { label: "Piksel terang (220) vs ambang 128", nilaiPiksel: 220, ambang: 128, referensi: binerDariPiksel(220, 128) },
-    { label: "Piksel (100) vs ambang 100", nilaiPiksel: 100, ambang: 100, referensi: binerDariPiksel(100, 100) },
-    { label: "Piksel (100) vs ambang 101", nilaiPiksel: 100, ambang: 101, referensi: binerDariPiksel(100, 101) },
+    { label: "Piksel gelap (30) vs threshold 128", nilaiPiksel: 30, ambang: 128, referensi: binerDariPiksel(30, 128) },
+    { label: "Piksel terang (220) vs threshold 128", nilaiPiksel: 220, ambang: 128, referensi: binerDariPiksel(220, 128) },
+    { label: "Piksel (100) vs threshold 100", nilaiPiksel: 100, ambang: 100, referensi: binerDariPiksel(100, 100) },
+    { label: "Piksel (100) vs threshold 101", nilaiPiksel: 100, ambang: 101, referensi: binerDariPiksel(100, 101) },
   ];
 }
 
@@ -88,15 +88,15 @@ export default {
   tujuan: "Mengubah citra grayscale menjadi citra biner dan mengamati pengaruh nilai threshold pada hasil pemisahan garis dan lantai.",
 
   panduan: [
-    "Geser slider Ambang. Amati perubahan citra biner di sisi kanan dan posisi garis oranye pada histogram. Piksel yang nilainya lebih kecil dari ambang diklasifikasikan sebagai garis.",
-    "Atur ambang mendekati 0, kemudian mendekati 255. Amati bahwa ambang terlalu rendah membuat garis menghilang, sedangkan ambang terlalu tinggi membuat hampir seluruh citra dianggap garis.",
-    "Pilih kondisi pencahayaan Normal, Redup, dan Silau. Amati pergeseran kelompok nilai pada histogram dan perubahan hasil citra biner untuk nilai ambang yang sama.",
-    "Tentukan ambang yang memisahkan garis dan lantai dengan jelas pada minimal dua kondisi pencahayaan. Checklist pertama tercentang setelah target ini tercapai.",
-    "Buka bagian coding Level 2. Aktifkan kode fungsi biner(nilaiPiksel, ambang) yang tersedia, lalu pilih Uji fungsi biner. Lab selesai setelah fungsi lulus seluruh kasus uji.",
+    "Geser slider Threshold. Amati perubahan citra biner di sisi kanan dan posisi garis oranye pada histogram. Piksel yang nilainya lebih kecil dari threshold diklasifikasikan sebagai garis.",
+    "Atur threshold mendekati 0, kemudian mendekati 255. Amati bahwa threshold yang terlalu rendah membuat garis menghilang, sedangkan threshold yang terlalu tinggi membuat hampir seluruh citra dianggap garis.",
+    "Pilih kondisi pencahayaan Normal, Redup, dan Silau. Amati pergeseran kelompok nilai pada histogram dan perubahan hasil citra biner untuk nilai threshold yang sama.",
+    "Tentukan threshold yang memisahkan garis dan lantai dengan jelas pada minimal dua kondisi pencahayaan. Checklist pertama tercentang setelah target ini tercapai.",
+    "Buka bagian coding Level 2. Aktifkan kode fungsi biner(nilaiPiksel, threshold) yang tersedia, lalu pilih Uji fungsi biner. Lab selesai setelah fungsi lulus seluruh kasus uji.",
   ],
 
   deskripsiKoding:
-    "Kode fungsi biner(nilaiPiksel, ambang) tersedia di dalam komentar /* ... */. Hapus penanda komentar agar kode aktif. Fungsi menerima nilai piksel grayscale 0 sampai 255 dan nilai ambang, kemudian mengembalikan 1 untuk garis atau 0 untuk lantai. Tombol 'Uji fungsi biner' menjalankan empat pasangan nilai uji.",
+    "Kode fungsi biner(nilaiPiksel, threshold) tersedia di dalam komentar /* ... */. Hapus penanda komentar agar kode aktif. Fungsi menerima nilai piksel grayscale 0 sampai 255 dan nilai threshold, kemudian mengembalikan 1 untuk garis atau 0 untuk lantai. Tombol 'Uji fungsi biner' menjalankan empat pasangan nilai uji.",
 
   komponen: { thresholding: true },
 
@@ -104,7 +104,7 @@ export default {
     {
       jenis: "slider",
       id: "ambang",
-      label: "Ambang (threshold)",
+      label: "Threshold",
       min: 0,
       max: 255,
       langkah: 1,
@@ -204,11 +204,11 @@ export default {
     const tahapKode = state.level2Lulus
       ? "Level 2 ✓ (lab selesai)"
       : cukupKondisi
-        ? "Level 2 belum lulus, lengkapi biner(nilaiPiksel, ambang)"
-        : "cari dulu ambang bersih di minimal 2 kondisi";
+        ? "Level 2 belum lulus, lengkapi biner(nilaiPiksel, threshold)"
+        : "cari dulu threshold yang sesuai pada minimal 2 kondisi";
     panel.setTeks(
       "status",
-      `ambang bersih ditemukan di: normal ${d.normal ? "✓" : "…"} · redup ${d.redup ? "✓" : "…"} · silau ${d.silau ? "✓" : "…"} (${jumlahBersih}/3) · ${tahapKode}`,
+      `threshold sesuai ditemukan pada kondisi: normal ${d.normal ? "✓" : "…"} · redup ${d.redup ? "✓" : "…"} · silau ${d.silau ? "✓" : "…"} (${jumlahBersih}/3) · ${tahapKode}`,
     );
   },
 
@@ -217,9 +217,9 @@ export default {
   kriteriaSelesai: [
     {
       id: "ambangBersih",
-      label: "Temukan ambang bersih di minimal 2 dari 3 kondisi pencahayaan (normal, redup, silau)",
+      label: "Temukan threshold yang sesuai pada minimal 2 dari 3 kondisi pencahayaan (normal, redup, silau)",
       cek: (state) => Object.values(state.diperiksaBersih).filter(Boolean).length >= 2,
     },
-    { id: "level2", label: "Fungsi biner(nilaiPiksel, ambang) lulus semua uji", cek: (state) => state.level2Lulus },
+    { id: "level2", label: "Fungsi biner(nilaiPiksel, threshold) lulus semua uji", cek: (state) => state.level2Lulus },
   ],
 };
