@@ -92,84 +92,79 @@ export function buatRangkaianPull() {
 }
 
 /**
- * Rangkaian Lab 3: baterai — resistor (bisa diatur) — LED.
- * Model LED linier sepotong: mulai mengalir di atas tegangan maju (Vf),
- * dengan resistansi dinamis kecil (Rd) supaya tegangan LED sedikit bergeser
- * mengikuti arus — cukup akurat untuk menunjukkan pembagian tegangan.
+ * Rangkaian Lab 3: pembagi tegangan dua resistor.
+ * R1 terhubung dari VCC ke Vout, sedangkan R2 terhubung dari Vout ke GND.
+ * Keluaran mengikuti Vout = Vsumber × R2 / (R1 + R2).
  */
-export const LED_TEGANGAN_MAJU = 2.0; // volt
-export const LED_RESISTANSI_DINAMIS = 20; // ohm
-
-export function buatRangkaianResistor() {
-  const PANJANG_RIWAYAT = 240; // ~8 detik pada 30 sampel/detik
-  const SELANG_SAMPEL = 1 / 30;
-  const WAKTU_ZONA = 0.4; // detik bertahan di satu zona sebelum dihitung tercapai
+export function buatPembagiTegangan() {
+  const WAKTU_KONDISI = 0.4;
 
   return {
-    resistansi: 1000, // ohm, diatur slider
-    zonaTercapai: { redup: false, normal: false, terang: false },
-    riwayat: [], // sampel { vR, vLed } untuk grafik tegangan real time
-    _sisaWaktuSampel: 0,
-    _zonaSebelumnya: null,
-    _lamaDiZona: 0,
+    resistansiAtas: 10000,
+    resistansiBawah: 5000,
+    kondisiTercapai: { rendah: false, seimbang: false, tinggi: false },
+    _sudahInteraksi: false,
+    _kondisiSebelumnya: null,
+    _lamaDiKondisi: 0,
 
-    /** Arus rangkaian dalam ampere. */
+    get resistansiTotal() {
+      return this.resistansiAtas + this.resistansiBawah;
+    },
+
     get arus() {
-      return (TEGANGAN_SUMBER - LED_TEGANGAN_MAJU) / (this.resistansi + LED_RESISTANSI_DINAMIS);
+      return TEGANGAN_SUMBER / this.resistansiTotal;
     },
 
     get arusMiliAmp() {
       return this.arus * 1000;
     },
 
-    get teganganLED() {
-      return LED_TEGANGAN_MAJU + this.arus * LED_RESISTANSI_DINAMIS;
+    get teganganKeluar() {
+      return this.arus * this.resistansiBawah;
     },
 
-    get teganganResistor() {
-      return TEGANGAN_SUMBER - this.teganganLED;
+    get teganganAtas() {
+      return TEGANGAN_SUMBER - this.teganganKeluar;
     },
 
-    /** Kecerahan LED 0-1 untuk renderer (25 mA dianggap paling terang). */
-    get kecerahan() {
-      return Math.min(1, this.arusMiliAmp / 25);
+    get rasioBawah() {
+      return this.resistansiBawah / this.resistansiTotal;
     },
 
-    /** "redup" | "normal" | "terang" berdasarkan arus. */
-    get zona() {
-      const mA = this.arusMiliAmp;
-      if (mA >= 18) return "terang";
-      if (mA >= 6) return "normal";
-      return "redup";
+    get kondisi() {
+      if (Math.abs(this.resistansiAtas - this.resistansiBawah) <= 100) return "seimbang";
+      if (this.teganganKeluar <= 1.5) return "rendah";
+      if (this.teganganKeluar >= 3.5) return "tinggi";
+      return null;
     },
 
-    /** Arus melebihi batas aman LED sungguhan — momen belajar, bukan hukuman. */
-    get bahaya() {
-      return this.arusMiliAmp > 30;
-    },
-
-    setResistor(ohm) {
+    setResistansiAtas(ohm) {
       ohm = Number(ohm);
       if (!Number.isFinite(ohm)) return;
-      this.resistansi = Math.max(1, ohm);
+      this.resistansiAtas = Math.max(1, ohm);
+      this._sudahInteraksi = true;
+    },
+
+    setResistansiBawah(ohm) {
+      ohm = Number(ohm);
+      if (!Number.isFinite(ohm)) return;
+      this.resistansiBawah = Math.max(1, ohm);
+      this._sudahInteraksi = true;
     },
 
     langkah(dt) {
-      // zona baru dihitung tercapai setelah bertahan sebentar (bukan sekadar terlewati slider)
-      const zona = this.zona;
-      if (zona === this._zonaSebelumnya) {
-        this._lamaDiZona += dt;
-        if (this._lamaDiZona >= WAKTU_ZONA) this.zonaTercapai[zona] = true;
-      } else {
-        this._zonaSebelumnya = zona;
-        this._lamaDiZona = 0;
+      const kondisi = this._sudahInteraksi ? this.kondisi : null;
+      if (!kondisi) {
+        this._kondisiSebelumnya = null;
+        this._lamaDiKondisi = 0;
+        return;
       }
-
-      this._sisaWaktuSampel -= dt;
-      if (this._sisaWaktuSampel <= 0) {
-        this._sisaWaktuSampel += SELANG_SAMPEL;
-        this.riwayat.push({ vR: this.teganganResistor, vLed: this.teganganLED });
-        if (this.riwayat.length > PANJANG_RIWAYAT) this.riwayat.shift();
+      if (kondisi === this._kondisiSebelumnya) {
+        this._lamaDiKondisi += dt;
+        if (this._lamaDiKondisi >= WAKTU_KONDISI) this.kondisiTercapai[kondisi] = true;
+      } else {
+        this._kondisiSebelumnya = kondisi;
+        this._lamaDiKondisi = 0;
       }
     },
   };

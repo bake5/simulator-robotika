@@ -1,7 +1,7 @@
 /*
  * Menggambar skema rangkaian flat untuk Lab 1-8.
  * Saat ini: Lab 1 (baterai — saklar — LED), Lab 2 (meja rakit pull-up/down),
- * Lab 3 (baterai — resistor variabel — LED + grafik tegangan real time),
+ * Lab 3 (pembagi tegangan dua resistor dengan keluaran Vout),
  * Lab 4 (dial potensiometer yang bisa diputar/diseret + bar tegangan),
  * Lab 5 (photodiode + sumber cahaya yang diseret + ADC besar),
  * Lab 6 (photodiode tetap membaca permukaan bergaris yang diseret + grafik ADC).
@@ -853,191 +853,184 @@ export function gambarArraySensor(ctx, state, ukuran) {
 }
 
 /**
- * Rangkaian Lab 3: baterai kiri, resistor variabel di sisi atas, LED kanan.
- * Bagian bawah kanvas berisi grafik tegangan real time (V resistor + V LED)
- * yang bergerak mengikuti riwayat di state.
+ * Rangkaian Lab 3: dua resistor seri dengan titik keluaran di antaranya.
+ * Titik Vout dan bar rasio menjadi fokus visual agar perubahan nilai mudah
+ * dihubungkan dengan rumus pembagi tegangan.
  */
-export function gambarRangkaianResistor(ctx, state, ukuran, waktu) {
+export function gambarPembagiTegangan(ctx, state, ukuran, waktu) {
   const { lebar, tinggi } = ukuran;
   ctx.clearRect(0, 0, lebar, tinggi);
 
   const fontUtama = getComputedStyle(document.documentElement).getPropertyValue("--font-utama");
   const warnaTeks = warnaToken("--teks");
   const warnaLabel = warnaToken("--teks-lembut");
-
-  // area: rangkaian di 62% atas, grafik di sisanya
-  const tinggiRangkaian = tinggi * 0.62;
-
-  const margin = Math.max(48, lebar * 0.12);
-  const x0 = margin;
-  const x1 = lebar - margin;
-  const y0 = Math.max(36, tinggiRangkaian * 0.24);
-  const y1 = tinggiRangkaian - Math.max(30, tinggiRangkaian * 0.16);
-  const tengahKiri = (y0 + y1) / 2;
-  const tengahAtas = (x0 + x1) / 2;
-
-  const kecerahan = state.kecerahan;
   const warnaKawat = warnaToken("--oranye");
-  const jariLED = Math.max(13, lebar * 0.03);
+  const warnaGaris = warnaToken("--abu-garis");
+  const warnaSorot = warnaToken("--oranye-muda");
 
-  ctx.lineWidth = LEBAR_KAWAT;
+  const sempit = lebar < 480;
+  const xBaterai = lebar * (sempit ? 0.18 : 0.22);
+  const xPembagi = lebar * (sempit ? 0.48 : 0.56);
+  const xKeluaran = lebar * (sempit ? 0.8 : 0.86);
+  const yAtas = tinggi * 0.14;
+  const yTengah = tinggi * 0.46;
+  const yBawah = tinggi * 0.76;
+  const panjangResistor = Math.max(58, tinggi * 0.17);
+
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  ctx.font = `600 13px ${fontUtama}`;
-  ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-
-  // ---- Kawat (rangkaian selalu tertutup; arus selalu mengalir) ----
-  const setengahResistor = 46; // setengah lebar simbol resistor di sisi atas
+  ctx.lineWidth = LEBAR_KAWAT;
   ctx.strokeStyle = warnaKawat;
+
+  // Jalur tertutup melalui baterai, R1, dan R2.
   ctx.beginPath();
-  // sisi kiri: dua ruas mengapit baterai
-  ctx.moveTo(x0, y1);
-  ctx.lineTo(x0, tengahKiri + 13);
-  ctx.moveTo(x0, tengahKiri - 13);
-  ctx.lineTo(x0, y0);
-  // sisi atas: dua ruas mengapit resistor
-  ctx.moveTo(x0, y0);
-  ctx.lineTo(tengahAtas - setengahResistor, y0);
-  ctx.moveTo(tengahAtas + setengahResistor, y0);
-  ctx.lineTo(x1, y0);
-  // sisi kanan: dua ruas mengapit LED
-  ctx.moveTo(x1, y0);
-  ctx.lineTo(x1, tengahKiri - jariLED - 6);
-  ctx.moveTo(x1, tengahKiri + jariLED + 6);
-  ctx.lineTo(x1, y1);
-  // sisi bawah utuh
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x0, y1);
+  ctx.moveTo(xBaterai, yAtas);
+  ctx.lineTo(xPembagi, yAtas);
+  ctx.lineTo(xPembagi, yAtas + 18);
+  ctx.moveTo(xPembagi, yTengah - 18);
+  ctx.lineTo(xPembagi, yTengah);
+  ctx.moveTo(xPembagi, yTengah);
+  ctx.lineTo(xPembagi, yTengah + 18);
+  ctx.moveTo(xPembagi, yBawah - 18);
+  ctx.lineTo(xPembagi, yBawah);
+  ctx.lineTo(xBaterai, yBawah);
   ctx.stroke();
 
-  // ---- Baterai (sisi kiri) ----
-  const yPlus = tengahKiri - 13;
-  const yMinus = tengahKiri + 13;
-  ctx.strokeStyle = warnaTeks;
+  // Baterai pada sisi kiri.
+  const yPlus = (yAtas + yBawah) / 2 - 13;
+  const yMinus = yPlus + 26;
   ctx.beginPath();
+  ctx.moveTo(xBaterai, yAtas);
+  ctx.lineTo(xBaterai, yPlus);
+  ctx.moveTo(xBaterai, yMinus);
+  ctx.lineTo(xBaterai, yBawah);
+  ctx.stroke();
+  ctx.strokeStyle = warnaTeks;
   ctx.lineWidth = 3;
-  ctx.moveTo(x0 - 16, yPlus);
-  ctx.lineTo(x0 + 16, yPlus);
-  ctx.stroke();
   ctx.beginPath();
+  ctx.moveTo(xBaterai - 17, yPlus);
+  ctx.lineTo(xBaterai + 17, yPlus);
+  ctx.stroke();
   ctx.lineWidth = 7;
-  ctx.moveTo(x0 - 8, yMinus);
-  ctx.lineTo(x0 + 8, yMinus);
-  ctx.stroke();
-  ctx.lineWidth = LEBAR_KAWAT;
-  ctx.fillStyle = warnaLabel;
-  ctx.fillText(`Baterai ${TEGANGAN_SUMBER}V`, x0, yMinus + 28);
-
-  // ---- Resistor variabel (sisi atas, zigzag mendatar + panah) ----
-  const lebarZig = setengahResistor * 2 - 16;
-  const xZigMulai = tengahAtas - lebarZig / 2;
-  const tinggiZig = 9;
-  ctx.strokeStyle = warnaTeks;
   ctx.beginPath();
-  ctx.moveTo(tengahAtas - setengahResistor, y0);
-  ctx.lineTo(xZigMulai, y0);
-  for (let i = 0; i < 5; i++) {
-    const xa = xZigMulai + (lebarZig * (i + 0.25)) / 5;
-    const xb = xZigMulai + (lebarZig * (i + 0.75)) / 5;
-    ctx.lineTo(xa, i % 2 === 0 ? y0 - tinggiZig : y0 + tinggiZig);
-    ctx.lineTo(xb, i % 2 === 0 ? y0 - tinggiZig : y0 + tinggiZig);
-  }
-  ctx.lineTo(xZigMulai + lebarZig, y0);
-  ctx.lineTo(tengahAtas + setengahResistor, y0);
+  ctx.moveTo(xBaterai - 9, yMinus);
+  ctx.lineTo(xBaterai + 9, yMinus);
   ctx.stroke();
-  // panah diagonal menandakan resistor bisa diatur
-  ctx.beginPath();
-  ctx.moveTo(tengahAtas - 20, y0 + 16);
-  ctx.lineTo(tengahAtas + 20, y0 - 16);
-  ctx.moveTo(tengahAtas + 20, y0 - 16);
-  ctx.lineTo(tengahAtas + 11, y0 - 15);
-  ctx.moveTo(tengahAtas + 20, y0 - 16);
-  ctx.lineTo(tengahAtas + 19, y0 - 7);
-  ctx.stroke();
-  ctx.fillStyle = warnaLabel;
-  ctx.fillText(`${Math.round(state.resistansi)} Ω`, tengahAtas, y0 - 30);
 
-  // ---- LED (sisi kanan): kecerahan mengikuti arus ----
-  const yLED = tengahKiri;
-  if (kecerahan > 0.02) {
-    ctx.save();
-    ctx.globalAlpha = kecerahan;
-    ctx.fillStyle = warnaToken("--oranye-muda");
-    ctx.beginPath();
-    ctx.arc(x1, yLED, jariLED * (1.4 + kecerahan * 0.8), 0, Math.PI * 2);
-    ctx.fill();
-    // sinar pendek: makin terang makin panjang
-    ctx.strokeStyle = warnaToken("--led-nyala");
-    ctx.lineWidth = 2.5;
-    for (let i = 0; i < 8; i++) {
-      const sudut = (i / 8) * Math.PI * 2 + Math.PI / 8;
-      const r1 = jariLED * 1.5;
-      const r2 = jariLED * (1.6 + kecerahan * 0.5);
-      ctx.beginPath();
-      ctx.moveTo(x1 + r1 * Math.cos(sudut), yLED + r1 * Math.sin(sudut));
-      ctx.lineTo(x1 + r2 * Math.cos(sudut), yLED + r2 * Math.sin(sudut));
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-  ctx.beginPath();
-  ctx.arc(x1, yLED, jariLED, 0, Math.PI * 2);
-  // warna isi LED memudar ke abu saat arus kecil
-  ctx.save();
-  ctx.fillStyle = warnaToken("--abu-muda");
-  ctx.fill();
-  ctx.globalAlpha = Math.min(1, 0.15 + kecerahan * 0.85);
-  ctx.fillStyle = warnaToken("--led-nyala");
-  ctx.fill();
-  ctx.restore();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = kecerahan > 0.1 ? warnaToken("--led-nyala") : warnaLabel;
-  ctx.stroke();
-  ctx.lineWidth = LEBAR_KAWAT;
-  ctx.fillStyle = warnaLabel;
-  ctx.fillText("LED", x1, yLED + jariLED + 20);
+  // Dua resistor vertikal.
+  gambarResistorVertikal(ctx, xPembagi, yAtas + 18, yTengah - 18, panjangResistor, warnaTeks);
+  gambarResistorVertikal(ctx, xPembagi, yTengah + 18, yBawah - 18, panjangResistor, warnaTeks);
 
-  // ---- Label tegangan tiap titik ----
+  const arahLabel = sempit ? -1 : 1;
+  const xLabelResistor = xPembagi + arahLabel * 28;
+  ctx.font = `700 13px ${fontUtama}`;
+  ctx.textAlign = sempit ? "right" : "left";
   ctx.fillStyle = warnaTeks;
-  ctx.fillText(`${TEGANGAN_SUMBER.toFixed(1)} V`, x0 + 30, y0 - 14);
-  ctx.fillText(`${state.teganganLED.toFixed(2)} V`, x1 - 40, y0 - 14);
-  ctx.fillText("0 V", tengahAtas, y1 + 18);
+  ctx.fillText("R1", xLabelResistor, (yAtas + yTengah) / 2 - 10);
+  ctx.fillText("R2", xLabelResistor, (yTengah + yBawah) / 2 - 10);
+  ctx.font = `600 12px ${fontUtama}`;
+  ctx.fillStyle = warnaLabel;
+  ctx.fillText(`${(state.resistansiAtas / 1000).toFixed(1)} kΩ`, xLabelResistor, (yAtas + yTengah) / 2 + 10);
+  ctx.fillText(`${(state.resistansiBawah / 1000).toFixed(1)} kΩ`, xLabelResistor, (yTengah + yBawah) / 2 + 10);
+
+  // Titik keluaran dan kartu nilai Vout.
+  ctx.strokeStyle = warnaKawat;
+  ctx.lineWidth = LEBAR_KAWAT;
+  ctx.beginPath();
+  ctx.moveTo(xPembagi, yTengah);
+  ctx.lineTo(xKeluaran, yTengah);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(xPembagi, yTengah, 6, 0, Math.PI * 2);
+  ctx.fillStyle = warnaKawat;
+  ctx.fill();
+
+  const lebarKartu = Math.min(132, lebar * (sempit ? 0.32 : 0.24));
+  const tinggiKartu = 76;
+  const xKartu = xKeluaran - lebarKartu / 2;
+  const yKartu = yTengah - tinggiKartu / 2;
+  ctx.fillStyle = warnaSorot;
+  ctx.beginPath();
+  ctx.roundRect(xKartu, yKartu, lebarKartu, tinggiKartu, 12);
+  ctx.fill();
+  ctx.textAlign = "center";
   ctx.fillStyle = warnaLabel;
   ctx.font = `600 12px ${fontUtama}`;
-  ctx.fillText(`V resistor = ${state.teganganResistor.toFixed(2)} V`, tengahAtas, y0 + 34);
-  ctx.font = `600 13px ${fontUtama}`;
+  ctx.fillText("Vout", xKeluaran, yTengah - 23);
+  ctx.font = `500 10px ${fontUtama}`;
+  ctx.fillText("tegangan keluaran", xKeluaran, yTengah - 8);
+  ctx.fillStyle = warnaTeks;
+  ctx.font = `700 20px ${fontUtama}`;
+  ctx.fillText(`${state.teganganKeluar.toFixed(2)} V`, xKeluaran, yTengah + 16);
 
-  // ---- Peringatan arus berlebih ----
-  if (state.bahaya) {
-    ctx.fillStyle = warnaToken("--merah");
-    ctx.font = `700 14px ${fontUtama}`;
-    ctx.fillText("Arus terlalu besar, LED sungguhan bisa rusak!", tengahAtas, y1 - 22);
-    ctx.font = `600 13px ${fontUtama}`;
+  // Label sumber, ground, dan jatuh tegangan pada tiap resistor.
+  ctx.textAlign = "center";
+  ctx.font = `700 12px ${fontUtama}`;
+  ctx.fillStyle = warnaTeks;
+  ctx.fillText(`VCC, sumber ${TEGANGAN_SUMBER.toFixed(0)} V`, xPembagi, yAtas - 18);
+  ctx.fillText("GND, acuan 0 V", xPembagi, yBawah + 18);
+  ctx.font = `600 11px ${fontUtama}`;
+  ctx.fillStyle = warnaLabel;
+  ctx.fillText(`V R1 ${state.teganganAtas.toFixed(2)} V`, xBaterai, yAtas - 18);
+  ctx.fillText(`V R2 ${state.teganganKeluar.toFixed(2)} V`, xBaterai, yBawah + 18);
+
+  // Titik arus bergerak pelan untuk menegaskan bahwa kedua resistor dialiri arus yang sama.
+  gambarTitikArus(ctx, waktu * 0.55, [
+    [xBaterai, yPlus],
+    [xBaterai, yAtas],
+    [xPembagi, yAtas],
+    [xPembagi, yBawah],
+    [xBaterai, yBawah],
+    [xBaterai, yMinus],
+  ]);
+
+  // Bar rasio R2 terhadap total resistansi.
+  const lebarBar = Math.min(lebar * 0.7, 360);
+  const tinggiBar = 12;
+  const xBar = (lebar - lebarBar) / 2;
+  const yBar = tinggi * 0.91;
+  ctx.lineWidth = tinggiBar;
+  ctx.strokeStyle = warnaGaris;
+  ctx.beginPath();
+  ctx.moveTo(xBar + tinggiBar / 2, yBar);
+  ctx.lineTo(xBar + lebarBar - tinggiBar / 2, yBar);
+  ctx.stroke();
+  const xIsi = xBar + tinggiBar / 2 + state.rasioBawah * (lebarBar - tinggiBar);
+  ctx.strokeStyle = warnaKawat;
+  ctx.beginPath();
+  ctx.moveTo(xBar + tinggiBar / 2, yBar);
+  ctx.lineTo(xIsi, yBar);
+  ctx.stroke();
+  ctx.font = `600 12px ${fontUtama}`;
+  ctx.fillStyle = warnaLabel;
+  ctx.textAlign = "left";
+  ctx.fillText("0%", xBar, yBar - 18);
+  ctx.textAlign = "right";
+  ctx.fillText("100%", xBar + lebarBar, yBar - 18);
+  ctx.textAlign = "center";
+  ctx.fillStyle = warnaTeks;
+  ctx.fillText(`Bagian R2 dari total ${(state.rasioBawah * 100).toFixed(1)}%`, lebar / 2, yBar + 22);
+}
+
+function gambarResistorVertikal(ctx, x, yAwal, yAkhir, panjang, warna) {
+  const tengah = (yAwal + yAkhir) / 2;
+  const mulai = tengah - panjang / 2;
+  const akhir = tengah + panjang / 2;
+  const lebarZig = 10;
+
+  ctx.strokeStyle = warna;
+  ctx.lineWidth = LEBAR_KAWAT;
+  ctx.beginPath();
+  ctx.moveTo(x, yAwal);
+  ctx.lineTo(x, mulai);
+  for (let i = 0; i < 6; i++) {
+    const y = mulai + ((i + 1) / 7) * panjang;
+    ctx.lineTo(x + (i % 2 === 0 ? lebarZig : -lebarZig), y);
   }
-
-  // ---- Titik arus: makin besar arus, makin cepat ----
-  const kecepatanArus = 30 + state.arusMiliAmp * 6; // piksel per detik
-  gambarTitikArus(
-    ctx,
-    (waktu * kecepatanArus) / 70, // gambarTitikArus memakai kecepatan tetap 70 px/s
-    [
-      [x0, yPlus],
-      [x0, y0],
-      [x1, y0],
-      [x1, y1],
-      [x0, y1],
-      [x0, yMinus],
-    ],
-  );
-
-  gambarGrafikTegangan(ctx, state.riwayat, {
-    x: margin * 0.55,
-    y: tinggiRangkaian + 6,
-    lebar: lebar - margin * 1.1,
-    tinggi: tinggi - tinggiRangkaian - 16,
-    fontUtama,
-  });
+  ctx.lineTo(x, akhir);
+  ctx.lineTo(x, yAkhir);
+  ctx.stroke();
 }
 
 /**
@@ -1188,69 +1181,6 @@ export function gambarPotensiometer(ctx, state, ukuran) {
   ctx.fillStyle = warnaTeks;
   ctx.textAlign = "center";
   ctx.fillText(`${state.tegangan.toFixed(2)} V`, cx, yBar + tinggiBar / 2 + 20);
-}
-
-/** Grafik garis tegangan resistor dan LED terhadap waktu (riwayat bergulir). */
-function gambarGrafikTegangan(ctx, riwayat, { x, y, lebar, tinggi, fontUtama }) {
-  if (tinggi < 40 || riwayat.length < 2) return;
-
-  const warnaKisi = warnaToken("--abu-garis");
-  const warnaLabel = warnaToken("--teks-lembut");
-  const warnaVR = warnaToken("--oranye");
-  const warnaVLed = warnaToken("--hijau");
-  const xPlot = x + 34; // ruang label sumbu kiri
-  const lebarPlot = lebar - 34;
-
-  // kisi mendatar tiap 1 V
-  ctx.lineWidth = 1;
-  ctx.font = `600 11px ${fontUtama}`;
-  ctx.textAlign = "right";
-  ctx.textBaseline = "middle";
-  for (let v = 0; v <= TEGANGAN_SUMBER; v++) {
-    const yV = y + tinggi - (v / TEGANGAN_SUMBER) * tinggi;
-    ctx.strokeStyle = warnaKisi;
-    ctx.beginPath();
-    ctx.moveTo(xPlot, yV);
-    ctx.lineTo(xPlot + lebarPlot, yV);
-    ctx.stroke();
-    ctx.fillStyle = warnaLabel;
-    ctx.fillText(`${v} V`, xPlot - 6, yV);
-  }
-
-  // dua garis riwayat: sampel terbaru di kanan
-  ctx.lineWidth = 2;
-  for (const [kunci, warna] of [
-    ["vR", warnaVR],
-    ["vLed", warnaVLed],
-  ]) {
-    ctx.strokeStyle = warna;
-    ctx.beginPath();
-    for (const [i, sampel] of riwayat.entries()) {
-      const xS = xPlot + (i / (riwayat.length - 1)) * lebarPlot;
-      const yS = y + tinggi - (sampel[kunci] / TEGANGAN_SUMBER) * tinggi;
-      if (i === 0) ctx.moveTo(xS, yS);
-      else ctx.lineTo(xS, yS);
-    }
-    ctx.stroke();
-  }
-
-  // legenda kecil di pojok kanan atas grafik
-  ctx.textAlign = "left";
-  const xLegenda = xPlot + lebarPlot - 150;
-  for (const [indeks, [label, warna]] of [
-    ["V resistor", warnaVR],
-    ["V LED", warnaVLed],
-  ].entries()) {
-    const yL = y + 8 + indeks * 15;
-    ctx.strokeStyle = warna;
-    ctx.beginPath();
-    ctx.moveTo(xLegenda, yL);
-    ctx.lineTo(xLegenda + 16, yL);
-    ctx.stroke();
-    ctx.fillStyle = warnaLabel;
-    ctx.fillText(label, xLegenda + 22, yL);
-  }
-  ctx.textAlign = "center";
 }
 
 function gambarSlotResistor(ctx, x, yAwal, yAkhir, terisi, warnaTeks, warnaLabel, fontUtama) {

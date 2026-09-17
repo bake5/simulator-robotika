@@ -18,7 +18,7 @@ export const daftarModul = [
 export const daftarLab = [
   { id: 1,  singkat: "LED ON/OFF",               modul: 1, thumb: "assets/thumbs/lab01.svg", berkas: "lab01-led.js", tersedia: true },
   { id: 2,  singkat: "Pull-Up & Pull-Down",     modul: 1, thumb: "assets/thumbs/lab02.svg", berkas: "lab02-pullupdown.js", tersedia: true },
-  { id: 3,  singkat: "Resistor & Pembagi Tegangan", modul: 1, thumb: "assets/thumbs/lab03.svg", berkas: "lab03-resistor.js", tersedia: true },
+  { id: 3,  singkat: "Pembagi Tegangan",          modul: 1, thumb: "assets/thumbs/lab03.svg", berkas: "lab03-resistor.js", tersedia: true },
   { id: 4,  singkat: "Variabel Resistor",       modul: 1, thumb: "assets/thumbs/lab04.svg", berkas: "lab04-potensiometer.js", tersedia: true },
   { id: 5,  singkat: "Photodiode",              modul: 2, thumb: "assets/thumbs/lab05.svg", berkas: "lab05-photodiode.js", tersedia: true },
   { id: 6,  singkat: "Photodiode di Permukaan", modul: 2, thumb: "assets/thumbs/lab06.svg", berkas: "lab06-sensor-permukaan.js", tersedia: true },

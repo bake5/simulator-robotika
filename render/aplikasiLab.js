@@ -11,7 +11,7 @@ import { bangunKontrol, isiPanduan, isiChecklist } from "./panel.js";
 import {
   gambarRangkaianLED,
   gambarRangkaianPull,
-  gambarRangkaianResistor,
+  gambarPembagiTegangan,
   gambarPotensiometer,
   gambarPhotodiode,
   gambarSensorPermukaan,
@@ -128,8 +128,8 @@ async function muatLab(info) {
         gambarRangkaianLED(ctx, state, ukuran(), waktu);
       } else if (lab.komponen?.rangkaianPull) {
         gambarRangkaianPull(ctx, state, ukuran(), waktu);
-      } else if (lab.komponen?.rangkaianResistor) {
-        gambarRangkaianResistor(ctx, state, ukuran(), waktu);
+      } else if (lab.komponen?.pembagiTegangan) {
+        gambarPembagiTegangan(ctx, state, ukuran(), waktu);
       } else if (lab.komponen?.potensiometer) {
         gambarPotensiometer(ctx, state, ukuran());
       } else if (lab.komponen?.photodiode) {

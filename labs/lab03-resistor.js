@@ -1,54 +1,61 @@
 /*
- * Lab 3 — Resistor dan Pembagi Tegangan.
- * Slider resistor mengubah arus; kecerahan LED, angka arus/tegangan,
- * dan grafik tegangan real time memperlihatkan hukum Ohm bekerja.
+ * Lab 3: rangkaian pembagi tegangan dengan dua resistor.
+ * Dua slider mengubah R1 dan R2 agar hubungan antara rasio resistansi
+ * dan tegangan keluaran terlihat langsung.
  */
 
-import { buatRangkaianResistor, TEGANGAN_SUMBER } from "../engine/rangkaian.js";
-
-const LABEL_ZONA = { redup: "redup", normal: "normal", terang: "sangat terang" };
+import { buatPembagiTegangan, TEGANGAN_SUMBER } from "../engine/rangkaian.js";
 
 export default {
   id: 3,
-  judul: "Resistor dan Pembagi Tegangan",
-  singkat: "Resistor & Pembagi Tegangan",
+  judul: "Pembagi Tegangan",
+  singkat: "Pembagi Tegangan",
   modul: 1,
-  tujuan: "Memahami hubungan resistansi, arus, dan tegangan.",
+  tujuan: "Memahami cara dua resistor membagi tegangan sumber menjadi tegangan keluaran.",
 
   panduan: [
-    "Geser slider resistor dan perhatikan: resistansi kecil menghasilkan arus besar sehingga LED terang, resistansi besar menghasilkan arus kecil sehingga LED redup. Ini adalah hukum Ohm.",
-    "Perhatikan pembagian tegangan: tegangan baterai 5 V terbagi antara resistor dan LED. Tegangan LED relatif tetap di sekitar 2 V. Nilai yang berubah signifikan adalah arusnya.",
-    "Grafik di bawah rangkaian merekam kedua tegangan tersebut secara real time. Geser slider secara perlahan dan amati pergerakan garis pada grafik.",
-    "Geser slider untuk menemukan nilai resistor yang membuat LED redup, normal, dan sangat terang. Tahan slider pada tiap kondisi selama beberapa detik hingga status tercapai untuk ketiganya.",
-    "Geser ke resistansi paling kecil. Arus akan melewati batas aman. Pada rangkaian sungguhan, kondisi ini dapat merusak LED. Oleh karena itu, LED selalu dipasangi resistor seri, umumnya bernilai 220-330 Ω.",
-    "Lihat kartu Rumus. Hukum Ohm menghitung arus dari selisih tegangan sumber dan tegangan beban (LED), dibagi resistansi. Tegangan resistor kemudian didapat dari arus dikalikan resistansi. Baris terakhir menunjukkan bahwa tegangan resistor dan tegangan beban selalu berjumlah sama dengan tegangan sumber.",
+    "Atur R1 dan R2 ke nilai yang sama. R1 adalah resistor atas yang terhubung ke sumber 5 V, sedangkan R2 adalah resistor bawah yang terhubung ke GND 0 V. Amati tegangan keluaran (Vout) pada titik tengah yang berubah menjadi 2,5 V karena kedua resistor membagi tegangan sama besar.",
+    "Atur R1 lebih besar daripada R2. Amati Vout yang menurun karena bagian tegangan pada R2 menjadi lebih kecil. Temukan kombinasi yang menghasilkan Vout maksimal 1,5 V.",
+    "Atur R2 lebih besar daripada R1. Amati Vout yang meningkat karena bagian tegangan pada R2 menjadi lebih besar. Temukan kombinasi yang menghasilkan Vout minimal 3,5 V.",
+    "Bandingkan ketiga kondisi pada panel Kontrol dan kartu Rumus. Setelah target tegangan rendah, seimbang, dan tinggi tercapai, checklist akan tercentang dan status lab berubah menjadi Selesai. Jelaskan hubungan antara nilai R1, nilai R2, dan tegangan keluaran Vout.",
   ],
 
-  komponen: { rangkaianResistor: true },
+  komponen: { pembagiTegangan: true },
 
   kontrol: [
     {
       jenis: "slider",
-      id: "resistor",
-      label: "Nilai resistor",
-      min: 50,
-      max: 2000,
-      langkah: 10,
-      nilaiAwal: 1000,
-      satuan: "Ω",
-      terapkan: (state, nilai) => state.setResistor(nilai),
+      id: "resistorAtas",
+      label: "R1, resistor atas",
+      min: 1,
+      max: 10,
+      langkah: 0.5,
+      nilaiAwal: 10,
+      satuan: "kΩ",
+      terapkan: (state, nilai) => state.setResistansiAtas(nilai * 1000),
+    },
+    {
+      jenis: "slider",
+      id: "resistorBawah",
+      label: "R2, resistor bawah",
+      min: 1,
+      max: 10,
+      langkah: 0.5,
+      nilaiAwal: 5,
+      satuan: "kΩ",
+      terapkan: (state, nilai) => state.setResistansiBawah(nilai * 1000),
     },
     { jenis: "nilai", id: "arus", label: "Arus", satuan: "mA" },
-    { jenis: "nilai", id: "vResistor", label: "V resistor", satuan: "V" },
-    { jenis: "nilai", id: "vLed", label: "V LED", satuan: "V" },
+    { jenis: "nilai", id: "vKeluar", label: "Vout", satuan: "V" },
+    { jenis: "nilai", id: "rasio", label: "Bagian R2", satuan: "%" },
     {
       jenis: "rumus",
       id: "rumus",
-      judul: "Rumus & perhitungan saat ini",
+      judul: "Rumus dan perhitungan saat ini",
       baris: [
-        { id: "ohm", simbol: "Hukum Ohm: I = (V_sumber − V_beban) ÷ R" },
-        { id: "vr", simbol: "Tegangan resistor: V_R = I × R" },
-        { id: "cek", simbol: "Cek pembagian tegangan: V_R + V_beban = V_sumber" },
+        { id: "total", simbol: "Rtotal = R1 + R2" },
+        { id: "keluar", simbol: "Vout = Vsumber × R2 ÷ (R1 + R2)" },
+        { id: "arus", simbol: "I = Vsumber ÷ (R1 + R2)" },
       ],
     },
     { jenis: "teks", id: "status" },
@@ -56,35 +63,37 @@ export default {
 
   levelCoding: [1],
 
-  buatState: () => buatRangkaianResistor(),
+  buatState: () => buatPembagiTegangan(),
 
   langkah: (state, dt) => state.langkah(dt),
 
   perbaruiPanel(panel, state) {
-    panel.setAngka("arus", state.arusMiliAmp.toFixed(1));
-    panel.setAngka("vResistor", state.teganganResistor.toFixed(2));
-    panel.setAngka("vLed", state.teganganLED.toFixed(2));
+    panel.setAngka("arus", state.arusMiliAmp.toFixed(2));
+    panel.setAngka("vKeluar", state.teganganKeluar.toFixed(2));
+    panel.setAngka("rasio", (state.rasioBawah * 100).toFixed(1));
 
     const vSumber = TEGANGAN_SUMBER.toFixed(2);
-    const vBeban = state.teganganLED.toFixed(2);
-    const vR = state.teganganResistor.toFixed(2);
-    const r = Math.round(state.resistansi);
-    const mA = state.arusMiliAmp.toFixed(1);
-    const jumlah = (state.teganganResistor + state.teganganLED).toFixed(2);
+    const r1 = (state.resistansiAtas / 1000).toFixed(1);
+    const r2 = (state.resistansiBawah / 1000).toFixed(1);
+    const total = (state.resistansiTotal / 1000).toFixed(1);
+    const vKeluar = state.teganganKeluar.toFixed(2);
+    const mA = state.arusMiliAmp.toFixed(2);
 
-    panel.setRumus("rumus", "ohm", `= (${vSumber} V − ${vBeban} V) ÷ ${r} Ω = ${mA} mA`);
-    panel.setRumus("rumus", "vr", `= ${mA} mA × ${r} Ω = ${vR} V`);
-    panel.setRumus("rumus", "cek", `${vR} V + ${vBeban} V = ${jumlah} V ✓`);
+    panel.setRumus("rumus", "total", `= ${r1} kΩ + ${r2} kΩ = ${total} kΩ`);
+    panel.setRumus("rumus", "keluar", `= ${vSumber} V × ${r2} kΩ ÷ ${total} kΩ = ${vKeluar} V`);
+    panel.setRumus("rumus", "arus", `= ${vSumber} V ÷ ${total} kΩ = ${mA} mA`);
 
-    const daftarZona = ["redup", "normal", "terang"]
-      .map((z) => `${LABEL_ZONA[z]} ${state.zonaTercapai[z] ? "✓" : "…"}`)
-      .join(" · ");
-    panel.setTeks("status", `LED sekarang: ${LABEL_ZONA[state.zona]}. Zona tercapai: ${daftarZona}`);
+    const kondisi = [
+      `rendah ${state.kondisiTercapai.rendah ? "✓" : "…"}`,
+      `seimbang ${state.kondisiTercapai.seimbang ? "✓" : "…"}`,
+      `tinggi ${state.kondisiTercapai.tinggi ? "✓" : "…"}`,
+    ].join(" · ");
+    panel.setTeks("status", `Target tercapai: ${kondisi}`);
   },
 
   kriteriaSelesai: [
-    { id: "redup", label: "Temukan nilai resistor yang membuat LED redup", cek: (state) => state.zonaTercapai.redup },
-    { id: "normal", label: "Temukan nilai resistor yang membuat LED normal", cek: (state) => state.zonaTercapai.normal },
-    { id: "terang", label: "Temukan nilai resistor yang membuat LED sangat terang", cek: (state) => state.zonaTercapai.terang },
+    { id: "rendah", label: "Temukan Vout maksimal 1,5 V", cek: (state) => state.kondisiTercapai.rendah },
+    { id: "seimbang", label: "Atur R1 dan R2 sama untuk menghasilkan Vout 2,5 V", cek: (state) => state.kondisiTercapai.seimbang },
+    { id: "tinggi", label: "Temukan Vout minimal 3,5 V", cek: (state) => state.kondisiTercapai.tinggi },
   ],
 };
