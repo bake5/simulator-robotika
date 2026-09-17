@@ -1,7 +1,7 @@
 /*
- * Lab 2 — Resistor Pull-Up dan Pull-Down.
- * Praktek rakit: pasang resistor ke VCC (pull-up) atau GND (pull-down),
- * rasakan pin mengambang, lalu uji tekan-lepas tombol di kedua konfigurasi.
+ * Lab 2. Resistor Pull-Up dan Pull-Down.
+ * Praktik perakitan memasang resistor ke VCC untuk pull-up atau ke GND untuk
+ * pull-down, mengamati kondisi floating, lalu menguji kedua konfigurasi.
  */
 
 import { buatRangkaianPull } from "../engine/rangkaian.js";
@@ -23,7 +23,7 @@ export default {
   tujuan: "Memahami kondisi aktif high dan aktif low melalui rangkaian pull-up dan pull-down.",
 
   panduan: [
-    "Lepaskan resistor dari pin sinyal. Amati indikator yang berubah antara HIGH? dan LOW? tanpa pola. Pin berada dalam kondisi mengambang sehingga nilai logikanya tidak dapat ditentukan dengan stabil.",
+    "Lepaskan resistor dari pin sinyal. Amati indikator yang berubah antara HIGH? dan LOW? tanpa pola. Tanpa resistor, pin menjadi floating karena tidak terhubung ke VCC atau GND.",
     "Pilih mode Rakit Pull-Up, lalu pasang resistor ke VCC. Tahan dan lepaskan tombol. Saat tombol dilepas, indikator menunjukkan HIGH dengan tegangan 5 V. Saat tombol ditekan, indikator menunjukkan LOW dengan tegangan 0 V. Tombol ini bersifat aktif low karena kondisi aktif terjadi saat sinyal LOW.",
     "Pilih mode Rakit Pull-Down, lalu pasang resistor ke GND. Tahan dan lepaskan tombol. Saat tombol dilepas, indikator menunjukkan LOW dengan tegangan 0 V. Saat tombol ditekan, indikator menunjukkan HIGH dengan tegangan 5 V. Tombol ini bersifat aktif high karena kondisi aktif terjadi saat sinyal HIGH.",
     "Pasang resistor pada posisi yang tidak sesuai dengan mode rangkaian, lalu tekan dan lepaskan tombol. Amati bahwa sinyal tertahan pada satu nilai sehingga tombol tidak mengubah kondisi logika.",
@@ -76,7 +76,7 @@ export default {
       panel.setIndikator("logika", {
         nilai: state.logikaTampak ? "HIGH?" : "LOW?",
         varian: "ambang",
-        keterangan: "mengambang, nilai tidak stabil",
+        keterangan: "floating, nilai tidak stabil",
       });
     } else {
       panel.setIndikator("logika", {

@@ -10,7 +10,7 @@ export const TEGANGAN_SUMBER = 5;
  * Dua mode rakit, masing-masing punya rakitan sendiri:
  * - pullup: tombol menghubungkan pin ke GND; resistor benar = ke VCC (tekan = LOW → aktif low)
  * - pulldown: tombol menghubungkan pin ke VCC; resistor benar = ke GND (tekan = HIGH → aktif high)
- * Tanpa resistor, pin mengambang: nilainya berkedip tak menentu.
+ * Tanpa resistor, pin menjadi floating sehingga nilainya berubah tak menentu.
  */
 export function buatRangkaianPull() {
   return {
@@ -20,7 +20,7 @@ export function buatRangkaianPull() {
       pulldown: { resistor: null, ujiTekan: false, ujiLepas: false },
     },
     tombolDitekan: false,
-    nilaiAmbang: false, // nilai kedip saat pin mengambang
+    nilaiAmbang: false, // nilai yang tampak saat pin floating
     _sisaWaktuDerau: 0,
 
     get rakitAktif() {
@@ -46,7 +46,7 @@ export function buatRangkaianPull() {
       return "AMBANG";
     },
 
-    /** Nilai logika yang terlihat (mengambang → nilai kedip acak). */
+    /** Nilai logika yang terlihat saat pin floating. */
     get logikaTampak() {
       const keluar = this.output;
       if (keluar === "AMBANG") return this.nilaiAmbang;

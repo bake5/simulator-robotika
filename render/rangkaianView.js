@@ -314,11 +314,11 @@ export function gambarRangkaianPull(ctx, state, ukuran, waktu) {
   ctx.fillText("LED indikator", xLED, yPin + jariLED + 20);
   ctx.fillText("(nyala saat HIGH)", xLED, yPin + jariLED + 36);
 
-  // ---- Peringatan pin mengambang ----
+  // Peringatan saat pin floating
   if (keluar === "AMBANG") {
     ctx.fillStyle = warnaAmbang;
     ctx.font = `700 15px ${fontUtama}`;
-    ctx.fillText("pin mengambang, pasang resistor!", (xRailKiri + xRailKanan) / 2, yGND + 26);
+    ctx.fillText("pin floating, pasang resistor!", (xRailKiri + xRailKanan) / 2, yGND + 26);
     ctx.font = `600 13px ${fontUtama}`;
   }
 }
