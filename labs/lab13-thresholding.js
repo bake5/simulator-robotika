@@ -85,18 +85,18 @@ export default {
   judul: "Thresholding",
   singkat: "Thresholding",
   modul: 4,
-  tujuan: "Mengubah grayscale jadi biner dengan nilai ambang, memahami efek ambang terlalu rendah atau tinggi.",
+  tujuan: "Mengubah citra grayscale menjadi citra biner dan mengamati pengaruh nilai threshold pada hasil pemisahan garis dan lantai.",
 
   panduan: [
-    "Geser slider ambang dan perhatikan gambar biner di kanan. Garis putus-putus oranye di histogram menandai posisi ambang saat ini.",
-    "Ambang terlalu rendah (dekat 0) membuat hampir semua piksel dianggap lantai, sehingga garis nyaris hilang dari hasil biner. Ambang terlalu tinggi (dekat 255) membuat hampir semua piksel dianggap garis.",
-    "Ganti kondisi pencahayaan ke Redup atau Silau. Histogramnya akan menyempit dan bergeser, sehingga ambang yang tadinya pas di kondisi Normal bisa jadi tidak lagi memisahkan dengan bersih.",
-    "Cari ambang yang memisahkan dengan bersih (di celah antara dua gerombolan nilai histogram) di minimal dua kondisi pencahayaan berbeda.",
-    "Level 2: buka kartu kode di bawah. Kode biner(nilaiPiksel, ambang) yang benar sudah tertulis di sana, ditandai di dalam komentar. Baca dulu kodenya, lalu hapus baris '/*' dan baris '*/' supaya kode itu aktif, dan klik \"Uji fungsi biner\" untuk memeriksa. Lab ini selesai setelah dua syarat terpenuhi: ambang bersih ditemukan di minimal dua kondisi pencahayaan (langkah sebelumnya), dan Level 2 lulus semua uji.",
+    "Geser slider Ambang. Amati perubahan citra biner di sisi kanan dan posisi garis oranye pada histogram. Piksel yang nilainya lebih kecil dari ambang diklasifikasikan sebagai garis.",
+    "Atur ambang mendekati 0, kemudian mendekati 255. Amati bahwa ambang terlalu rendah membuat garis menghilang, sedangkan ambang terlalu tinggi membuat hampir seluruh citra dianggap garis.",
+    "Pilih kondisi pencahayaan Normal, Redup, dan Silau. Amati pergeseran kelompok nilai pada histogram dan perubahan hasil citra biner untuk nilai ambang yang sama.",
+    "Tentukan ambang yang memisahkan garis dan lantai dengan jelas pada minimal dua kondisi pencahayaan. Checklist pertama tercentang setelah target ini tercapai.",
+    "Buka bagian coding Level 2. Aktifkan kode fungsi biner(nilaiPiksel, ambang) yang tersedia, lalu pilih Uji fungsi biner. Lab selesai setelah fungsi lulus seluruh kasus uji.",
   ],
 
   deskripsiKoding:
-    "Kode biner(nilaiPiksel, ambang) yang benar sudah disediakan di bawah, di dalam komentar /* ... */. Hapus baris '/*' dan baris '*/' supaya kode itu aktif, tidak perlu menulis perbandingannya dari nol. Fungsi ini menerima dua angka, satu nilai piksel grayscale (0-255) dan satu nilai ambang, lalu mengembalikan 1 (piksel dianggap garis) atau 0 (piksel dianggap lantai). Tombol 'Uji fungsi biner' memanggil fungsi Anda empat kali, dengan empat pasangan nilaiPiksel dan ambang yang berbeda.",
+    "Kode fungsi biner(nilaiPiksel, ambang) tersedia di dalam komentar /* ... */. Hapus penanda komentar agar kode aktif. Fungsi menerima nilai piksel grayscale 0 sampai 255 dan nilai ambang, kemudian mengembalikan 1 untuk garis atau 0 untuk lantai. Tombol 'Uji fungsi biner' menjalankan empat pasangan nilai uji.",
 
   komponen: { thresholding: true },
 
@@ -220,6 +220,6 @@ export default {
       label: "Temukan ambang bersih di minimal 2 dari 3 kondisi pencahayaan (normal, redup, silau)",
       cek: (state) => Object.values(state.diperiksaBersih).filter(Boolean).length >= 2,
     },
-    { id: "level2", label: "Fungsi biner(nilaiPiksel, ambang) buatanmu lulus semua uji", cek: (state) => state.level2Lulus },
+    { id: "level2", label: "Fungsi biner(nilaiPiksel, ambang) lulus semua uji", cek: (state) => state.level2Lulus },
   ],
 };

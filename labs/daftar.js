@@ -27,9 +27,9 @@ export const daftarLab = [
   { id: 9,  singkat: "Gerak Robot Dua Roda",    modul: 3, thumb: "assets/thumbs/lab09.svg", berkas: "lab09-gerak-robot.js", tersedia: true },
   { id: 10, singkat: "Kendali On-Off",          modul: 3, thumb: "assets/thumbs/lab10.svg", berkas: "lab10-kendali-onoff.js", tersedia: true },
   { id: 11, singkat: "Kendali P, PD, PID",      modul: 3, thumb: "assets/thumbs/lab11.svg", berkas: "lab11-kendali-pid.js", tersedia: true },
-  { id: 12, singkat: "Konsep Piksel",           modul: 4, thumb: "assets/thumbs/lab12.svg", berkas: "lab12-piksel.js", tersedia: true },
+  { id: 12, singkat: "Piksel dan Citra Digital", modul: 4, thumb: "assets/thumbs/lab12.svg", berkas: "lab12-piksel.js", tersedia: true },
   { id: 13, singkat: "Thresholding",            modul: 4, thumb: "assets/thumbs/lab13.svg", berkas: "lab13-thresholding.js", tersedia: true },
-  { id: 14, singkat: "Frame jadi 8 Region",     modul: 4, thumb: "assets/thumbs/lab14.svg", berkas: "lab14-frame-region.js", tersedia: true },
-  { id: 15, singkat: "Robot dengan Kamera",     modul: 4, thumb: "assets/thumbs/lab15.svg", berkas: "lab15-robot-kamera.js", tersedia: true },
+  { id: 14, singkat: "Delapan Region Kamera",   modul: 4, thumb: "assets/thumbs/lab14.svg", berkas: "lab14-frame-region.js", tersedia: true },
+  { id: 15, singkat: "Kamera sebagai Sensor Robot", modul: 4, thumb: "assets/thumbs/lab15.svg", berkas: "lab15-robot-kamera.js", tersedia: true },
   { id: 16, singkat: "Eksperimen Komparatif",   modul: 5, thumb: "assets/thumbs/lab16.svg", berkas: "lab16-eksperimen.js", tersedia: true },
 ];

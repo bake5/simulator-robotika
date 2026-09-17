@@ -1,5 +1,5 @@
 /*
- * Lab 12: Konsep Piksel.
+ * Lab 12: Piksel dan Citra Digital.
  * Lab pembuka Modul 4 (Kamera). Gambar digital tersusun dari piksel, tiap
  * piksel cuma satu angka grayscale 0-255 (0 = hitam pekat, 255 = putih
  * penuh). Frame di sini menggambarkan pandangan dari atas garis di lantai,
@@ -44,16 +44,16 @@ export function buatKonsepPiksel() {
 
 export default {
   id: 12,
-  judul: "Konsep Piksel",
-  singkat: "Konsep Piksel",
+  judul: "Piksel dan Citra Digital",
+  singkat: "Piksel dan Citra Digital",
   modul: 4,
-  tujuan: "Gambar digital tersusun dari piksel bernilai 0-255 (grayscale).",
+  tujuan: "Mengenali piksel sebagai unsur dasar citra digital dan membandingkan nilai grayscale pada garis dan lantai.",
 
   panduan: [
-    "Geser slider zoom untuk memperbesar frame sampai terlihat jelas kotak-kotak piksel individualnya.",
-    "Arahkan kursor atau ketuk sebuah piksel untuk melihat nilai grayscale-nya, 0 (hitam pekat) sampai 255 (putih penuh).",
-    "Periksa nilai piksel di area garis gelap dan di area lantai terang, lalu bandingkan kedua angkanya.",
-    "Konsep ini sama dengan yang dipakai di Lab 14: delapan kelompok kolom piksel dirata-ratakan sekaligus, bukan dibaca satu per satu, meniru delapan photodiode di Lab 7.",
+    "Geser slider Zoom ke kanan. Amati kotak-kotak piksel yang terlihat semakin jelas. Perbesaran hanya mengubah tampilan, bukan jumlah atau nilai piksel pada citra.",
+    "Arahkan penunjuk atau ketuk salah satu piksel. Amati nilai grayscale yang ditampilkan, dari 0 untuk hitam hingga 255 untuk putih.",
+    "Pilih piksel pada area garis gelap, kemudian pilih piksel pada area lantai terang. Bandingkan nilainya dan perhatikan bahwa area yang lebih gelap memiliki nilai lebih kecil.",
+    "Periksa kedua area hingga checklist tercentang. Hasil ini menjadi dasar thresholding pada Lab 13, yaitu pemisahan piksel garis dan lantai berdasarkan nilainya.",
   ],
 
   komponen: { konsepPiksel: true },
@@ -92,7 +92,7 @@ export default {
     panel.setAngka("nilaiPiksel", state.nilaiDipilih === null ? "—" : String(state.nilaiDipilih));
     panel.setTeks(
       "status",
-      `sudah periksa garis ${state.sudahPeriksaGaris ? "✓" : "…"} · sudah periksa lantai ${state.sudahPeriksaLantai ? "✓" : "…"}`,
+      `garis diperiksa ${state.sudahPeriksaGaris ? "✓" : "…"} · lantai diperiksa ${state.sudahPeriksaLantai ? "✓" : "…"}`,
     );
   },
 

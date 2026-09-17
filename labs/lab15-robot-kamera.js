@@ -1,5 +1,5 @@
 /*
- * Lab 15 — Robot Jalan Penuh dengan Kamera.
+ * Lab 15: Kamera sebagai Sensor Robot.
  * Kendali PID yang SAMA PERSIS dari Lab 11 dipakai lagi tanpa perubahan —
  * bedanya cuma sumber array 8 angka sensor: dulu dari photodiode
  * (engine/simulasiLintasan.js), sekarang dari frame kamera yang di-threshold
@@ -191,22 +191,22 @@ function buatStateKamera() {
 
 export default {
   id: 15,
-  judul: "Robot Jalan Penuh dengan Kamera",
-  singkat: "Robot dengan Kamera",
+  judul: "Kamera sebagai Sensor Robot",
+  singkat: "Kamera sebagai Sensor Robot",
   modul: 4,
-  tujuan: "Kendali PID yang sama dari Modul 3 dipakai lagi, inputnya dari region kamera.",
+  tujuan: "Menghubungkan delapan nilai region kamera dengan kendali PID untuk mengikuti garis.",
   rasioKanvas: 0.75, // lebih tinggi dari standar (0.6) — kanvas ini menumpuk tampilan lintasan, inset kamera, dan grafik error, perlu ruang vertikal ekstra supaya tidak berdesakan.
 
   panduan: [
-    "Tampilan lab ini sama dengan Lab 11. Bedanya ada di pojok kanan atas kanvas: inset kecil menampilkan pandangan kamera robot, lengkap dengan garis yang membagi frame menjadi 8 region.",
-    "Slider Kp, Kd, dan Ki berfungsi persis seperti di Lab 11. Kalau kamu sudah menemukan kombinasi yang bagus di sana, pakai angka yang sama di sini sebagai titik awal.",
-    "Slider ambang mengatur threshold kamera. Nilai yang terlalu rendah atau terlalu tinggi membuat region salah membaca posisi garis. Konsep ini sama seperti di Lab 13.",
-    "Level 2/3: buka kartu kode di bawah. Kode kendali(sensor) yang benar sudah tertulis lengkap di sana (JavaScript maupun Python), persis sama dengan solusi Lab 11, ditandai di dalam komentar. Baca dulu kodenya, lalu hapus tanda komentarnya supaya kode itu aktif, dan tekan 'Pakai kode ini'.",
-    "Lab ini ditandai selesai hanya jika kode kendali(sensor) itu (Level 2 atau Level 3) berhasil menempuh lintasan Tajam satu putaran penuh dengan keluar jalur kurang dari 3 kali, dalam mode kamera. Mengatur slider Kp/Kd/Ki saja di Level 1 tidak menandai lab ini selesai.",
+    "Pilih lintasan Halus, lalu jalankan robot dengan pengaturan awal. Amati pandangan kamera, pembagian delapan region, grafik error, dan gerak robot pada lintasan.",
+    "Ubah nilai Ambang kamera. Amati bahwa hasil pembacaan region dan gerak robot ikut berubah ketika garis tidak terpisah dengan baik dari lantai.",
+    "Atur Kp, Kd, dan Ki seperti pada Lab 11. Amati pengaruh setiap parameter terhadap respons robot, overshoot, dan osilasi.",
+    "Pilih lintasan Tajam. Buka bagian coding Level 2 atau Level 3, aktifkan kode kendali(sensor) yang tersedia, lalu pilih Pakai kode ini. Fungsi menerima delapan nilai ADC dari region kamera dan menghasilkan kecepatan roda kiri dan kanan.",
+    "Biarkan robot menempuh satu putaran lintasan Tajam. Lab selesai jika robot dikendalikan oleh kode Level 2 atau Level 3 dan keluar jalur kurang dari tiga kali.",
   ],
 
   deskripsiKoding:
-    "Kode kendali(sensor) yang benar sudah disediakan di bawah, di dalam komentar (JavaScript memakai /* ... */, Python memakai \"\"\" ... \"\"\"), persis sama dengan solusi Lab 11. Hapus tanda komentarnya supaya kode itu aktif. Fungsi ini menerima array 8 angka ADC dan mengembalikan [kecepatanKiri, kecepatanKanan], hanya saja sensornya sekarang berasal dari kamera. Setelah Anda menekan 'Pakai kode ini', fungsi ini dipanggil berulang sekitar 10 kali per detik selama robot berjalan. Tidak ada tombol uji terpisah: kode Anda dinilai dari performa nyatanya, yaitu apakah robot berhasil menempuh satu putaran penuh di lintasan Tajam dengan keluar jalur kurang dari 3 kali.",
+    "Kode fungsi kendali(sensor) tersedia di dalam komentar. JavaScript menggunakan /* ... */ dan Python menggunakan tanda kutip tiga. Hapus penanda komentar agar kode aktif. Fungsi menerima array delapan nilai ADC dari kamera dan mengembalikan [kecepatanKiri, kecepatanKanan]. Setelah tombol Pakai kode ini dipilih, fungsi dijalankan sekitar sepuluh kali per detik. Penyelesaian dinilai dari satu putaran pada lintasan Tajam dengan keluar jalur kurang dari tiga kali.",
 
   komponen: { simulasiKamera: true },
 
@@ -378,7 +378,7 @@ export default {
           state._galatKode = null;
           state.resetPosisi();
           state.mulai();
-          tampilkanPesan(`Kode ${namaBahasa} dimuat. Robot sekarang berjalan dan dikendalikan kode kamu.`, false);
+          tampilkanPesan(`Kode ${namaBahasa} dimuat. Robot sekarang berjalan dengan kode tersebut.`, false);
         } catch (err) {
           tampilkanPesan(err?.message ?? String(err), true);
         } finally {

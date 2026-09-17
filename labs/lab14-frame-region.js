@@ -1,5 +1,5 @@
 /*
- * Lab 14 — Pembagian Frame jadi 8 Region.
+ * Lab 14: Delapan Region Kamera.
  * Momen kunci penghubung Modul 2 dan Modul 4: frame kamera dibagi 8 kolom,
  * tiap kolom dihitung proporsi piksel gelapnya, hasilnya diubah ke skala ADC
  * yang SAMA PERSIS dengan array 8 photodiode Lab 7. Ini sengaja dibuat
@@ -154,22 +154,22 @@ function buatStateFrameRegion() {
 
 export default {
   id: 14,
-  judul: "Pembagian Frame jadi 8 Region",
-  singkat: "Frame jadi 8 Region",
+  judul: "Delapan Region Kamera",
+  singkat: "Delapan Region Kamera",
   modul: 4,
-  tujuan: "Frame kamera dibagi 8 kolom, hasilnya berperilaku seperti array 8 photodiode.",
+  tujuan: "Mengubah citra biner menjadi delapan nilai ADC yang dapat diproses seperti array delapan photodiode.",
   rasioKanvas: 0.95, // lebih tinggi dari standar (0.6) — frame perlu ruang lebar penuh mengikuti rasio aslinya (lihat gambarFrameRegion), plus ruang untuk bar chart 8 region di bawahnya.
 
   panduan: [
-    "Seret garis di dalam frame ke kiri dan ke kanan. Bar chart di bawah frame menampilkan nilai 8 region, dengan bentuk yang sama seperti bar chart array sensor di Lab 7. Bedanya, nilai ini dihitung dari gambar kamera, bukan dari photodiode fisik.",
-    "Garis putus-putus oranye membagi frame jadi 8 kolom (region). Setiap bar mewakili satu region.",
-    "Ubah slider ambang dan amati nilai tiap region ikut berubah. Ini menunjukkan kenapa thresholding di Lab 13 harus dilakukan lebih dulu, sebelum frame kamera bisa dipakai sebagai data sensor.",
-    "Level 2/3: buka kartu kode di bawah. Kode hitungRegion(frameBiner) di JavaScript maupun hitung_region(frame_biner) di Python sudah tertulis lengkap di sana, ditandai di dalam komentar. Baca dulu kodenya, lalu hapus tanda komentarnya supaya kode itu aktif, dan tekan tombol Uji.",
-    "Lab ini ditandai selesai kalau dua syarat terpenuhi: kamu sudah menggeser garis sampai mentok kiri dan mentok kanan, dan kode Level 2 atau Level 3 sudah lulus semua kasus uji.",
+    "Seret garis pada frame ke kiri dan ke kanan. Amati region yang dilewati garis dan perubahan delapan batang nilai ADC di bawah frame.",
+    "Perhatikan garis putus-putus oranye yang membagi seluruh frame menjadi delapan kolom. Setiap nilai ADC dihitung dari proporsi piksel garis pada satu region, kemudian disesuaikan agar arahnya sama dengan bacaan photodiode pada Lab 7.",
+    "Ubah slider Ambang. Amati bahwa perubahan hasil thresholding ikut mengubah nilai ADC setiap region. Citra biner dari Lab 13 menjadi masukan untuk perhitungan ini.",
+    "Geser garis hingga mencapai ujung kiri dan ujung kanan. Checklist posisi tercentang setelah kedua batas tersebut dicapai.",
+    "Buka bagian coding Level 2 atau Level 3. Aktifkan fungsi hitungRegion(frameBiner) pada JavaScript atau hitung_region(frame_biner) pada Python, lalu jalankan pengujian. Lab selesai setelah fungsi lulus seluruh kasus uji.",
   ],
 
   deskripsiKoding:
-    "Kode hitungRegion(frameBiner) (JavaScript) dan hitung_region(frame_biner) (Python) yang benar sudah disediakan di bawah, di dalam komentar. Hapus tanda komentarnya supaya kode itu aktif, tidak perlu menulis logikanya dari nol. Fungsi ini menerima grid 2D berisi angka 0 atau 1, hasil thresholding, dan mengembalikan array 8 angka ADC seperti bacaan array photodiode Lab 7. Tombol 'Uji' memanggil fungsi Anda tiga kali, sekali untuk tiap posisi garis (kolom paling kiri, tengah, kolom paling kanan).",
+    "Kode fungsi hitungRegion(frameBiner) untuk JavaScript dan hitung_region(frame_biner) untuk Python tersedia di dalam komentar. Hapus penanda komentar agar kode aktif. Fungsi menerima grid dua dimensi berisi 0 atau 1 dari hasil thresholding dan mengembalikan array delapan nilai ADC. Tombol Uji menjalankan tiga posisi garis, yaitu kiri, tengah, dan kanan.",
 
   komponen: { frameRegion: true },
 
@@ -334,6 +334,6 @@ export default {
   kriteriaSelesai: [
     { id: "kiri", label: "Geser garis sampai mentok ujung kiri", cek: (state) => state.sudahKiri },
     { id: "kanan", label: "Geser garis sampai mentok ujung kanan", cek: (state) => state.sudahKanan },
-    { id: "level2", label: "Fungsi hitungRegion(frameBiner) buatanmu lulus semua uji", cek: (state) => state.level2Lulus },
+    { id: "level2", label: "Fungsi hitungRegion(frameBiner) lulus semua uji", cek: (state) => state.level2Lulus },
   ],
 };
