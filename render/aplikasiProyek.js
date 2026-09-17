@@ -22,11 +22,11 @@ if (window.self !== window.top) {
 }
 
 const PANDUAN = [
-  "Susun lintasanmu sendiri: klik brick di kartu 'Bricks Lintasan' satu per satu (lurus, tajam kiri/kanan, halus kiri/kanan). Setiap klik menyambung brick baru di ujung lintasan yang sedang disusun, seperti menyambung rel kereta. Pakai 'Hapus terakhir' kalau salah pilih, atau 'Reset lintasan' untuk mengulang dari kosong.",
-  "Pilih mode sensor: Photodiode (array 8 sensor titik, seperti Modul 3) atau Kamera (frame dibagi 8 region, seperti Modul 4). Kontrak kendali(sensor) sama persis di kedua mode.",
-  "Atur Kp, Kd, Ki, kecepatan dasar, dan ambang (khusus mode kamera) sampai robot mengikuti lintasan rancanganmu dengan halus lewat kendali PID bawaan (Level 1).",
-  "Level 2/3: buka kartu kode di bawah. Kode kendali(sensor) yang benar sudah tertulis lengkap di sana (JavaScript maupun Python), ditandai di dalam komentar. Baca dulu kodenya, lalu hapus tanda komentarnya supaya kode itu aktif, dan tekan 'Pakai kode ini' — atau tulis ulang pendekatanmu sendiri dari kode itu sebagai titik awal. Bedanya dari solusi PID di Lab 11/15/16: kecepatan dasarnya di sini tidak konstan, otomatis melambat begitu error membesar (lagi menikung tajam) dan mempercepat lagi begitu error mengecil (lurusan) — cocok untuk lintasan buatanmu sendiri yang mungkin mencampur lurusan panjang dan tikungan tajam sekaligus.",
-  "Tekan 'Jalankan' untuk menguji rancanganmu dari awal lintasan. Tidak ada kriteria selesai baku di sini — rancangan lintasan, parameter kendali, dan kode adalah milikmu sendiri. Dokumentasikan hasil kerjamu (screenshot/video dan penjelasan) untuk dikumpulkan lewat assignment Mini Project Capstone di LMS.",
+  "Klik brick pada kartu 'Bricks Lintasan' untuk menyusun lintasan secara berurutan. Pilih brick lurus, tajam kiri atau kanan, dan halus kiri atau kanan. Gunakan 'Hapus terakhir' untuk membatalkan brick terakhir atau 'Reset lintasan' untuk mengulang dari awal.",
+  "Pilih mode Photodiode atau Kamera. Kedua mode menghasilkan delapan nilai sensor sehingga fungsi kendali(sensor) dapat digunakan tanpa mengubah bentuk masukan dan keluaran.",
+  "Atur kecepatan dasar serta parameter Kp, Kd, dan Ki. Untuk mode Kamera, atur juga nilai threshold. Tekan 'Jalankan', lalu amati gerak robot dan grafik error untuk menilai kemampuan kendali mengikuti lintasan yang disusun.",
+  "Jika menggunakan Level 2 atau 3, buka kartu kode dan pelajari contoh kendali(sensor) yang tersedia di dalam komentar. Hapus tanda komentar untuk mengaktifkan contoh tersebut, lalu tekan 'Pakai kode ini'. Kecepatan dasar pada contoh akan berkurang ketika besar error meningkat dan bertambah kembali ketika error mengecil.",
+  "Uji beberapa susunan lintasan dan catat parameter yang digunakan. Halaman capstone tidak memiliki kriteria selesai atau ekspor CSV. Dokumentasikan rancangan, pengaturan, hasil pengamatan, dan perbaikan yang dilakukan untuk pengumpulan Mini Project Capstone di LMS.",
 ];
 
 const TEMPLATE_JS = `let integral = 0;
@@ -47,11 +47,10 @@ function kendali(sensor) {
   const posisiIndeks = totalTertimbang / totalBobot;
   const error = ((posisiIndeks - 3.5) / 3.5) * 100;
 
-  // Kode PID yang benar sudah ditulis lengkap di bawah, di dalam komentar
-  // /* ... */ — mirip solusi Lab 11/15/16, bedanya kecepatan dasarnya di
-  // sini TIDAK konstan (lihat penjelasan di dalam kode di bawah). Bacalah
-  // dulu, lalu hapus baris "/*" dan baris "*/" di bawah ini supaya kode
-  // itu aktif — atau jadikan titik awal untuk pendekatanmu sendiri.
+  // Contoh PID tersedia di dalam komentar /* ... */ di bawah ini.
+  // Berbeda dari contoh Lab 11, 15, dan 16, kecepatan dasar pada contoh
+  // ini tidak konstan. Pelajari contoh, lalu hapus baris "/*" dan "*/"
+  // untuk mengaktifkannya atau gunakan sebagai dasar pendekatan lain.
 
   /*
   const Kp = 0.6;
@@ -59,14 +58,11 @@ function kendali(sensor) {
   const Ki = 0;
 
   // Kecepatan dasar mengikuti besar |error| SAAT INI, bukan angka tetap.
-  // Di lintasan buatan sendiri yang mungkin mencampur lurusan panjang dan
-  // tikungan tajam, kecepatan tetap memaksa memilih: cukup cepat di
-  // lurusan tapi keluar jalur di tikungan, atau aman di tikungan tapi
-  // lambat terus di lurusan. Triknya: error kecil berarti robot di tengah
-  // garis (lurusan, atau tikungan yang sedang dikendalikan dengan baik),
-  // error besar berarti sedang menikung tajam dan robot belum sempat
-  // menyesuaikan arah — jadi kecepatan diturunkan otomatis sebanding
-  // dengan besar error itu, dinaikkan lagi begitu error mengecil.
+  // Lintasan rancangan dapat menggabungkan bagian lurus dan tikungan tajam.
+  // Error kecil menunjukkan robot berada dekat bagian tengah garis.
+  // Error besar menunjukkan robot perlu koreksi arah yang lebih kuat.
+  // Karena itu, kecepatan dikurangi ketika besar error meningkat dan
+  // ditambah kembali ketika error mengecil.
   const KECEPATAN_MAKS = 60;
   const KECEPATAN_MIN = 20;
   const PENGURANGAN_PER_ERROR = 0.5;
@@ -102,12 +98,10 @@ def kendali(sensor):
     posisi_indeks = total_tertimbang / total_bobot
     error = ((posisi_indeks - 3.5) / 3.5) * 100
 
-    # Kode PID yang benar sudah ditulis lengkap di bawah, di antara tanda
-    # kutip tiga (""" ... """) — mirip solusi Lab 11/15/16, bedanya
-    # kecepatan dasarnya di sini TIDAK konstan (lihat penjelasan di dalam
-    # kode di bawah). Bacalah dulu, lalu hapus baris yang berisi """ di
-    # atas dan di bawah blok itu supaya kode itu aktif — atau jadikan
-    # titik awal untuk pendekatanmu sendiri.
+    # Contoh PID tersedia di antara tanda kutip tiga di bawah ini.
+    # Berbeda dari contoh Lab 11, 15, dan 16, kecepatan dasar pada contoh
+    # ini tidak konstan. Pelajari contoh, lalu hapus tanda kutip tiga
+    # untuk mengaktifkannya atau gunakan sebagai dasar pendekatan lain.
 
     """
     Kp = 0.6
@@ -115,15 +109,11 @@ def kendali(sensor):
     Ki = 0
 
     # Kecepatan dasar mengikuti besar |error| SAAT INI, bukan angka tetap.
-    # Di lintasan buatan sendiri yang mungkin mencampur lurusan panjang
-    # dan tikungan tajam, kecepatan tetap memaksa memilih: cukup cepat di
-    # lurusan tapi keluar jalur di tikungan, atau aman di tikungan tapi
-    # lambat terus di lurusan. Triknya: error kecil berarti robot di
-    # tengah garis (lurusan, atau tikungan yang sedang dikendalikan
-    # dengan baik), error besar berarti sedang menikung tajam dan robot
-    # belum sempat menyesuaikan arah — jadi kecepatan diturunkan otomatis
-    # sebanding dengan besar error itu, dinaikkan lagi begitu error
-    # mengecil.
+    # Lintasan rancangan dapat menggabungkan bagian lurus dan tikungan
+    # tajam. Error kecil menunjukkan robot berada dekat bagian tengah
+    # garis. Error besar menunjukkan robot perlu koreksi arah yang lebih
+    # kuat. Karena itu, kecepatan dikurangi ketika besar error meningkat
+    # dan ditambah kembali ketika error mengecil.
     kecepatan_maks = 60
     kecepatan_min = 20
     pengurangan_per_error = 0.5
@@ -160,7 +150,7 @@ const panel = bangunKontrol(
       terapkan: (s, v) => s.setMode(v),
     },
     { jenis: "slider", id: "kecepatanDasar", label: "Kecepatan dasar", min: 0, max: 100, langkah: 1, nilaiAwal: 35, satuan: "%", terapkan: (s, v) => s.setKecepatanDasar(v) },
-    { jenis: "slider", id: "ambang", label: "Ambang kamera", min: 0, max: 255, langkah: 1, nilaiAwal: 128, terapkan: (s, v) => s.setAmbang(v) },
+    { jenis: "slider", id: "ambang", label: "Threshold kamera", min: 0, max: 255, langkah: 1, nilaiAwal: 128, terapkan: (s, v) => s.setAmbang(v) },
     { jenis: "slider", id: "kp", label: "Kp (proporsional)", min: 0, max: 3, langkah: 0.05, nilaiAwal: 0.6, terapkan: (s, v) => s.setKp(v) },
     { jenis: "slider", id: "kd", label: "Kd (turunan)", min: 0, max: 3, langkah: 0.05, nilaiAwal: 0.15, terapkan: (s, v) => s.setKd(v) },
     { jenis: "slider", id: "ki", label: "Ki (integral)", min: 0, max: 1, langkah: 0.02, nilaiAwal: 0, terapkan: (s, v) => s.setKi(v) },
@@ -204,7 +194,7 @@ document.getElementById("tombolResetBrick").addEventListener("click", () => {
 
 // ---- Kartu kode: sama persis pola Lab 16 (JS Level 2 / Python Level 3, solusi lengkap ter-comment) ----
 document.getElementById("deskripsiKoding").textContent =
-  "Kode kendali(sensor) yang benar sudah disediakan di bawah, di dalam komentar (JavaScript memakai /* ... */, Python memakai \"\"\" ... \"\"\"), berbasis PID seperti solusi Lab 11/15/16 tapi dengan kecepatan dasar yang menyesuaikan besar error (melambat di tikungan tajam, mempercepat di lurusan) — cocok untuk lintasan buatanmu sendiri yang bisa mencampur keduanya. Hapus tanda komentarnya supaya kode itu aktif, atau tulis ulang pendekatanmu sendiri. Fungsi ini menerima array 8 angka ADC dan mengembalikan [kecepatanKiri, kecepatanKanan]. Setelah menekan 'Pakai kode ini', fungsi ini dipanggil berulang sekitar 10 kali per detik selama robot berjalan, menggantikan kendali PID bawaan (Level 1).";
+  "Contoh kendali(sensor) berbasis PID tersedia di dalam komentar pada editor JavaScript dan Python. Contoh tersebut menyesuaikan kecepatan dasar berdasarkan besar error. Hapus tanda komentar untuk mengaktifkannya atau gunakan sebagai dasar untuk menyusun pendekatan lain. Fungsi menerima array berisi delapan nilai ADC dan mengembalikan [kecepatanKiri, kecepatanKanan]. Setelah tombol 'Pakai kode ini' ditekan, fungsi dipanggil sekitar 10 kali per detik dan menggantikan kendali PID bawaan.";
 
 function pasangKoding(wadah, state) {
   const barisTab = document.createElement("div");
@@ -349,12 +339,12 @@ mulaiLoop({
 
     document.getElementById("infoBrick").textContent = state.bricks.length
       ? `${state.bricks.length} brick tersusun`
-      : "Belum ada brick — klik salah satu brick untuk mulai menyusun lintasan.";
+      : "Belum ada brick. Klik salah satu brick untuk mulai menyusun lintasan.";
 
-    const sumber = state._kodeAktif ? `kode kamu (Level ${state._bahasaAktif === "Python" ? "3" : "2"})` : "kendali PID bawaan (Level 1)";
+    const sumber = state._kodeAktif ? `kode peserta (Level ${state._bahasaAktif === "Python" ? "3" : "2"})` : "kendali PID bawaan (Level 1)";
     const galat = state._galatKode ? ` · ⚠ ${state._galatKode}` : "";
-    const kosong = !state.bricks.length ? " · susun lintasan dulu sebelum menekan Jalankan" : "";
-    const keluar = state.keluarDariLintasan ? " · robot terlalu jauh/mencapai ujung lintasan, berhenti otomatis" : "";
-    panel.setTeks("status", `sumber: ${sumber} · keluar jalur ${state.jumlahKeluarJalur}× · waktu ${state.waktuTempuh.toFixed(1)}s${galat}${kosong}${keluar}`);
+    const kosong = !state.bricks.length ? " · susun lintasan sebelum menekan Jalankan" : "";
+    const keluar = state.keluarDariLintasan ? " · robot terlalu jauh dari lintasan atau mencapai ujung lintasan sehingga berhenti otomatis" : "";
+    panel.setTeks("status", `sumber ${sumber} · keluar jalur ${state.jumlahKeluarJalur}× · waktu ${state.waktuTempuh.toFixed(1)}s${galat}${kosong}${keluar}`);
   },
 });

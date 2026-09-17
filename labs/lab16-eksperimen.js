@@ -38,11 +38,11 @@ function kendali(sensor) {
   const posisiIndeks = totalTertimbang / totalBobot;
   const error = ((posisiIndeks - 3.5) / 3.5) * 100;
 
-  // Kode PID yang benar sudah ditulis lengkap di bawah, di dalam komentar
-  // /* ... */, persis sama dengan solusi Lab 11 dan Lab 15. Bacalah dulu,
-  // lalu hapus baris "/*" dan baris "*/" di bawah ini supaya kode itu aktif.
-  // Memakai kode ini bersifat opsional di lab ini: kendali PID bawaan (Level 1)
-  // juga sah dipakai untuk sesi terukur.
+  // Contoh PID tersedia di dalam komentar /* ... */ di bawah ini.
+  // Contoh ini menggunakan pendekatan yang sama seperti Lab 11 dan Lab 15.
+  // Pelajari contoh, lalu hapus baris "/*" dan "*/" untuk mengaktifkannya.
+  // Penggunaan kode bersifat opsional karena sesi terukur juga dapat
+  // memakai kendali PID bawaan pada Level 1.
 
   /*
   const Kp = 0.6;
@@ -80,11 +80,11 @@ def kendali(sensor):
     posisi_indeks = total_tertimbang / total_bobot
     error = ((posisi_indeks - 3.5) / 3.5) * 100
 
-    # Kode PID yang benar sudah ditulis lengkap di bawah, di antara tanda
-    # kutip tiga (""" ... """), persis sama dengan solusi Lab 11 dan Lab 15.
-    # Bacalah dulu, lalu hapus baris yang berisi """ di atas dan di bawah
-    # blok itu supaya kode itu aktif. Memakai kode ini bersifat opsional di
-    # lab ini: kendali PID bawaan (Level 1) juga sah dipakai.
+    # Contoh PID tersedia di antara tanda kutip tiga di bawah ini.
+    # Contoh ini menggunakan pendekatan yang sama seperti Lab 11 dan Lab 15.
+    # Pelajari contoh, lalu hapus tanda kutip tiga untuk mengaktifkannya.
+    # Penggunaan kode bersifat opsional karena sesi terukur juga dapat
+    # memakai kendali PID bawaan pada Level 1.
 
     """
     Kp = 0.6
@@ -254,19 +254,19 @@ export default {
   judul: "Eksperimen Komparatif",
   singkat: "Eksperimen Komparatif",
   modul: 5,
-  tujuan: "Lintasan sama, dua mode sensor, data untuk mini project.",
+  tujuan: "Membandingkan photodiode dan kamera pada lintasan serta parameter kendali yang sama.",
   rasioKanvas: 0.75, // sama dengan Lab 15 — mode kamera di sini menumpuk lintasan, inset kamera, dan grafik error, perlu ruang vertikal ekstra.
 
   panduan: [
-    "Atur dulu parameter kendali: Kp, Kd, Ki, kecepatan dasar, dan ambang (khusus mode kamera). Untuk sesi terukur, kamu boleh memakai kendali PID bawaan (Level 1) atau kode kendali(sensor) di kartu kode (Level 2/3, sudah tertulis lengkap di dalam komentar, tinggal dihapus tanda komentarnya). Keduanya sah dipakai, yang penting parameternya sama saat kamu membandingkan dua mode sensor.",
-    "Tekan 'Mulai sesi terukur' untuk menjalankan sesi berdurasi tetap 30 detik. Selama sesi berjalan, error, posisi robot, dan status keluar jalur dicatat otomatis 10 kali per detik.",
-    "Jalankan satu sesi terukur di mode Photodiode. Lalu ganti ke mode Kamera dan jalankan satu sesi terukur lagi, dengan kendali dan parameter yang sama seperti sebelumnya. Bandingkan hasil keduanya: mode mana yang rata-rata errornya lebih kecil, dan mode mana yang lebih sering keluar jalur.",
-    "Tekan 'Ekspor CSV' untuk mengunduh seluruh data yang sudah terkumpul dari semua sesi yang pernah dijalankan. Data ini jadi bahan laporan mini project.",
-    "Lab ini selesai setelah kamu menjalankan minimal satu sesi terukur di masing-masing mode sensor (photodiode dan kamera), lalu mengekspor CSV minimal sekali.",
+    "Pilih lintasan, lalu atur kecepatan dasar serta parameter Kp, Kd, dan Ki. Untuk mode Kamera, atur juga nilai threshold. Gunakan kendali PID bawaan atau kode kendali(sensor). Pertahankan lintasan, jenis kendali, dan parameter yang sama ketika membandingkan kedua mode sensor.",
+    "Pilih mode Photodiode, kemudian tekan 'Mulai sesi terukur (30 detik)'. Amati gerak robot dan grafik error. Selama sesi berlangsung, waktu, mode, lintasan, error, posisi robot, dan jumlah keluar jalur dicatat sekitar 10 kali per detik.",
+    "Setelah sesi Photodiode selesai, pilih mode Kamera dan jalankan sesi terukur dengan pengaturan yang sama. Amati perbedaan grafik error dan jumlah keluar jalur untuk menilai respons kedua mode pada kondisi uji yang setara.",
+    "Tekan 'Ekspor CSV' setelah kedua sesi selesai. Berkas CSV memuat seluruh sampel dari sesi yang telah dijalankan dan dapat digunakan untuk membandingkan error absolut serta jumlah keluar jalur setiap mode.",
+    "Lab dinyatakan selesai setelah satu sesi terukur pada mode Photodiode, satu sesi terukur pada mode Kamera, dan satu ekspor CSV berhasil dilakukan.",
   ],
 
   deskripsiKoding:
-    "Kode kendali(sensor) yang benar sudah disediakan di bawah, di dalam komentar (JavaScript memakai /* ... */, Python memakai \"\"\" ... \"\"\"), persis sama dengan solusi Lab 11 dan Lab 15. Kode ini bersifat opsional di lab ini: dipakai lewat 'Pakai kode ini' kalau kamu ingin membandingkan kedua mode sensor dengan kendali PID itu, sebagai alternatif dari kendali PID bawaan (Level 1). Setelah diaktifkan, fungsi ini dipanggil berulang sekitar 10 kali per detik selama sesi terukur berjalan, di kedua mode sensor.",
+    "Contoh kendali(sensor) tersedia di dalam komentar pada editor JavaScript dan Python. Hapus tanda komentar untuk mengaktifkannya, lalu tekan 'Pakai kode ini'. Penggunaan kode bersifat opsional karena sesi terukur juga dapat memakai kendali PID bawaan. Setelah diaktifkan, fungsi dipanggil sekitar 10 kali per detik pada kedua mode sensor.",
 
   komponen: { eksperimen: true },
 
@@ -303,7 +303,7 @@ export default {
       satuan: "%",
       terapkan: (state, nilai) => state.setKecepatanDasar(nilai),
     },
-    { jenis: "slider", id: "ambang", label: "Ambang kamera", min: 0, max: 255, langkah: 1, nilaiAwal: 128, terapkan: (s, v) => s.setAmbang(v) },
+    { jenis: "slider", id: "ambang", label: "Threshold kamera", min: 0, max: 255, langkah: 1, nilaiAwal: 128, terapkan: (s, v) => s.setAmbang(v) },
     { jenis: "slider", id: "kp", label: "Kp (proporsional)", min: 0, max: 3, langkah: 0.05, nilaiAwal: 0.6, terapkan: (s, v) => s.setKp(v) },
     { jenis: "slider", id: "kd", label: "Kd (turunan)", min: 0, max: 3, langkah: 0.05, nilaiAwal: 0.15, terapkan: (s, v) => s.setKd(v) },
     { jenis: "slider", id: "ki", label: "Ki (integral)", min: 0, max: 1, langkah: 0.02, nilaiAwal: 0, terapkan: (s, v) => s.setKi(v) },
@@ -466,12 +466,12 @@ export default {
     panel.setAngka("jumlahLogAngka", String(state.logGabungan.length));
 
     const s = state.sesiSelesai;
-    const sumber = state._kodeAktif ? `kode kamu (Level ${state._bahasaAktif === "Python" ? "3" : "2"})` : "kendali PID bawaan (Level 1)";
+    const sumber = state._kodeAktif ? `kode peserta (Level ${state._bahasaAktif === "Python" ? "3" : "2"})` : "kendali PID bawaan (Level 1)";
     const galat = state._galatKode ? ` · ⚠ ${state._galatKode}` : "";
-    const keluar = state.keluarDariLintasan ? " · robot terlalu jauh dari lintasan, sesi berhenti otomatis: tekan Reset untuk mengulang" : "";
+    const keluar = state.keluarDariLintasan ? " · robot terlalu jauh dari lintasan sehingga sesi berhenti otomatis. Tekan Reset untuk mengulang" : "";
     panel.setTeks(
       "status",
-      `sumber: ${sumber} · sesi selesai: photodiode ${s.photodiode ? "✓" : "…"} · kamera ${s.kamera ? "✓" : "…"} · CSV ${state.sudahEksporCSV ? "✓ terunduh" : "belum diekspor"}${galat}${keluar}`,
+      `sumber ${sumber} · sesi Photodiode ${s.photodiode ? "✓" : "…"} · sesi Kamera ${s.kamera ? "✓" : "…"} · CSV ${state.sudahEksporCSV ? "✓ terunduh" : "belum diekspor"}${galat}${keluar}`,
     );
   },
 
