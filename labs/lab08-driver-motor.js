@@ -13,13 +13,13 @@ export default {
   judul: "Driver Motor",
   singkat: "Driver Motor",
   modul: 3,
-  tujuan: "Memahami kenapa perlu driver, arah putar lewat H-bridge, dan kecepatan lewat PWM.",
+  tujuan: "Memahami peran driver motor, pengaturan arah melalui H-bridge, dan pengaturan kecepatan melalui PWM.",
 
   panduan: [
-    "Panel 1: bandingkan pin mikrokontroler yang mencoba menggerakkan motor langsung (baris atas, gagal) dengan pin yang menggerakkan motor lewat driver motor (baris bawah, berhasil). Perhatikan angka arus pada kedua baris. Perbedaan angka arus itu menunjukkan alasan driver motor dibutuhkan.",
-    "Panel 2: klik saklar S1-S4 di kanvas. Coba semua kombinasi. S1+S4 menyalakan arah maju, S2+S3 menyalakan arah mundur. Coba juga nyalakan dua saklar sekaki (S1+S2 atau S3+S4) untuk melihat kondisi hubung singkat. Kondisi ini berbahaya dan jangan pernah dicoba di rangkaian sungguhan.",
-    "Panel 3: geser slider duty cycle dan perhatikan tiga hal, bentuk gelombang kotak berubah, tegangan rata-rata (garis hijau putus-putus) naik turun mengikuti perubahan itu, dan motor berputar lebih cepat atau lebih lambat mengikuti tegangan rata-rata tersebut.",
-    "Selesai kalau kamu sudah menemukan kombinasi maju, kombinasi mundur, dan sempat memicu hubung singkat (dengan aman, hanya di simulator) masing-masing minimal sekali.",
+    "Buka Panel 1, lalu bandingkan motor yang dihubungkan langsung ke pin mikrokontroler dengan motor yang dihubungkan melalui driver. Perhatikan arus pada kedua rangkaian. Perbedaan hasilnya menunjukkan alasan motor memerlukan jalur daya melalui driver.",
+    "Buka Panel 2, lalu klik saklar S1 sampai S4 pada kanvas. Kombinasi S1 dan S4 menghasilkan arah maju, sedangkan S2 dan S3 menghasilkan arah mundur. Mengaktifkan dua saklar pada sisi yang sama, yaitu S1 dan S2 atau S3 dan S4, menimbulkan hubung singkat. Kondisi tersebut hanya boleh diamati di simulator.",
+    "Buka Panel 3, lalu ubah duty cycle. Amati perubahan lebar pulsa, tegangan rata-rata yang ditunjukkan oleh garis hijau putus-putus, dan kecepatan motor. Duty cycle yang lebih besar menghasilkan tegangan rata-rata dan kecepatan motor yang lebih tinggi.",
+    "Temukan arah maju, arah mundur, dan kondisi hubung singkat masing-masing minimal satu kali. Checklist akan tercentang setelah ketiga kondisi tersebut tercapai.",
   ],
 
   komponen: { driverMotor: true },
@@ -30,7 +30,7 @@ export default {
       id: "panel",
       label: "Panel",
       pilihan: [
-        { label: "1. Kenapa driver", nilai: 1 },
+        { label: "1. Kebutuhan driver", nilai: 1 },
         { label: "2. H-bridge", nilai: 2 },
         { label: "3. PWM", nilai: 3 },
       ],
@@ -102,13 +102,13 @@ export default {
     const progres = `maju ${state.sudahMaju ? "✓" : "…"} · mundur ${state.sudahMundur ? "✓" : "…"} · hubung singkat ${state.sudahShort ? "✓" : "…"}`;
     panel.setTeks(
       "status",
-      state.panelAktif === 2 ? `H-bridge sekarang: ${kondisi} · ${progres}` : `Progres Panel 2: ${progres}`,
+      state.panelAktif === 2 ? `Kondisi H-bridge ${kondisi} · ${progres}` : `Progres Panel 2 · ${progres}`,
     );
   },
 
   kriteriaSelesai: [
     { id: "maju", label: "Temukan kombinasi saklar untuk arah maju", cek: (state) => state.sudahMaju },
     { id: "mundur", label: "Temukan kombinasi saklar untuk arah mundur", cek: (state) => state.sudahMundur },
-    { id: "short", label: "Picu kondisi hubung singkat (aman, di simulator)", cek: (state) => state.sudahShort },
+    { id: "short", label: "Amati kondisi hubung singkat di simulator", cek: (state) => state.sudahShort },
   ],
 };

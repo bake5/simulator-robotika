@@ -202,20 +202,20 @@ export default {
   judul: "Kendali Proporsional, PD, PID",
   singkat: "Kendali P, PD, PID",
   modul: 3,
-  tujuan: "Tuning parameter kendali, membandingkan kehalusan gerak dengan Lab 10.",
+  tujuan: "Memahami pengaruh Kp, Kd, dan Ki serta membandingkan respons PID dengan kendali on-off.",
 
   panduan: [
-    "Dibandingkan dengan Lab 10, koreksi sekarang sebanding dengan seberapa jauh robot melenceng dari garis (P), bukan hanya tiga keadaan kanan/kiri/lurus.",
-    "Mulai dari Kp saja (Kd = Ki = 0). Naikkan nilainya pelan-pelan sampai robot mulai berosilasi, yaitu bergoyang kanan-kiri terus-menerus. Kondisi ini menandakan Kp sudah terlalu besar.",
-    "Tambahkan Kd untuk meredam osilasi itu. Kd menghitung koreksi dari seberapa cepat error berubah, sehingga menurunkan responsnya sebelum robot overshoot.",
-    "Ki jarang perlu bernilai besar di simulator ini. Kalau dinaikkan terlalu tinggi, muncul integral windup: koreksi terus membesar dan sulit berhenti.",
+    "Kendali pada lab ini menghitung besar koreksi dari error. Berbeda dari tiga keadaan tetap pada Lab 10, komponen proporsional menghasilkan koreksi yang berubah mengikuti jarak garis dari posisi tengah.",
+    "Mulai dengan Kp saja dan atur Kd serta Ki ke 0. Naikkan Kp secara bertahap sampai robot mulai berosilasi. Osilasi yang terus meningkat menunjukkan nilai Kp terlalu besar.",
+    "Tambahkan Kd untuk meredam osilasi. Komponen turunan menggunakan laju perubahan error untuk mengurangi koreksi ketika robot bergerak cepat menuju posisi tengah.",
+    "Ki mengakumulasi error dari waktu ke waktu. Nilai Ki yang terlalu besar dapat menyebabkan integral windup sehingga koreksi tetap besar meskipun kondisi robot sudah berubah.",
     "Grafik error di bawah kanvas serta angka overshoot dan osilasi di panel membantu menilai kehalusan tuning secara objektif, tidak hanya dengan mengamati gerakan robot.",
-    "Mode banding untuk melihat efek perubahan parameter secara visual: atur Kp/Kd/Ki, lalu tekan 'Jalankan sebagai A' untuk menjalankan robot dengan nilai itu. Ubah Kp/Kd/Ki ke nilai lain, lalu tekan 'Jalankan sebagai B'. Jejak konfigurasi A tergambar sebagai garis putus, jejak konfigurasi B yang baru saja dijalankan tergambar sebagai garis penuh, keduanya ditumpuk di kanvas yang sama sehingga kehalusan dua konfigurasi bisa langsung dibandingkan.",
-    "Level 2/3: buka kartu kode di bawah kanvas. Kode kendali(sensor) yang benar sudah tertulis lengkap di sana (JavaScript maupun Python), ditandai di dalam komentar. Baca dulu kodenya, lalu hapus tanda komentarnya supaya kode itu aktif, dan tekan 'Pakai kode ini'. Lab ini ditandai selesai hanya setelah kode itu (bukan slider Level 1) berhasil menyelesaikan satu putaran penuh lintasan Tajam dengan keluar jalur kurang dari 3 kali.",
+    "Untuk membandingkan parameter, atur Kp, Kd, dan Ki, lalu tekan 'Jalankan sebagai A'. Ubah parameter dan tekan 'Jalankan sebagai B'. Jejak A ditampilkan sebagai garis putus-putus, sedangkan jejak B ditampilkan sebagai garis penuh pada kanvas yang sama.",
+    "Pada Level 2 atau Level 3, buka kartu kode di bawah kanvas. Fungsi kendali(sensor) tersedia dalam JavaScript dan Python. Hapus tanda komentar agar fungsi aktif, lalu tekan 'Pakai kode ini'. Lab selesai setelah kode tersebut menyelesaikan lintasan Tajam dengan keluar jalur kurang dari tiga kali.",
   ],
 
   deskripsiKoding:
-    "Kode kendali(sensor) yang benar sudah disediakan di bawah, di dalam komentar (JavaScript memakai /* ... */, Python memakai \"\"\" ... \"\"\"). Hapus tanda komentarnya supaya kode itu aktif, tidak perlu menulis rumus PID dari nol. Fungsi ini menerima array 8 angka ADC dan mengembalikan [kecepatanKiri, kecepatanKanan], kontrak yang sama dengan Lab 10. Setelah Anda menekan 'Pakai kode ini', fungsi ini dipanggil berulang sekitar 10 kali per detik selama robot berjalan, menggantikan kendali PID bawaan. Tidak ada tombol uji terpisah: kode Anda dinilai dari performa nyatanya, yaitu apakah robot berhasil menempuh satu putaran penuh di lintasan Tajam dengan keluar jalur kurang dari 3 kali.",
+    "Fungsi kendali(sensor) tersedia di dalam komentar. JavaScript menggunakan /* ... */, sedangkan Python menggunakan \"\"\" ... \"\"\". Hapus tanda komentar agar fungsi aktif. Fungsi menerima array delapan nilai ADC dan mengembalikan [kecepatanKiri, kecepatanKanan], sama seperti pada Lab 10. Setelah tombol 'Pakai kode ini' ditekan, fungsi dipanggil sekitar 10 kali per detik. Pengujian dilakukan langsung pada lintasan Tajam.",
 
   komponen: { simulasiPID: true },
 
@@ -422,7 +422,7 @@ export default {
           state._galatKode = null;
           state.resetPosisi();
           state.mulai();
-          tampilkanPesan(`Kode ${namaBahasa} dimuat. Robot sekarang berjalan dan dikendalikan oleh kode kamu.`, false);
+          tampilkanPesan(`Kode ${namaBahasa} dimuat. Robot sekarang berjalan dengan fungsi kendali(sensor) yang aktif.`, false);
         } catch (err) {
           tampilkanPesan(err?.message ?? String(err), true);
         } finally {
@@ -450,18 +450,18 @@ export default {
     panel.setRumus("rumusPID", "p", `= ${state.kp} × ${state.error.toFixed(1)} = ${(state.kp * state.error).toFixed(1)}`);
     panel.setRumus("rumusPID", "i", `= ${state.ki} × ${state.integral.toFixed(1)} = ${(state.ki * state.integral).toFixed(1)}`);
     panel.setRumus("rumusPID", "d", `Kd = ${state.kd}`);
-    panel.setRumus("rumusPID", "koreksi", "kecepatanKiri = dasar − koreksi, kecepatanKanan = dasar + koreksi");
+    panel.setRumus("rumusPID", "koreksi", "kecepatanKiri = dasar + koreksi, kecepatanKanan = dasar − koreksi");
 
-    const sumber = state._kodeAktif ? `kode kamu (Level ${state._bahasaAktif === "Python" ? "3" : "2"})` : "kendali PID bawaan (Level 1)";
+    const sumber = state._kodeAktif ? `kode Level ${state._bahasaAktif === "Python" ? "3" : "2"}` : "kendali PID bawaan Level 1";
     const galat = state._galatKode ? ` · ⚠ ${state._galatKode}` : "";
     const tahapKode = state.keluarDariLintasan
-      ? " · robot terlalu jauh dari lintasan (kemungkinan Kp/Kd terlalu besar), berhenti otomatis: tekan Reset untuk mengulang"
+      ? " · robot terlalu jauh dari lintasan dan berhenti otomatis. Tekan Reset untuk mengulang"
       : state.level2Lulus
         ? " · Level 2/3 ✓ (lab selesai)"
         : " · lab selesai setelah lintasan Tajam ditempuh pakai kode sendiri";
     panel.setTeks(
       "status",
-      `sumber: ${sumber} · keluar jalur ${state.jumlahKeluarJalur}× · waktu ${state.waktuTempuh.toFixed(1)}s${galat}${tahapKode}`,
+      `Sumber kendali ${sumber} · keluar jalur ${state.jumlahKeluarJalur}× · waktu ${state.waktuTempuh.toFixed(1)}s${galat}${tahapKode}`,
     );
   },
 
@@ -470,7 +470,7 @@ export default {
   kriteriaSelesai: [
     {
       id: "level2",
-      label: "Kode kendali(sensor) sendiri menyelesaikan lintasan Tajam dengan keluar jalur kurang dari 3 kali",
+      label: "Fungsi kendali(sensor) menyelesaikan lintasan Tajam dengan keluar jalur kurang dari 3 kali",
       cek: (state) => state.level2Lulus === true,
     },
   ],

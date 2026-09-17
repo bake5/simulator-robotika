@@ -55,21 +55,21 @@ const TEMPLATE_JS = `function kendali(sensor) {
 
 export default {
   id: 10,
-  judul: "Robot Mengikuti Garis dengan Kendali On Off",
-  singkat: "Kendali On Off",
+  judul: "Robot Mengikuti Garis dengan Kendali On-Off",
+  singkat: "Kendali On-Off",
   modul: 3,
-  tujuan: "Kendali paling sederhana, robot zigzag kasar, memunculkan kebutuhan kendali yang lebih halus.",
+  tujuan: "Memahami cara kendali on-off menggunakan error untuk mengatur arah robot serta penyebab gerak zigzag.",
 
   panduan: [
-    "Langkah 1 (Level 1): pilih lintasan, atur kecepatan dasar, lalu tekan Jalankan. Robot dikendalikan oleh kendali on-off bawaan, yang hanya punya tiga keadaan: belok kanan tajam, belok kiri tajam, atau lurus. Tidak ada tingkat 'belok sedikit', sehingga gerakan robot terlihat zigzag.",
+    "Pada Level 1, pilih lintasan, atur kecepatan dasar, lalu tekan Jalankan. Kendali bawaan memiliki tiga keadaan tetap, yaitu belok kanan tajam, belok kiri tajam, dan lurus. Karena besar koreksinya tidak berubah mengikuti besar error, gerakan robot terlihat zigzag.",
     "Jejak hijau berarti robot masih membaca garis. Jejak merah berarti robot sempat kehilangan garis sepenuhnya.",
-    "Coba lintasan 'Belokan halus' (berbentuk oval tertutup) dengan kendali bawaan dulu, supaya pola zigzagnya terlihat jelas sebelum kamu menulis kode sendiri.",
-    "Langkah 2 (Level 2): buka kartu kode di bawah kanvas. Kode kendali(sensor) yang benar sudah tertulis lengkap di sana, ditandai di dalam komentar. Baca dulu kodenya, lalu hapus baris '/*' dan baris '*/' supaya kode itu aktif, dan tekan 'Pakai kode ini'. Setelah itu robot dikendalikan oleh kode kamu, bukan lagi kendali bawaan.",
-    "Lab ini ditandai selesai hanya jika kode kendali(sensor) milik kamu sendiri berhasil membawa robot menempuh satu putaran penuh di lintasan 'Belokan halus'. Menyelesaikan satu putaran dengan kendali bawaan (Level 1) saja tidak dihitung.",
+    "Gunakan lintasan 'Belokan halus' dengan kendali bawaan agar perubahan arah dan pola zigzag dapat diamati sebelum kode Level 2 diaktifkan.",
+    "Pada Level 2, buka kartu kode di bawah kanvas. Fungsi kendali(sensor) sudah tersedia di dalam komentar. Baca kodenya, hapus baris '/*' dan '*/', lalu tekan 'Pakai kode ini'. Robot kemudian menggunakan fungsi tersebut sebagai pengganti kendali bawaan.",
+    "Lab selesai setelah fungsi kendali(sensor) pada Level 2 membawa robot menempuh satu putaran penuh di lintasan 'Belokan halus'. Putaran yang diselesaikan dengan kendali bawaan tidak memenuhi kriteria ini.",
   ],
 
   deskripsiKoding:
-    "Kode kendali(sensor) yang benar sudah disediakan di bawah, di dalam komentar /* ... */. Hapus baris '/*' dan baris '*/' supaya kode itu aktif, tidak perlu menulis logikanya dari nol. Fungsi ini menerima array 8 angka ADC dari sensor robot dan mengembalikan [kecepatanKiri, kecepatanKanan]. Setelah Anda menekan 'Pakai kode ini', fungsi ini dipanggil berulang sekitar 10 kali per detik selama robot berjalan, menggantikan kendali on-off bawaan sepenuhnya. Tidak ada tombol uji terpisah: kode Anda dinilai langsung dari performanya, yaitu apakah robot berhasil menempuh satu putaran penuh di lintasan 'Belokan halus'.",
+    "Fungsi kendali(sensor) sudah disediakan di dalam komentar /* ... */. Hapus baris '/*' dan '*/' agar fungsi aktif. Fungsi menerima array delapan nilai ADC dan mengembalikan [kecepatanKiri, kecepatanKanan]. Setelah tombol 'Pakai kode ini' ditekan, fungsi dipanggil sekitar 10 kali per detik selama robot berjalan. Pengujian dilakukan langsung pada lintasan 'Belokan halus' tanpa tombol uji terpisah.",
 
   komponen: { simulasiLintasan: true },
 
@@ -149,7 +149,7 @@ export default {
                 state._kecepatanKodeTerakhir = hasil;
                 state._galatKode = null;
               } else {
-                state._galatKode = "kendali(sensor) harus mengembalikan array dua angka, contoh: return [40, 40];";
+                state._galatKode = "kendali(sensor) harus mengembalikan array dua angka, misalnya return [40, 40].";
               }
             })
             .catch((err) => {
@@ -212,7 +212,7 @@ export default {
         state._galatKode = null;
         state.resetPosisi();
         state.mulai();
-        tampilkanPesan("Kode dimuat. Robot sekarang berjalan dan dikendalikan kode kamu.", false);
+        tampilkanPesan("Kode dimuat. Robot sekarang berjalan dengan fungsi kendali(sensor) yang aktif.", false);
       } catch (err) {
         tampilkanPesan(err?.message ?? String(err), true);
       } finally {
@@ -228,18 +228,18 @@ export default {
 
   perbaruiPanel(panel, state) {
     panel.setRumus("rumusOnOff", "error", `= ${state.error.toFixed(1)}`);
-    const sumber = state._kodeAktif ? "kode kamu (Level 2)" : "kendali bawaan (Level 1)";
+    const sumber = state._kodeAktif ? "kode Level 2" : "kendali bawaan Level 1";
     const galat = state._galatKode ? ` · ⚠ ${state._galatKode}` : "";
     const tahapKode = state.level2Lulus
       ? " · Level 2 ✓ (lab selesai)"
       : state.satuPutaranTercapai
-        ? " · putaran selesai, tapi belum pakai kode sendiri: tekan 'Pakai kode ini' lalu ulangi"
+        ? " · putaran selesai dengan kendali bawaan. Aktifkan kode Level 2, lalu ulangi"
         : state.keluarDariLintasan
-          ? " · robot kehilangan garis, berhenti otomatis: tekan Reset untuk mengulang"
+          ? " · robot kehilangan garis dan berhenti otomatis. Tekan Reset untuk mengulang"
           : "";
     panel.setTeks(
       "status",
-      `sumber kendali: ${sumber} · keluar jalur ${state.jumlahKeluarJalur}× · waktu ${state.waktuTempuh.toFixed(1)}s${galat}${tahapKode}`,
+      `Sumber kendali ${sumber} · keluar jalur ${state.jumlahKeluarJalur}× · waktu ${state.waktuTempuh.toFixed(1)}s${galat}${tahapKode}`,
     );
   },
 
@@ -248,7 +248,7 @@ export default {
   kriteriaSelesai: [
     {
       id: "level2",
-      label: "Kode kendali(sensor) sendiri menyelesaikan satu putaran penuh di lintasan Belokan halus",
+      label: "Fungsi kendali(sensor) menyelesaikan satu putaran penuh di lintasan Belokan halus",
       cek: (state) => state.level2Lulus === true,
     },
   ],

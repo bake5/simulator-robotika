@@ -25,7 +25,7 @@ export const daftarLab = [
   { id: 7,  singkat: "Array 8 Photodiode",      modul: 2, thumb: "assets/thumbs/lab07.svg", berkas: "lab07-array-sensor.js", tersedia: true },
   { id: 8,  singkat: "Driver Motor",            modul: 3, thumb: "assets/thumbs/lab08.svg", berkas: "lab08-driver-motor.js", tersedia: true },
   { id: 9,  singkat: "Gerak Robot Dua Roda",    modul: 3, thumb: "assets/thumbs/lab09.svg", berkas: "lab09-gerak-robot.js", tersedia: true },
-  { id: 10, singkat: "Kendali On Off",          modul: 3, thumb: "assets/thumbs/lab10.svg", berkas: "lab10-kendali-onoff.js", tersedia: true },
+  { id: 10, singkat: "Kendali On-Off",          modul: 3, thumb: "assets/thumbs/lab10.svg", berkas: "lab10-kendali-onoff.js", tersedia: true },
   { id: 11, singkat: "Kendali P, PD, PID",      modul: 3, thumb: "assets/thumbs/lab11.svg", berkas: "lab11-kendali-pid.js", tersedia: true },
   { id: 12, singkat: "Konsep Piksel",           modul: 4, thumb: "assets/thumbs/lab12.svg", berkas: "lab12-piksel.js", tersedia: true },
   { id: 13, singkat: "Thresholding",            modul: 4, thumb: "assets/thumbs/lab13.svg", berkas: "lab13-thresholding.js", tersedia: true },

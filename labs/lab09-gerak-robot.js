@@ -95,18 +95,18 @@ export default {
   judul: "Gerak Robot Dua Roda",
   singkat: "Gerak Robot Dua Roda",
   modul: 3,
-  tujuan: "Memahami kinematika differential drive: bagaimana dua kecepatan roda menghasilkan gerak robot.",
+  tujuan: "Memahami hubungan antara kecepatan roda kiri dan kanan dengan gerak robot differential drive.",
 
   panduan: [
-    "Geser slider kecepatan roda kiri dan kanan (rentang -100 sampai 100). Tampilan dari atas menunjukkan posisi dan arah hadap robot, dengan jejak lintasan yang memudar di belakangnya.",
-    "Level 1: cari empat pola gerak dengan mencoba kombinasi kedua slider. LURUS: kedua roda diset sama persis. ROTASI DI TEMPAT: kedua roda berlawanan arah dengan besar sama, robot berputar di tempat. PIVOT: satu roda diam, satu roda berputar, robot berputar dengan poros di roda yang diam. MELENGKUNG: kedua roda searah tapi kecepatannya berbeda.",
-    "Latihan opsional sebelum masuk ke coding: arahkan robot ke kotak target putus-putus dengan menggabungkan kedua slider secara manual.",
-    "Level 2: buka kartu kode di bawah kanvas. Kode gerak(x, y, sudut, targetX, targetY) yang benar sudah tertulis lengkap di sana, ditandai di dalam komentar. Baca dulu kodenya, lalu hapus baris '/*' dan baris '*/' supaya kode itu aktif, dan klik tombol \"Jalankan simulasi menuju target\".",
-    "Lab ini ditandai selesai hanya kalau dua syarat terpenuhi sekaligus: keempat pola gerak di Level 1 sudah ditemukan, dan simulasi Level 2 berhasil membawa robot ke target. Menemukan pola gerak saja, atau memarkirkan robot secara manual saja, belum cukup untuk menandai lab ini selesai.",
+    "Atur slider kecepatan roda kiri dan kanan pada rentang −100 sampai 100. Tampilan dari atas menunjukkan posisi, arah hadap, dan jejak lintasan robot.",
+    "Pada Level 1, temukan empat pola gerak. Kecepatan roda yang sama menghasilkan gerak lurus. Kecepatan yang sama besar tetapi berlawanan tanda menghasilkan rotasi di tempat. Satu roda diam menghasilkan pivot. Dua roda yang bergerak searah dengan kecepatan berbeda menghasilkan gerak melengkung.",
+    "Sebagai latihan tambahan, arahkan robot ke kotak target putus-putus dengan mengatur kedua slider secara manual.",
+    "Pada Level 2, buka kartu kode di bawah kanvas. Fungsi gerak(x, y, sudut, targetX, targetY) sudah tersedia di dalam komentar. Baca kodenya, hapus baris '/*' dan '*/', lalu pilih 'Jalankan simulasi menuju target'.",
+    "Lab selesai setelah keempat pola gerak ditemukan dan simulasi Level 2 berhasil membawa robot ke target. Parkir manual tidak menggantikan pengujian fungsi pada Level 2.",
   ],
 
   deskripsiKoding:
-    "Kode gerak(x, y, sudut, targetX, targetY) yang benar sudah disediakan di bawah, di dalam komentar /* ... */. Hapus baris '/*' dan baris '*/' supaya kode itu aktif, tidak perlu menulis rumus dari nol. Fungsi ini menerima posisi dan arah hadap robot sekarang, ditambah posisi kotak target, dan mengembalikan [kecepatanKiri, kecepatanKanan]. Fungsi ini dipanggil berulang, satu kali tiap langkah simulasi singkat, sampai robot sampai ke target atau 20 detik simulasi habis. Tombol 'Jalankan simulasi menuju target' menjalankan simulasi itu dari awal dan menampilkan berhasil atau tidaknya.",
+    "Fungsi gerak(x, y, sudut, targetX, targetY) sudah disediakan di dalam komentar /* ... */. Hapus baris '/*' dan '*/' agar fungsi aktif. Fungsi menerima posisi serta arah hadap robot dan posisi target, kemudian mengembalikan [kecepatanKiri, kecepatanKanan]. Fungsi dipanggil pada setiap langkah simulasi sampai robot mencapai target atau batas waktu 20 detik tercapai. Tombol 'Jalankan simulasi menuju target' memulai pengujian dari posisi awal.",
 
   komponen: { gerakRobot: true },
 
@@ -235,7 +235,7 @@ export default {
         : "temukan dulu keempat pola gerak";
     panel.setTeks(
       "status",
-      `pola ditemukan: lurus ${p.lurus ? "✓" : "…"} · rotasi ${p.rotasiTempat ? "✓" : "…"} · pivot ${p.pivot ? "✓" : "…"} · melengkung ${p.melengkung ? "✓" : "…"}${semuaPola ? " · keempatnya tercapai" : ""} · parkir manual ${state.parkirTercapai ? "✓" : "belum"} · ${tahapKode}`,
+      `Pola ditemukan · lurus ${p.lurus ? "✓" : "…"} · rotasi ${p.rotasiTempat ? "✓" : "…"} · pivot ${p.pivot ? "✓" : "…"} · melengkung ${p.melengkung ? "✓" : "…"}${semuaPola ? " · keempatnya tercapai" : ""} · parkir manual ${state.parkirTercapai ? "✓" : "belum"} · ${tahapKode}`,
     );
   },
 
@@ -246,6 +246,6 @@ export default {
     { id: "rotasiTempat", label: "Temukan pola rotasi di tempat", cek: (state) => state.polaTercapai.rotasiTempat },
     { id: "pivot", label: "Temukan pola pivot (satu roda diam)", cek: (state) => state.polaTercapai.pivot },
     { id: "melengkung", label: "Temukan pola manuver melengkung", cek: (state) => state.polaTercapai.melengkung },
-    { id: "level2", label: "Fungsi gerak(...) buatanmu berhasil membawa robot ke target", cek: (state) => state.level2Lulus },
+    { id: "level2", label: "Fungsi gerak(...) berhasil membawa robot ke target", cek: (state) => state.level2Lulus },
   ],
 };
