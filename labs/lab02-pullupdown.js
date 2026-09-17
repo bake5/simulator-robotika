@@ -17,17 +17,17 @@ function statusMode(state, nama, label) {
 
 export default {
   id: 2,
-  judul: "Resistor Pull-Up dan Pull-Down",
-  singkat: "Pull-Up & Pull-Down",
+  judul: "Aktif High dan Aktif Low",
+  singkat: "Aktif High/Low",
   modul: 1,
-  tujuan: "Merakit resistor pull-up dan pull-down, memahami asal sinyal aktif low dan aktif high.",
+  tujuan: "Memahami kondisi aktif high dan aktif low melalui rangkaian pull-up dan pull-down.",
 
   panduan: [
-    "Amati pin sinyal tanpa resistor terpasang. Nilainya tidak stabil dan berubah-ubah tanpa pola karena pin dalam kondisi mengambang. Karena itu, pin input selalu memerlukan resistor pull-up atau pull-down.",
-    "Mode Rakit Pull-Up: tombol menghubungkan pin ke GND. Pasang resistor ke VCC, lalu tahan dan lepas tombol. Lepas = HIGH, tekan = LOW → tombol ini aktif low.",
-    "Mode Rakit Pull-Down: tombol menghubungkan pin ke VCC. Pasang resistor ke GND, lalu tahan dan lepas tombol. Lepas = LOW, tekan = HIGH → aktif high.",
-    "Coba juga pasang resistor pada posisi yang salah. Sinyal akan tertahan di satu nilai dan tombol tidak berpengaruh.",
-    "Banyak modul sensor garis memakai logika aktif low: garis hitam = pantulan rendah = nilai rendah. Konsep ini muncul lagi mulai Lab 6.",
+    "Lepaskan resistor dari pin sinyal. Amati indikator yang berubah antara HIGH? dan LOW? tanpa pola. Pin berada dalam kondisi mengambang sehingga nilai logikanya tidak dapat ditentukan dengan stabil.",
+    "Pilih mode Rakit Pull-Up, lalu pasang resistor ke VCC. Tahan dan lepaskan tombol. Saat tombol dilepas, indikator menunjukkan HIGH dengan tegangan 5 V. Saat tombol ditekan, indikator menunjukkan LOW dengan tegangan 0 V. Tombol ini bersifat aktif low karena kondisi aktif terjadi saat sinyal LOW.",
+    "Pilih mode Rakit Pull-Down, lalu pasang resistor ke GND. Tahan dan lepaskan tombol. Saat tombol dilepas, indikator menunjukkan LOW dengan tegangan 0 V. Saat tombol ditekan, indikator menunjukkan HIGH dengan tegangan 5 V. Tombol ini bersifat aktif high karena kondisi aktif terjadi saat sinyal HIGH.",
+    "Pasang resistor pada posisi yang tidak sesuai dengan mode rangkaian, lalu tekan dan lepaskan tombol. Amati bahwa sinyal tertahan pada satu nilai sehingga tombol tidak mengubah kondisi logika.",
+    "Bandingkan rangkaian pull-up dan pull-down. Jelaskan hubungan antara posisi resistor, kondisi tombol, nilai HIGH atau LOW, dan penentuan aktif high atau aktif low. Setelah kedua rangkaian dirakit dan diuji dengan benar, checklist akan tercentang dan status lab berubah menjadi Selesai.",
   ],
 
   komponen: { rangkaianPull: true },
@@ -94,7 +94,7 @@ export default {
   },
 
   kriteriaSelesai: [
-    { id: "pullup", label: "Rakit dan uji pull up (tekan = LOW, lepas = HIGH)", cek: (state) => state.modeTuntas("pullup") },
-    { id: "pulldown", label: "Rakit dan uji pull down (tekan = HIGH, lepas = LOW)", cek: (state) => state.modeTuntas("pulldown") },
+    { id: "pullup", label: "Rakit dan uji pull-up (tekan = LOW, lepas = HIGH)", cek: (state) => state.modeTuntas("pullup") },
+    { id: "pulldown", label: "Rakit dan uji pull-down (tekan = HIGH, lepas = LOW)", cek: (state) => state.modeTuntas("pulldown") },
   ],
 };

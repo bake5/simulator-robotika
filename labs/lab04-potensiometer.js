@@ -1,6 +1,6 @@
 /*
- * Lab 4 — Variabel Resistor (potensiometer).
- * Knob diputar langsung di kanvas (drag), bukan slider di panel — supaya terasa
+ * Lab 4 — Potensiometer.
+ * Kenop diputar langsung di kanvas (drag), bukan slider di panel — supaya terasa
  * seperti memutar potensiometer sungguhan dan sinyal analog terasa kontinu.
  */
 
@@ -9,17 +9,17 @@ import { posisiPersenPotensiometer } from "../render/rangkaianView.js";
 
 export default {
   id: 4,
-  judul: "Variabel Resistor",
-  singkat: "Variabel Resistor",
+  judul: "Potensiometer",
+  singkat: "Potensiometer",
   modul: 1,
-  tujuan: "Memahami sinyal analog kontinyu.",
+  tujuan: "Memahami perubahan sinyal analog melalui potensiometer sebagai pembagi tegangan yang dapat diatur.",
 
   panduan: [
-    "Klik knob di kanvas dan seret: searah jarum jam menaikkan tegangan, berlawanan arah menurunkannya.",
-    "Sapu penuh dari posisi minimum (0%) sampai maksimum (100%). Perhatikan tegangan berubah bertahap, bukan meloncat antara dua nilai seperti saklar pada Lab 1. Perubahan bertahap ini disebut sinyal analog.",
-    "Panel kanan menampilkan target persentase. Tahan knob di sekitar angka itu (tanda hijau pada trek) selama sekitar 1 detik sampai lab ditandai selesai.",
-    "Sinyal analog seperti ini nanti dibaca mikrokontroler sebagai angka ADC 0–1023. Topik ini mulai dijelajahi di Lab 5.",
-    "Lihat kartu Rumus. Potensiometer sebenarnya terdiri dari dua resistor yang jumlahnya tetap 10 kΩ, dan wiper hanya menggeser titik pembagian di antara keduanya. Prinsipnya sama dengan pembagi tegangan pada Lab 3, hanya sekarang resistansi yang diubah, tegangan sumbernya tetap.",
+    "Klik kenop pada diagram, lalu seret searah dan berlawanan arah jarum jam. Amati bahwa putaran searah jarum jam menaikkan posisi dan tegangan, sedangkan putaran berlawanan arah menurunkannya.",
+    "Gerakkan kenop dari posisi minimum 0% sampai maksimum 100%. Amati tegangan berubah secara bertahap dari 0 V sampai 5 V, bukan hanya berpindah antara dua kondisi seperti pada Lab 1. Perubahan berkelanjutan ini merupakan sinyal analog.",
+    "Arahkan kenop ke nilai target yang ditampilkan pada panel Kontrol, lalu pertahankan posisinya selama sekitar satu detik. Setelah posisi minimum, maksimum, dan target tercapai, checklist akan tercentang dan status lab berubah menjadi Selesai.",
+    "Bandingkan keluaran potensiometer dengan keluaran saklar pada Lab 1. Jelaskan perbedaan antara sinyal analog yang memiliki rentang nilai dan sinyal digital yang hanya memiliki dua kondisi logika.",
+    "Amati perhitungan pada panel Rumus. Potensiometer membagi resistansi total 10 kΩ menjadi dua bagian yang berubah mengikuti posisi kenop. Hubungkan hasilnya dengan prinsip pembagi tegangan pada Lab 3 dan pembacaan ADC pada lab berikutnya.",
   ],
 
   komponen: { potensiometer: true },
@@ -30,7 +30,7 @@ export default {
     {
       jenis: "rumus",
       id: "rumus",
-      judul: "Rumus & perhitungan saat ini",
+      judul: "Rumus dan perhitungan saat ini",
       baris: [
         { id: "bawah", simbol: "R_bawah (ke wiper) = (posisi ÷ 100) × R_total" },
         { id: "keluar", simbol: "V_keluar = (R_bawah ÷ R_total) × V_sumber" },
@@ -98,8 +98,8 @@ export default {
   },
 
   kriteriaSelesai: [
-    { id: "min", label: "Putar knob sampai minimum", cek: (state) => state.sudahMin },
-    { id: "max", label: "Putar knob sampai maksimum", cek: (state) => state.sudahMax },
-    { id: "tahan", label: "Tahan knob di nilai target yang diminta", cek: (state) => state.tahanTercapai },
+    { id: "min", label: "Putar kenop sampai minimum", cek: (state) => state.sudahMin },
+    { id: "max", label: "Putar kenop sampai maksimum", cek: (state) => state.sudahMax },
+    { id: "tahan", label: "Tahan kenop pada nilai target yang diminta", cek: (state) => state.tahanTercapai },
   ],
 };
