@@ -85,15 +85,15 @@ export default {
 
   panduan: [
     "Pada Level 1, klik dan seret permukaan di kanvas seperti pada Lab 6. Delapan sensor kini membaca permukaan secara bersamaan.",
-    "Perhatikan bar chart di bawah kanvas. Saat garis melintas, biasanya satu atau dua bar turun karena membaca permukaan gelap, sedangkan bar lainnya tetap tinggi karena membaca permukaan terang. Panah hijau menandai perkiraan posisi garis. Posisi ini dapat berada di antara dua bar dan tidak harus tepat pada satu sensor.",
-    "Nyalakan toggle 'Tampilkan rumus' untuk melihat perhitungan weighted average, lengkap dengan angka yang berubah mengikuti posisi garis saat ini.",
-    "Pada Level 2, buka kartu kode di bawah kanvas setelah pola bacaan pada Level 1 dipahami. Kode hitungError(sensor) yang benar sudah tersedia di dalam komentar. Baca kodenya, lalu hapus baris '/*' dan baris '*/' agar kode tersebut aktif. Tombol 'Jalankan pada bacaan sekarang' mencoba fungsi dengan satu bacaan. Tombol 'Uji 3 posisi' memeriksa fungsi terhadap tiga posisi garis yang berbeda.",
+    "Perhatikan diagram batang di bawah kanvas. Saat garis melintas, biasanya satu atau dua batang turun karena membaca permukaan gelap, sedangkan batang lainnya tetap tinggi karena membaca permukaan terang. Panah hijau menandai perkiraan posisi garis. Posisi ini dapat berada di antara dua batang dan tidak harus tepat pada satu sensor.",
+    "Aktifkan opsi 'Tampilkan rumus' untuk melihat perhitungan rata-rata berbobot (weighted average), lengkap dengan angka yang berubah mengikuti posisi garis saat ini.",
+    "Pada Level 2, buka kartu kode di bawah kanvas setelah pola bacaan pada Level 1 dipahami. Kode hitungError(sensor) yang benar sudah tersedia di dalam komentar. Baca kodenya, lalu hapus baris '/*' dan baris '*/' agar kode tersebut aktif. Tombol 'Jalankan pada bacaan sensor saat ini' mencoba fungsi dengan satu bacaan. Tombol 'Uji 3 posisi' memeriksa fungsi terhadap tiga posisi garis yang berbeda.",
     "Lab ditandai selesai setelah fungsi hitungError(sensor) lulus ketiga kasus pada 'Uji 3 posisi'. Menggeser garis sampai ujung kiri dan kanan saja belum cukup. Bagian coding tetap perlu dikerjakan dengan mengaktifkan kode di dalam komentar dan menjalankan pengujian.",
     "Skala error ideal berada pada rentang −100 sampai +100. Sensor yang membaca permukaan putih pada simulator tidak sepenuhnya ideal sehingga nilai ujung yang tercapai lebih sempit, yaitu sekitar ±40. Kondisi ini menunjukkan alasan sensor robot line follower perlu dikalibrasi sebelum digunakan.",
   ],
 
   deskripsiKoding:
-    "Kode hitungError(sensor) yang benar sudah disediakan di bawah, di dalam komentar /* ... */. Hapus baris '/*' dan baris '*/' agar kode tersebut aktif. Rumus tidak perlu ditulis dari awal. Fungsi ini menerima array delapan angka ADC sesuai bacaan pada bar chart dan mengembalikan satu nilai error dari −100 sampai +100. Tombol 'Jalankan pada bacaan sekarang' memanggil fungsi satu kali dengan bacaan sensor saat ini. Tombol 'Uji 3 posisi' memanggil fungsi tiga kali untuk posisi garis di kiri, tengah, dan kanan, kemudian menandai setiap kasus sebagai lulus atau gagal.",
+    "Kode hitungError(sensor) yang benar sudah disediakan di bawah, di dalam komentar /* ... */. Hapus baris '/*' dan baris '*/' agar kode tersebut aktif. Rumus tidak perlu ditulis dari awal. Fungsi ini menerima array delapan angka ADC sesuai bacaan pada diagram batang dan mengembalikan satu nilai error dari −100 sampai +100. Tombol 'Jalankan pada bacaan sensor saat ini' memanggil fungsi satu kali dengan bacaan sensor saat ini. Tombol 'Uji 3 posisi' memanggil fungsi tiga kali untuk posisi garis di kiri, tengah, dan kanan, kemudian menandai setiap kasus sebagai lulus atau gagal.",
 
   komponen: { arraySensor: true },
 
@@ -165,7 +165,7 @@ export default {
     const tombolJalankan = document.createElement("button");
     tombolJalankan.type = "button";
     tombolJalankan.className = "tombol-sekunder";
-    tombolJalankan.textContent = "Jalankan pada bacaan sekarang";
+    tombolJalankan.textContent = "Jalankan pada bacaan sensor saat ini";
     const tombolUji = document.createElement("button");
     tombolUji.type = "button";
     tombolUji.className = "tombol";
@@ -273,7 +273,7 @@ export default {
     const tahapKode = state.level2Lulus ? "Level 2 ✓ (lab selesai)" : sapuSelesai ? "Level 2 belum lulus, coba lengkapi hitungError(sensor)" : "geser dulu sampai ujung kiri dan kanan";
     panel.setTeks(
       "status",
-      `Sapu penuh: kiri ${state.sudahKiri ? "✓" : "…"} · kanan ${state.sudahKanan ? "✓" : "…"}${peringatan} · ${tahapKode}`,
+      `Rentang gerak: kiri ${state.sudahKiri ? "✓" : "…"} · kanan ${state.sudahKanan ? "✓" : "…"}${peringatan} · ${tahapKode}`,
     );
   },
 
@@ -281,8 +281,8 @@ export default {
   // melengkapi hitungError(sensor) (lulus ketiga uji posisi) — sapu penuh kiri/kanan
   // sendirian tidak cukup, supaya peserta tidak melewati coding sama sekali.
   kriteriaSelesai: [
-    { id: "kiri", label: "Geser garis sampai mentok ujung kiri", cek: (state) => state.sudahKiri },
-    { id: "kanan", label: "Geser garis sampai mentok ujung kanan", cek: (state) => state.sudahKanan },
+    { id: "kiri", label: "Geser garis hingga mencapai batas kiri", cek: (state) => state.sudahKiri },
+    { id: "kanan", label: "Geser garis hingga mencapai batas kanan", cek: (state) => state.sudahKanan },
     { id: "level2", label: "Fungsi hitungError(sensor) lulus ketiga uji posisi", cek: (state) => state.level2Lulus },
   ],
 };

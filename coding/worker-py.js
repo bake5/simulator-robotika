@@ -60,7 +60,7 @@ self.onmessage = async (e) => {
         self.postMessage({
           tipe: "galat",
           id: pesan.id,
-          pesan: `Fungsi "${pesan.nama}" tidak ditemukan. Pastikan Anda menulis "def ${pesan.nama}(...):".`,
+          pesan: `Fungsi "${pesan.nama}" tidak ditemukan. Pastikan fungsi ditulis sebagai "def ${pesan.nama}(...):".`,
         });
         return;
       }

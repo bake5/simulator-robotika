@@ -27,7 +27,7 @@ self.onmessage = (e) => {
         self.postMessage({
           tipe: "galat",
           id: pesan.id,
-          pesan: `Fungsi "${pesan.nama}" tidak ditemukan. Pastikan Anda menulis "function ${pesan.nama}(...) { ... }".`,
+          pesan: `Fungsi "${pesan.nama}" tidak ditemukan. Pastikan fungsi ditulis sebagai "function ${pesan.nama}(...) { ... }".`,
         });
         return;
       }

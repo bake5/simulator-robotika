@@ -22,7 +22,7 @@ if (window.self !== window.top) {
 }
 
 const PANDUAN = [
-  "Klik brick pada kartu 'Bricks Lintasan' untuk menyusun lintasan secara berurutan. Pilih brick lurus, tajam kiri atau kanan, dan halus kiri atau kanan. Gunakan 'Hapus terakhir' untuk membatalkan brick terakhir atau 'Reset lintasan' untuk mengulang dari awal.",
+  "Klik segmen pada kartu 'Segmen Lintasan' untuk menyusun lintasan secara berurutan. Pilih segmen lurus, tikungan tajam ke kiri atau kanan, serta tikungan halus ke kiri atau kanan. Gunakan 'Hapus terakhir' untuk membatalkan segmen terakhir atau 'Reset lintasan' untuk mengulang dari awal.",
   "Pilih mode Photodiode atau Kamera. Kedua mode menghasilkan delapan nilai sensor sehingga fungsi kendali(sensor) dapat digunakan tanpa mengubah bentuk masukan dan keluaran.",
   "Atur kecepatan dasar serta parameter Kp, Kd, dan Ki. Untuk mode Kamera, atur juga nilai threshold. Tekan 'Jalankan', lalu amati gerak robot dan grafik error untuk menilai kemampuan kendali mengikuti lintasan yang disusun.",
   "Jika menggunakan Level 2 atau 3, buka kartu kode dan pelajari contoh kendali(sensor) yang tersedia di dalam komentar. Hapus tanda komentar untuk mengaktifkan contoh tersebut, lalu tekan 'Pakai kode ini'. Kecepatan dasar pada contoh akan berkurang ketika besar error meningkat dan bertambah kembali ketika error mengecil.",
@@ -338,8 +338,8 @@ mulaiLoop({
     gambarEksperimen(ctx, state, ukuran());
 
     document.getElementById("infoBrick").textContent = state.bricks.length
-      ? `${state.bricks.length} brick tersusun`
-      : "Belum ada brick. Klik salah satu brick untuk mulai menyusun lintasan.";
+      ? `${state.bricks.length} segmen tersusun`
+      : "Belum ada segmen. Klik salah satu segmen untuk mulai menyusun lintasan.";
 
     const sumber = state._kodeAktif ? `kode peserta (Level ${state._bahasaAktif === "Python" ? "3" : "2"})` : "kendali PID bawaan (Level 1)";
     const galat = state._galatKode ? ` · ⚠ ${state._galatKode}` : "";

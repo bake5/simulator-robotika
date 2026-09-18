@@ -166,7 +166,7 @@ export default {
             tanda.className = "tanda-uji-koding";
             tanda.textContent = lulus ? "✓" : "✗";
             const teks = document.createElement("span");
-            teks.textContent = `${kasus.label}: kode Anda = ${nilai}, seharusnya = ${kasus.referensi}`;
+            teks.textContent = `${kasus.label}: hasil kode = ${nilai}, seharusnya = ${kasus.referensi}`;
             baris.append(tanda, teks);
           } catch (err) {
             semuaLulus = false;
@@ -182,7 +182,7 @@ export default {
         if (semuaLulus) {
           const catatan = document.createElement("p");
           catatan.className = "baris-status";
-          catatan.textContent = "Semua uji lulus. Fungsi biner() Anda sudah benar.";
+          catatan.textContent = "Semua uji lulus. Fungsi biner() sudah benar.";
           hasilEl.append(catatan);
         }
       } catch (err) {

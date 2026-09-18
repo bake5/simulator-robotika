@@ -18,12 +18,12 @@ function statusMode(state, nama, label) {
 export default {
   id: 2,
   judul: "Aktif High dan Aktif Low",
-  singkat: "Aktif High/Low",
+  singkat: "Aktif High dan Aktif Low",
   modul: 1,
   tujuan: "Memahami kondisi aktif high dan aktif low melalui rangkaian pull-up dan pull-down.",
 
   panduan: [
-    "Lepaskan resistor dari pin sinyal. Amati indikator yang berubah antara HIGH? dan LOW? tanpa pola. Tanpa resistor, pin menjadi floating karena tidak terhubung ke VCC atau GND.",
+    "Lepaskan resistor dari pin sinyal. Amati indikator yang berubah antara HIGH? dan LOW? tanpa pola. Tanpa resistor, pin tidak memiliki acuan tegangan atau berada dalam kondisi floating karena tidak terhubung ke VCC maupun GND.",
     "Pilih mode Rakit Pull-Up, lalu pasang resistor ke VCC. Tahan dan lepaskan tombol. Saat tombol dilepas, indikator menunjukkan HIGH dengan tegangan 5 V. Saat tombol ditekan, indikator menunjukkan LOW dengan tegangan 0 V. Tombol ini bersifat aktif low karena kondisi aktif terjadi saat sinyal LOW.",
     "Pilih mode Rakit Pull-Down, lalu pasang resistor ke GND. Tahan dan lepaskan tombol. Saat tombol dilepas, indikator menunjukkan LOW dengan tegangan 0 V. Saat tombol ditekan, indikator menunjukkan HIGH dengan tegangan 5 V. Tombol ini bersifat aktif high karena kondisi aktif terjadi saat sinyal HIGH.",
     "Pasang resistor pada posisi yang tidak sesuai dengan mode rangkaian, lalu tekan dan lepaskan tombol. Amati bahwa sinyal tertahan pada satu nilai sehingga tombol tidak mengubah kondisi logika.",
@@ -76,7 +76,7 @@ export default {
       panel.setIndikator("logika", {
         nilai: state.logikaTampak ? "HIGH?" : "LOW?",
         varian: "ambang",
-        keterangan: "floating, nilai tidak stabil",
+        keterangan: "tanpa acuan tegangan, nilai tidak stabil",
       });
     } else {
       panel.setIndikator("logika", {

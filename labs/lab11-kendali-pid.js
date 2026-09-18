@@ -209,7 +209,7 @@ export default {
     "Mulai dengan Kp saja dan atur Kd serta Ki ke 0. Naikkan Kp secara bertahap sampai robot mulai berosilasi. Osilasi yang terus meningkat menunjukkan nilai Kp terlalu besar.",
     "Tambahkan Kd untuk meredam osilasi. Komponen turunan menggunakan laju perubahan error untuk mengurangi koreksi ketika robot bergerak cepat menuju posisi tengah.",
     "Ki mengakumulasi error dari waktu ke waktu. Nilai Ki yang terlalu besar dapat menyebabkan integral windup sehingga koreksi tetap besar meskipun kondisi robot sudah berubah.",
-    "Grafik error di bawah kanvas serta angka overshoot dan osilasi di panel membantu menilai kehalusan tuning secara objektif, tidak hanya dengan mengamati gerakan robot.",
+    "Grafik error di bawah kanvas serta nilai overshoot dan osilasi pada panel membantu menilai hasil tuning berdasarkan data, tidak hanya melalui pengamatan terhadap gerakan robot.",
     "Untuk membandingkan parameter, atur Kp, Kd, dan Ki, lalu tekan 'Jalankan sebagai A'. Ubah parameter dan tekan 'Jalankan sebagai B'. Jejak A ditampilkan sebagai garis putus-putus, sedangkan jejak B ditampilkan sebagai garis penuh pada kanvas yang sama.",
     "Pada Level 2 atau Level 3, buka kartu kode di bawah kanvas. Fungsi kendali(sensor) tersedia dalam JavaScript dan Python. Hapus tanda komentar agar fungsi aktif, lalu tekan 'Pakai kode ini'. Lab selesai setelah kode tersebut menyelesaikan lintasan Tajam dengan keluar jalur kurang dari tiga kali.",
   ],

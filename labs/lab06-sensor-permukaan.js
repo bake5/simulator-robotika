@@ -25,7 +25,7 @@ export default {
   panduan: [
     "Klik permukaan pada kanvas, lalu seret ke kiri atau ke kanan. Sensor tetap diam di tempat, sedangkan permukaan bergaris bergerak di bawahnya.",
     "Sensor ini sama seperti pada Lab 5, yaitu pemancar cahaya dan photodiode penerima, tetapi sekarang menghadap ke bawah sehingga cahaya memantul dari permukaan, bukan datang langsung dari lampu. Permukaan putih memantulkan hampir semua cahaya, sedangkan permukaan hitam menyerapnya. Prinsipnya sama dengan konsep 'resistor yang diatur' pada Lab 3 sampai Lab 5, hanya saja sekarang warna permukaan yang mengatur nilai resistansi.",
-    "Perhatikan lingkaran putus-putus oranye di tengah sensor. Lingkaran itu menunjukkan area pandang (footprint) photodiode, bukan satu titik pengukuran. Saat tepi garis masuk sebagian ke area itu, bacaan ADC berubah ke nilai antara, tidak langsung melompat. Seret permukaan melewati tepi garis dan amati perubahan nilai ini pada grafik.",
+    "Perhatikan lingkaran putus-putus oranye di tengah sensor. Lingkaran itu menunjukkan area cakupan pembacaan photodiode, bukan satu titik pengukuran. Saat tepi garis masuk sebagian ke area tersebut, bacaan ADC berubah ke nilai antara dan tidak langsung melompat. Seret permukaan melewati tepi garis, lalu amati perubahan nilai pada grafik.",
     "Lihat kartu rumus pertama untuk formula transisi tersebut, dan kartu rumus kedua untuk formula pembagi tegangan menuju ADC. Kedua formula ini sama dengan formula pada Lab 5.",
     "Geser permukaan sampai sensor berada tepat di atas warna hitam, lalu geser lagi sampai sensor berada tepat di atas warna putih. Tahan posisi tersebut sebentar sampai kedua kondisi tercapai.",
   ],
@@ -39,7 +39,7 @@ export default {
     {
       jenis: "rumus",
       id: "rumusReflektansi",
-      judul: "1. Posisi permukaan → reflektansi (pola sama seperti R_PD di Lab 5)",
+      judul: "1. Hubungan posisi permukaan dengan reflektansi",
       baris: [
         { id: "fraksi", simbol: "fraksiHitam: 0 = di luar garis, 1 = di dalam garis, dihaluskan di tepi" },
         { id: "reflektansi", simbol: "Reflektansi = putih − (putih − hitam) × fraksiHitam" },
@@ -48,7 +48,7 @@ export default {
     {
       jenis: "rumus",
       id: "rumusAdc",
-      judul: "2. Reflektansi → arus, tegangan, ADC (sama persis dengan Lab 5)",
+      judul: "2. Perhitungan arus, tegangan, dan ADC",
       baris: [
         { id: "arus", simbol: "I = V_sumber ÷ (R_PD + R_tetap)" },
         { id: "tegangan", simbol: "V_keluar = I × R_tetap" },

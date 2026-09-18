@@ -198,7 +198,7 @@ export default {
   rasioKanvas: 0.75, // lebih tinggi dari standar (0.6) — kanvas ini menumpuk tampilan lintasan, inset kamera, dan grafik error, perlu ruang vertikal ekstra supaya tidak berdesakan.
 
   panduan: [
-    "Pilih lintasan Halus, lalu jalankan robot dengan pengaturan awal. Amati pandangan kamera, pembagian delapan region, grafik error, dan gerak robot pada lintasan.",
+    "Pilih lintasan Halus, lalu jalankan robot dengan pengaturan awal. Amati citra kamera, pembagian delapan region, grafik error, dan gerak robot pada lintasan.",
     "Ubah nilai Threshold kamera. Amati bahwa hasil pembacaan region dan gerak robot ikut berubah ketika garis tidak terpisah dengan baik dari lantai.",
     "Atur Kp, Kd, dan Ki seperti pada Lab 11. Amati pengaruh setiap parameter terhadap respons robot, overshoot, dan osilasi.",
     "Pilih lintasan Tajam. Buka bagian coding Level 2 atau Level 3, aktifkan kode kendali(sensor) yang tersedia, lalu pilih Pakai kode ini. Fungsi menerima delapan nilai ADC dari region kamera dan menghasilkan kecepatan roda kiri dan kanan.",
@@ -403,7 +403,7 @@ export default {
   perbaruiPanel(panel, state) {
     panel.setAngka("overshootAngka", state.overshootMaks.toFixed(1));
     panel.setAngka("osilasiAngka", String(state.jumlahOsilasi));
-    const sumber = state._kodeAktif ? `kode kamu (Level ${state._bahasaAktif === "Python" ? "3" : "2"})` : "kendali PID bawaan (Level 1)";
+    const sumber = state._kodeAktif ? `kode Level ${state._bahasaAktif === "Python" ? "3" : "2"}` : "kendali PID bawaan (Level 1)";
     const galat = state._galatKode ? ` · ⚠ ${state._galatKode}` : "";
     const tahapKode = state.keluarDariLintasan
       ? " · robot terlalu jauh dari lintasan (kemungkinan Kp/Kd terlalu besar), berhenti otomatis: tekan Reset untuk mengulang"
@@ -421,7 +421,7 @@ export default {
   kriteriaSelesai: [
     {
       id: "level2",
-      label: "Kode kendali(sensor) sendiri menyelesaikan lintasan Tajam dalam mode kamera, keluar jalur kurang dari 3 kali",
+      label: "Fungsi kendali(sensor) pada Level 2 atau 3 menyelesaikan lintasan Tajam dalam mode kamera, keluar jalur kurang dari 3 kali",
       cek: (state) => state.level2Lulus === true,
     },
   ],

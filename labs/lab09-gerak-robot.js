@@ -136,7 +136,7 @@ export default {
     {
       jenis: "tombol",
       id: "resetJejak",
-      label: "Reset jejak & posisi",
+      label: "Reset jejak dan posisi",
       sekunder: true,
       terapkan: (state) => state.resetPosisi(),
     },

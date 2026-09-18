@@ -8,20 +8,20 @@
 // (course id 23812): Modul 1 Lab 1-4, Modul 2 Lab 5-7, Modul 3 Lab 8-11,
 // Modul 4 Lab 12-15, Modul 5 Lab 16 (Eksperimen Komparatif dan Capstone).
 export const daftarModul = [
-  { id: 1, nama: "Modul 1: Dasar Elektronika" },
-  { id: 2, nama: "Modul 2: Sensor Photodiode" },
-  { id: 3, nama: "Modul 3: Kendali Gerak Robot" },
-  { id: 4, nama: "Modul 4: Persepsi Kamera" },
-  { id: 5, nama: "Modul 5: Eksperimen dan Proyek Akhir" },
+  { id: 1, nama: "Modul 1: Dasar Sinyal dan Rangkaian" },
+  { id: 2, nama: "Modul 2: Sensor Garis Berbasis Photodiode" },
+  { id: 3, nama: "Modul 3: Pengendalian Motor dan Line Follower" },
+  { id: 4, nama: "Modul 4: Persepsi Berbasis Kamera" },
+  { id: 5, nama: "Modul 5: Perbandingan dan Capstone" },
 ];
 
 export const daftarLab = [
   { id: 1,  singkat: "LED ON/OFF",               modul: 1, thumb: "assets/thumbs/lab01.svg", berkas: "lab01-led.js", tersedia: true },
-  { id: 2,  singkat: "Aktif High/Low",          modul: 1, thumb: "assets/thumbs/lab02.svg", berkas: "lab02-pullupdown.js", tersedia: true },
+  { id: 2,  singkat: "Aktif High dan Aktif Low", modul: 1, thumb: "assets/thumbs/lab02.svg", berkas: "lab02-pullupdown.js", tersedia: true },
   { id: 3,  singkat: "Pembagi Tegangan",          modul: 1, thumb: "assets/thumbs/lab03.svg", berkas: "lab03-resistor.js", tersedia: true },
   { id: 4,  singkat: "Potensiometer",           modul: 1, thumb: "assets/thumbs/lab04.svg", berkas: "lab04-potensiometer.js", tersedia: true },
   { id: 5,  singkat: "Photodiode",              modul: 2, thumb: "assets/thumbs/lab05.svg", berkas: "lab05-photodiode.js", tersedia: true },
-  { id: 6,  singkat: "Photodiode di Permukaan", modul: 2, thumb: "assets/thumbs/lab06.svg", berkas: "lab06-sensor-permukaan.js", tersedia: true },
+  { id: 6,  singkat: "Photodiode di Permukaan Garis", modul: 2, thumb: "assets/thumbs/lab06.svg", berkas: "lab06-sensor-permukaan.js", tersedia: true },
   { id: 7,  singkat: "Array 8 Photodiode",      modul: 2, thumb: "assets/thumbs/lab07.svg", berkas: "lab07-array-sensor.js", tersedia: true },
   { id: 8,  singkat: "Driver Motor",            modul: 3, thumb: "assets/thumbs/lab08.svg", berkas: "lab08-driver-motor.js", tersedia: true },
   { id: 9,  singkat: "Gerak Robot Dua Roda",    modul: 3, thumb: "assets/thumbs/lab09.svg", berkas: "lab09-gerak-robot.js", tersedia: true },

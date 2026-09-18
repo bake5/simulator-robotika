@@ -288,7 +288,7 @@ export default {
               tanda.className = "tanda-uji-koding";
               tanda.textContent = lulus ? "✓" : "✗";
               const teks = document.createElement("span");
-              teks.textContent = `${kasus.label}: kode Anda = ${Array.isArray(nilai) ? formatArray(nilai) : String(nilai)}, seharusnya ≈ ${formatArray(kasus.referensi)}`;
+              teks.textContent = `${kasus.label}: hasil kode = ${Array.isArray(nilai) ? formatArray(nilai) : String(nilai)}, seharusnya ≈ ${formatArray(kasus.referensi)}`;
               baris.append(tanda, teks);
             } catch (err) {
               semuaLulus = false;
@@ -325,15 +325,15 @@ export default {
         : "geser dulu garis sampai ujung kiri dan kanan";
     panel.setTeks(
       "status",
-      `sapu penuh: kiri ${state.sudahKiri ? "✓" : "…"} · kanan ${state.sudahKanan ? "✓" : "…"} · ${tahapKode}`,
+      `rentang gerak: kiri ${state.sudahKiri ? "✓" : "…"} · kanan ${state.sudahKanan ? "✓" : "…"} · ${tahapKode}`,
     );
   },
 
   // Sapu penuh kiri/kanan saja tidak lagi cukup — peserta wajib mencoba dan
   // berhasil melengkapi hitungRegion(frameBiner) (JS Level 2 atau Python Level 3).
   kriteriaSelesai: [
-    { id: "kiri", label: "Geser garis sampai mentok ujung kiri", cek: (state) => state.sudahKiri },
-    { id: "kanan", label: "Geser garis sampai mentok ujung kanan", cek: (state) => state.sudahKanan },
+    { id: "kiri", label: "Geser garis hingga mencapai batas kiri", cek: (state) => state.sudahKiri },
+    { id: "kanan", label: "Geser garis hingga mencapai batas kanan", cek: (state) => state.sudahKanan },
     { id: "level2", label: "Fungsi hitungRegion(frameBiner) lulus semua uji", cek: (state) => state.level2Lulus },
   ],
 };

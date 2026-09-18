@@ -94,7 +94,7 @@ export default {
       : state.diTarget
         ? `menahan di ${state.target}%…`
         : `menuju ${state.target}%…`;
-    panel.setTeks("status", `Sapu penuh: ${sapu} · ${tahan}`);
+    panel.setTeks("status", `Rentang gerak: ${sapu} · ${tahan}`);
   },
 
   kriteriaSelesai: [

@@ -52,7 +52,7 @@ export default {
     {
       jenis: "rumus",
       id: "rumusMotor",
-      judul: "Dari duty cycle ke kecepatan motor",
+      judul: "Hubungan duty cycle dengan tegangan rata-rata dan kecepatan motor",
       baris: [
         { id: "vRata", simbol: "V rata-rata = duty% × VCC" },
         { id: "omega", simbol: "ω = V ÷ Ke" },

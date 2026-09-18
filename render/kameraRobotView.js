@@ -38,7 +38,7 @@ function gambarPanelKamera(ctx, state, lebar, tinggiAtas, fontUtama) {
   ctx.fillStyle = warnaToken("--teks-lembut");
   ctx.font = `600 10px ${fontUtama}`;
   ctx.textAlign = "left";
-  ctx.fillText("pandangan kamera", panelX, KOLOM_KAMERA_MARGIN + 8);
+  ctx.fillText("citra kamera", panelX, KOLOM_KAMERA_MARGIN + 8);
 
   ctx.fillStyle = warnaToken("--putih-kartu");
   ctx.strokeStyle = warnaToken("--abu-garis");

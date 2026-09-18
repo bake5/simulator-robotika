@@ -318,7 +318,7 @@ export function gambarRangkaianPull(ctx, state, ukuran, waktu) {
   if (keluar === "AMBANG") {
     ctx.fillStyle = warnaAmbang;
     ctx.font = `700 15px ${fontUtama}`;
-    ctx.fillText("pin floating, pasang resistor!", (xRailKiri + xRailKanan) / 2, yGND + 26);
+    ctx.fillText("pin tanpa acuan, pasang resistor!", (xRailKiri + xRailKanan) / 2, yGND + 26);
     ctx.font = `600 13px ${fontUtama}`;
   }
 }

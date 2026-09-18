@@ -205,7 +205,7 @@ function gambarPanel1(ctx, state, ukuran, waktu, fontUtama) {
     lebar * 0.5,
     tinggi * 0.88,
   );
-  ctx.fillText(`jauh di atas ${ARUS_PIN_MAKS_MA} mA yang aman ditarik dari satu pin`, lebar * 0.5, tinggi * 0.88 + 16);
+  ctx.fillText(`melebihi batas aman ${ARUS_PIN_MAKS_MA} mA pada satu pin`, lebar * 0.5, tinggi * 0.88 + 16);
 }
 
 /** Panel 2 — H-bridge: empat saklar, motor di tengah, rel VCC/GND di atas-bawah. */
@@ -315,7 +315,7 @@ function gambarPanel2(ctx, state, ukuran, waktu, fontUtama) {
         ? ["MUNDUR: S2 dan S3 menyala", "arus mengalir B ke A"]
         : kondisi === "short"
           ? ["⚠ HUBUNG SINGKAT: dua saklar sekaki menyala bersamaan", "JANGAN dicoba di rangkaian sungguhan"]
-          : ["netral: motor mengambang atau direm", "tidak ada beda tegangan"];
+          : ["netral: motor berputar bebas atau direm", "tidak ada beda tegangan"];
   ctx.font = `700 12px ${fontUtama}`;
   ctx.fillStyle = kondisi === "maju" ? warnaHijau : kondisi === "mundur" ? warnaOranye : kondisi === "short" ? warnaMerah : warnaLabel;
   ctx.fillText(barisStatus[0], lebar * 0.5, tinggi * 0.9);

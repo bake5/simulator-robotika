@@ -227,7 +227,7 @@ export function gambarFrameRegion(ctx, state, ukuran) {
     ctx.textAlign = "left";
     ctx.fillStyle = warnaTeks;
     ctx.font = `700 12px ${fontUtama}`;
-    ctx.fillText("nilai ADC tiap region, sama gayanya dengan bar chart array sensor Lab 7", xPlot, yZona2 - 6);
+    ctx.fillText("nilai ADC tiap region, ditampilkan seperti diagram batang sensor pada Lab 7", xPlot, yZona2 - 6);
   }
 }
 

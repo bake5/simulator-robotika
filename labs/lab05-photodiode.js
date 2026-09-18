@@ -24,12 +24,12 @@ export default {
   judul: "Photodiode",
   singkat: "Photodiode",
   modul: 2,
-  tujuan: "Memahami alur perubahan cahaya menjadi resistansi, arus, tegangan, dan nilai ADC 0 sampai 1023.",
+  tujuan: "Memahami hubungan intensitas cahaya dengan arus photodiode, tegangan keluaran, dan nilai ADC 0 sampai 1023.",
 
   panduan: [
     "Klik dan seret sumber cahaya di kanvas. Makin dekat sumber cahaya ke photodiode, makin terang cahaya yang diterimanya. Slider di panel kanan mengatur seberapa terang sumber cahaya itu sendiri.",
-    "Photodiode sungguhan menghasilkan arus yang sebanding dengan cahaya, bukan mengubah resistansinya sendiri. Resistansi yang berubah karena cahaya adalah ciri komponen lain, yaitu LDR atau photoresistor. Pada lab ini, photodiode disederhanakan agar berperilaku seperti LDR. Resistansinya, yang disingkat R_PD, berubah karena cahaya sehingga rumus pembagi tegangan dari Lab 3 dan Lab 4 dapat digunakan kembali. Pada lab sebelumnya nilai resistor diatur langsung oleh peserta, sedangkan pada lab ini nilai R_PD ditentukan oleh intensitas cahaya.",
-    "R_PD lalu masuk ke rangkaian pembagi tegangan dengan rumus yang sama persis seperti Lab 3 dan Lab 4. Lihat kartu rumus pertama. R_PD di sini sengaja dijaga tidak jauh berbeda ordenya dari resistor tetap (10 kΩ) supaya ketiga kondisi mudah dicapai. LDR sungguhan bisa memiliki resistansi gelap yang jauh lebih tinggi.",
+    "Photodiode pada rangkaian fisik menghasilkan arus yang sebanding dengan cahaya, bukan mengubah resistansinya sendiri. Resistansi yang berubah karena cahaya adalah ciri komponen lain, yaitu LDR atau photoresistor. Pada lab ini, photodiode disederhanakan agar berperilaku seperti LDR. Resistansinya, yang disingkat R_PD, berubah karena cahaya sehingga rumus pembagi tegangan dari Lab 3 dan Lab 4 dapat digunakan kembali. Pada lab sebelumnya, nilai resistor diatur langsung oleh peserta. Pada lab ini, nilai R_PD ditentukan oleh intensitas cahaya.",
+    "R_PD kemudian digunakan dalam rangkaian pembagi tegangan dengan rumus seperti pada Lab 3 dan Lab 4. Lihat kartu rumus pertama. Nilai R_PD pada simulator dibuat sebanding dengan resistor tetap 10 kΩ agar kondisi gelap, sedang, dan terang mudah diamati. Pada LDR fisik, resistansi dalam kondisi gelap dapat jauh lebih tinggi.",
     "Tegangan hasil pembagi diukur oleh mikrokontroler melalui ADC atau Analog-to-Digital Converter, kemudian diubah menjadi angka bulat dari 0 sampai 1023. Lihat kartu rumus kedua. Nilai ADC inilah yang dibaca oleh program, bukan nilai tegangannya secara langsung.",
     "Amati nilai ADC pada kondisi gelap total, sedang, dan terang penuh. Kondisi gelap diperoleh dengan mengatur intensitas ke 0. Kondisi terang penuh diperoleh dengan mengatur intensitas ke nilai maksimum dan menempatkan sumber cahaya sedekat mungkin dengan photodiode. Pertahankan setiap kondisi sampai statusnya berubah menjadi tanda centang.",
   ],
@@ -54,7 +54,7 @@ export default {
     {
       jenis: "rumus",
       id: "rumusCahaya",
-      judul: "1. Cahaya → resistansi photodiode (R_PD)",
+      judul: "1. Model hubungan cahaya dan R_PD pada simulator",
       baris: [
         { id: "efektif", simbol: "Cahaya efektif = intensitas × (jarak_min ÷ jarak)²" },
         { id: "resistansi", simbol: "R_PD = R_maks − (R_maks − R_min) × (cahaya ÷ 100)" },
@@ -63,7 +63,7 @@ export default {
     {
       jenis: "rumus",
       id: "rumusAdc",
-      judul: "2. Resistansi → tegangan → ADC (pembagi tegangan, sama seperti Lab 3/4)",
+      judul: "2. Perhitungan tegangan dan ADC dengan pembagi tegangan",
       baris: [
         { id: "arus", simbol: "I = V_sumber ÷ (R_PD + R_tetap)" },
         { id: "tegangan", simbol: "V_keluar = I × R_tetap" },
