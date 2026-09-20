@@ -24,26 +24,34 @@ import { gambarRobotPID } from "./pidView.js";
 import { gambarKonsepPiksel, gambarThresholding, gambarFrameRegion } from "./kameraView.js";
 import { gambarRobotKamera, gambarEksperimen } from "./kameraRobotView.js";
 
-// Di dalam iframe LMS, tautan "Beranda" cuma membuka daftar 16 lab di luar
-// konteks materi yang sedang dipelajari peserta — disembunyikan supaya peserta
-// tetap fokus ke satu lab yang memang ditugaskan, bukan lompat-lompat sendiri.
-// Dibiarkan tampil saat dibuka langsung (bukan di dalam iframe), misalnya untuk
-// pengembangan lokal atau kalau lab dibuka langsung lewat tautan di luar LMS.
-if (window.self !== window.top) {
-  document.getElementById("tautanKembali")?.remove();
-}
-
 const parameter = new URLSearchParams(location.search);
 const idLab = Number(parameter.get("lab"));
 const info = daftarLab.find((l) => l.id === idLab);
 
 if (!info) {
-  // tanpa parameter atau id tidak dikenal → kembali ke beranda
-  location.replace("index.html");
+  tampilkanLabTidakDitemukan();
 } else if (!info.tersedia) {
   tampilkanBelumTersedia(info);
 } else {
   muatLab(info);
+}
+
+function tampilkanLabTidakDitemukan() {
+  document.title = "Lab tidak ditemukan · Robotics Vision Journey";
+  document.getElementById("judulLab").textContent = "Lab tidak ditemukan";
+  document.getElementById("tujuanLab").textContent = "Periksa kembali tautan dari LMS";
+  const utama = document.querySelector("main");
+  utama.innerHTML = "";
+  utama.classList.remove("tata-lab");
+
+  const pesan = document.createElement("div");
+  pesan.className = "pesan-tengah";
+  const judul = document.createElement("h1");
+  judul.textContent = "Lab tidak ditemukan";
+  const isi = document.createElement("p");
+  isi.textContent = "Lab tidak dapat dimuat. Periksa kembali tautan yang tersedia di LMS.";
+  pesan.append(judul, isi);
+  utama.append(pesan);
 }
 
 function tampilkanBelumTersedia(info) {
@@ -59,12 +67,8 @@ function tampilkanBelumTersedia(info) {
   const judul = document.createElement("h1");
   judul.textContent = `Lab ${info.id}: ${info.singkat}`;
   const isi = document.createElement("p");
-  isi.textContent = "Lab ini masih disiapkan. Silakan kembali ke beranda dan coba lab yang sudah tersedia.";
-  const tautan = document.createElement("a");
-  tautan.className = "tombol";
-  tautan.href = "index.html";
-  tautan.textContent = "Kembali ke Beranda";
-  pesan.append(judul, isi, tautan);
+  isi.textContent = "Lab ini masih disiapkan. Silakan kembali ke halaman materi di LMS.";
+  pesan.append(judul, isi);
   utama.append(pesan);
 }
 
@@ -117,7 +121,7 @@ async function muatLab(info) {
     sudahSelesai = true;
     tandaiSelesai(lab.id);
     lencana.hidden = false;
-    kotakSelesai.textContent = "Lab selesai! Progres tersimpan, silakan lanjut bereksplorasi atau kembali ke beranda.";
+    kotakSelesai.textContent = "Lab selesai! Progres tersimpan. Silakan lanjut bereksplorasi atau kembali ke halaman materi di LMS.";
     kotakSelesai.hidden = false;
   }
 

@@ -14,13 +14,6 @@ import { gambarEksperimen } from "./kameraRobotView.js";
 import { buatEditor } from "../coding/editor.js";
 import { buatRunner } from "../coding/runner.js";
 
-// Di dalam iframe LMS, tautan "Beranda" cuma membuka daftar 16 lab di luar
-// konteks Mini Project yang sedang dikerjakan peserta — sama seperti
-// render/aplikasiLab.js, disembunyikan supaya peserta tetap fokus.
-if (window.self !== window.top) {
-  document.getElementById("tautanKembali")?.remove();
-}
-
 const PANDUAN = [
   "Klik segmen pada kartu 'Segmen Lintasan' untuk menyusun lintasan secara berurutan. Pilih segmen lurus, tikungan tajam ke kiri atau kanan, serta tikungan halus ke kiri atau kanan. Gunakan 'Hapus terakhir' untuk membatalkan segmen terakhir atau 'Reset lintasan' untuk mengulang dari awal.",
   "Pilih mode Photodiode atau Kamera. Kedua mode menghasilkan delapan nilai sensor sehingga fungsi kendali(sensor) dapat digunakan tanpa mengubah bentuk masukan dan keluaran.",

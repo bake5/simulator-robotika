@@ -12,23 +12,6 @@
   padding-block: 14px;
 }
 
-.tautan-kembali {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding-inline: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  color: var(--oranye);
-  border-radius: var(--radius-tombol);
-  transition: background var(--transisi);
-}
-
-.tautan-kembali:hover {
-  background: var(--oranye-muda);
-}
-
 .info-lab {
   flex: 1;
   min-width: 0;
