@@ -64,11 +64,14 @@ function formatAngka(nilai) {
   return typeof nilai === "number" && Number.isFinite(nilai) ? nilai.toFixed(1) : String(nilai);
 }
 
+// Garis berada di posisi fisik −posisiGaris (posisiGaris adalah geseran permukaan,
+// lihat engine/rangkaian.js). Supaya garis tepat di bawah sensor ke-i,
+// posisiGaris = −offsetSensor(i).
 function buatKasusUji() {
   return [
-    { label: "Posisi 1: garis di paling kiri", posisi: offsetSensor(0) },
+    { label: "Posisi 1: garis di paling kiri", posisi: -offsetSensor(0) },
     { label: "Posisi 2: garis tepat di tengah", posisi: 0 },
-    { label: "Posisi 3: garis di paling kanan", posisi: offsetSensor(7) },
+    { label: "Posisi 3: garis di paling kanan", posisi: -offsetSensor(7) },
   ].map(({ label, posisi }) => {
     const acuan = buatArraySensor();
     acuan.setPosisiGaris(posisi);

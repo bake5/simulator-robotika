@@ -596,8 +596,11 @@ export function buatArraySensor() {
       nilai = Number(nilai);
       if (!Number.isFinite(nilai)) return;
       this.posisiGaris = Math.max(-GARIS_JANGKAUAN, Math.min(GARIS_JANGKAUAN, nilai));
-      if (this.posisiGaris <= -GARIS_JANGKAUAN + 10) this.sudahKiri = true;
-      if (this.posisiGaris >= GARIS_JANGKAUAN - 10) this.sudahKanan = true;
+      // posisiGaris adalah geseran permukaan; garis berada di posisi fisik −posisiGaris
+      // (lihat reflektansiSensor dan gambarArraySensor). Jadi posisiGaris besar positif
+      // berarti garis tampak di ujung KIRI larik, dan besar negatif berarti di ujung KANAN.
+      if (this.posisiGaris >= GARIS_JANGKAUAN - 10) this.sudahKiri = true;
+      if (this.posisiGaris <= -GARIS_JANGKAUAN + 10) this.sudahKanan = true;
     },
 
     setTampilkanRumus(nilai) {
