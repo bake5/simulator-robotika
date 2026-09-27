@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 13. Thresholding</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P2 diagram lebar penuh */
+.legend{display:flex;gap:28px;align-items:center;font-size:17px}.legend span{display:flex;gap:10px;align-items:center}.garis-legenda{width:34px;height:4px;background:var(--oranye)}.garis-legenda.sinyal{height:0;border-top:3px dashed var(--teks-lembut);background:none}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P5 grafik interaktif */
+.pilihan{display:flex;gap:14px;margin-top:27px}
+.pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+/* P6 grafik data dan tabel */
+.tabel{width:100%;border-collapse:collapse;font-size:21px;margin-top:25px}
+.tabel th{font-size:15px;line-height:1.5;color:var(--teks-lembut);font-weight:600;text-align:left;padding:0 0 16px}
+.tabel td{border-top:1px solid var(--abu-garis);padding:19px 0}
+.tabel td:first-child{font-weight:700}.tabel td:last-child{text-align:right}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI ===== */
+.tabel td{white-space:nowrap}.tabel td:first-child{padding-right:16px}
+/* Legenda histogram slide 5. Warna mengikuti makna, bukan posisi. */
+.garis-legenda.abu{background:var(--teks-lembut)}
+.garis-legenda.pita{height:14px;background:var(--oranye-muda)}
+.garis-legenda.ambang{height:0;border-top:3px dashed var(--merah);background:none}
+/* Bingkai pindai slide 3. Berpindah satu piksel setiap langkah pada citra grayscale dan citra biner sekaligus. Gambar statis tetap lengkap tanpa bingkai ini. */
+svg .hantu{opacity:0;pointer-events:none;animation:pindai 8s linear infinite}
+@keyframes pindai{
+0%{opacity:0;transform:translate(var(--px),var(--py)) translateX(0px)}
+6%{opacity:1;transform:translate(var(--px),var(--py)) translateX(0px);animation-timing-function:steps(7,end)}
+76%{opacity:1;transform:translate(var(--px),var(--py)) translateX(var(--maju))}
+90%{opacity:1;transform:translate(var(--px),var(--py)) translateX(var(--maju))}
+100%{opacity:0;transform:translate(var(--px),var(--py)) translateX(var(--maju))}
+}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 13, Thresholding">
+
+<!-- SLIDE 1. Pola P1 pembuka -->
+<section class="slide aktif" aria-labelledby="judul1">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 13 · Modul 4</p>
+      <h1 id="judul1">Citra<br><span class="oranye">biner</span></h1>
+      <p class="ringkas">Memisahkan garis dari lantai dengan satu threshold.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Threshold adalah nilai batas pemisah antara piksel garis dan piksel lantai.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Nilai piksel terhadap threshold 128</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Empat nilai piksel pada frame simulator digambar sebagai batang berskala 0 sampai 255. Piksel garis bernilai 25 dan piksel tepi garis bernilai 66 berakhir sebelum garis threshold 128, sehingga dianggap garis. Piksel tepi garis bernilai 148 dan piksel lantai bernilai 230 melewati garis threshold, sehingga dianggap lantai.">
+        <text x="0" y="30">Piksel garis</text><text x="635" y="30" text-anchor="end" font-weight="700" class="oranye">25</text>
+        <rect x="0" y="45" width="58.8" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="92">Piksel tepi garis</text><text x="635" y="92" text-anchor="end" font-weight="700" class="oranye">66</text>
+        <rect x="0" y="107" width="155.3" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="154">Piksel tepi garis</text><text x="635" y="154" text-anchor="end" font-weight="700">148</text>
+        <rect x="0" y="169" width="348.2" height="22" rx="3" fill="var(--teks-lembut)"/>
+        <text x="0" y="216">Piksel lantai</text><text x="635" y="216" text-anchor="end" font-weight="700">230</text>
+        <rect x="0" y="231" width="541.2" height="22" rx="3" fill="var(--teks-lembut)"/>
+        <path d="M301.2 8 V258" fill="none" stroke="var(--merah)" stroke-width="3" stroke-dasharray="8 6" stroke-linecap="round"/>
+        <text x="313" y="26" class="merah" font-weight="700">Threshold 128</text>
+        <text x="0" y="272" class="label-kecil lembut">Nilai piksel pada simulator Lab 13</text>
+      </svg>
+      <p class="simpulan-visual">Threshold membagi nilai piksel menjadi dua kelompok. Nilai di bawah threshold dianggap garis, nilai lainnya dianggap lantai.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. Pola P2 skala lebar penuh -->
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Aturan thresholding</p><h2 id="judul2">Satu threshold membagi skala nilai</h2></header>
+  <div class="isi">
+    <svg viewBox="0 0 1152 310" width="1152" height="310" role="img" aria-label="Skala nilai piksel 0 sampai 255 dibagi oleh threshold 128 menjadi dua daerah. Daerah kiri berisi nilai yang lebih kecil dari threshold dan menghasilkan 1, yaitu dianggap garis. Daerah kanan berisi nilai yang sama atau lebih besar dari threshold dan menghasilkan 0, yaitu dianggap lantai. Nilai 25 dan 66 jatuh di daerah 1, nilai 148 dan 230 jatuh di daerah 0.">
+      <g text-anchor="middle">
+        <text x="322" y="30" font-size="24" font-weight="700">Dianggap garis</text><text x="322" y="58" class="label-kecil lembut">Nilai lebih kecil dari threshold</text>
+        <text x="832" y="30" font-size="24" font-weight="700">Dianggap lantai</text><text x="832" y="58" class="label-kecil lembut">Nilai sama atau lebih besar</text>
+      </g>
+      <rect x="66" y="78" width="512" height="72" fill="var(--teks)"/>
+      <rect x="578" y="78" width="508" height="72" fill="var(--putih)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="322" y="126" text-anchor="middle" font-size="36" font-weight="700" style="fill:var(--putih)">1</text>
+      <text x="832" y="126" text-anchor="middle" font-size="36" font-weight="700">0</text>
+      <path d="M66 190 V210 M1086 190 V210" fill="none" stroke="var(--teks-lembut)" stroke-width="2"/>
+      <path d="M66 200 H1086" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-linecap="round"/>
+      <g stroke="var(--putih)" stroke-width="3">
+        <circle cx="166" cy="200" r="8" fill="var(--oranye)"/><circle cx="330" cy="200" r="8" fill="var(--oranye)"/>
+        <circle cx="658" cy="200" r="8" fill="var(--teks-lembut)"/><circle cx="986" cy="200" r="8" fill="var(--teks-lembut)"/>
+      </g>
+      <g text-anchor="middle" font-size="24" font-weight="700">
+        <text x="66" y="246">0</text><text x="166" y="246" class="oranye">25</text><text x="330" y="246" class="oranye">66</text>
+        <text x="658" y="246" class="lembut">148</text><text x="986" y="246" class="lembut">230</text><text x="1086" y="246">255</text>
+      </g>
+      <path d="M578 68 V262" fill="none" stroke="var(--merah)" stroke-width="3" stroke-dasharray="8 6" stroke-linecap="round"/>
+      <text x="578" y="292" text-anchor="middle" class="merah" font-weight="700">Threshold 128</text>
+    </svg>
+    <p style="margin-top:18px">Aturan yang sama diterapkan pada setiap piksel. Hasilnya berupa citra biner yang hanya memuat nilai 1 dan 0.</p>
+    <p class="catatan lembut bawah">Pada tampilan simulator, piksel bernilai 1 digambar hitam dan piksel bernilai 0 digambar putih.</p>
+  </div>
+</section>
+
+<!-- SLIDE 3. Pola P4 dua kisi berdampingan. Satu satunya animasi pada deck -->
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Hasil pada setiap piksel</p><h2 id="judul3">Citra grayscale dan citra biner</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Grayscale</h3>
+        <svg viewBox="0 0 490 352" role="img" aria-label="Kisi piksel grayscale 8 kolom dan 5 baris pada tepi garis, yaitu kolom 8 sampai 15 frame simulator. Setiap baris bernilai 230, 230, 230, 148, 66, 25, 25, 25 dari kiri ke kanan. Bingkai oranye berpindah satu piksel setiap langkah sepanjang baris 10.">
+          <g class="kisi" data-frame="asli" data-x="5" data-y="44" data-sel="60" data-kolom="8" data-baris="8" data-nk="8" data-nb="5" data-nilai="ya" data-nomor-kolom="30" data-pindai="2"></g>
+        </svg>
+        <p><strong>Setiap piksel bernilai 0 sampai 255.</strong><br>Nilai 25 dan 66 lebih kecil dari 128.</p>
+      </div>
+      <div>
+        <h3>Biner pada threshold 128</h3>
+        <svg viewBox="0 0 490 352" role="img" aria-label="Kisi piksel biner 8 kolom dan 5 baris pada posisi yang sama setelah threshold 128. Setiap baris bernilai 0, 0, 0, 0, 1, 1, 1, 1 dari kiri ke kanan. Piksel bernilai 1 digambar hitam dan piksel bernilai 0 digambar putih. Bingkai oranye berpindah bersamaan dengan bingkai pada citra grayscale.">
+          <g class="kisi" data-frame="biner128" data-biner="ya" data-x="5" data-y="44" data-sel="60" data-kolom="8" data-baris="8" data-nk="8" data-nb="5" data-nilai="ya" data-nomor-kolom="30" data-pindai="2"></g>
+          <rect x="5" y="44" width="480" height="300" fill="none" stroke="var(--abu-garis)" stroke-width="2"/>
+        </svg>
+        <p><strong>Setiap piksel bernilai 1 atau 0.</strong><br>Nilai 1 dianggap garis, nilai 0 dianggap lantai.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. Pola P5 gambar interaktif -->
+<section class="slide" aria-labelledby="judul4" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Kontrol Threshold pada simulator</p><h2 id="judul4">Pengaruh threshold terhadap citra biner</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikAmbang" viewBox="0 0 700 384" width="700" height="384" role="img" aria-label="Citra biner 32 kolom dan 20 baris pada threshold 128 dan kondisi pencahayaan normal. Kolom 12 sampai 19 bernilai 1 dan digambar hitam, sehingga garis terlihat selebar 8 kolom. Skala di bawah citra menandai nilai 25, 66, 148, dan 230 terhadap posisi threshold."></svg>
+      <div class="pilihan" style="margin-top:16px" role="group" aria-label="Pilih nilai Threshold">
+        <button type="button" data-nilai="20" aria-pressed="false">20</button>
+        <button type="button" data-nilai="60" aria-pressed="false">60</button>
+        <button type="button" data-nilai="128" aria-pressed="true">128</button>
+        <button type="button" data-nilai="240" aria-pressed="false">240</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>Threshold <span id="nilaiKini" class="oranye">128</span></h3>
+      <p id="uraiKini">Nilai 25 dan 66 berada di bawah threshold. Garis terlihat selebar delapan kolom.</p>
+      <p>Kotak gelap bernilai 1 dan dianggap garis. Kotak terang bernilai 0 dan dianggap lantai.</p>
+      <p class="catatan lembut">Slider Threshold pada simulator bernilai 0 sampai 255 dengan nilai awal 128. Frame simulator berupa citra sintetis tanpa derau pada kondisi pencahayaan normal.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5. Pola P2 histogram lebar penuh -->
+<section class="slide" aria-labelledby="judul5" hidden data-video="steps=2">
+  <header class="judul"><p class="kicker">Tiga kondisi pencahayaan</p><h2 id="judul5">Pergeseran nilai piksel pada histogram</h2></header>
+  <div class="isi">
+    <svg id="grafikHistogram" viewBox="0 0 1152 360" width="1152" height="360" role="img" aria-label="Tiga histogram nilai piksel dengan 32 bin seperti pada simulator. Kondisi normal memuat nilai 25, 66, 148, dan 230 dengan rentang threshold sesuai 36 sampai 219. Kondisi redup memuat nilai 65, 82, 116, dan 150 dengan rentang sesuai 76 sampai 139. Kondisi silau memuat nilai 120, 146, 198, dan 250 dengan rentang sesuai 131 sampai 239. Garis threshold 128 berada di dalam rentang sesuai pada kondisi normal dan redup, tetapi di luar rentang pada kondisi silau."></svg>
+    <div class="legend" style="margin-top:14px"><span><i class="garis-legenda"></i>Nilai menjadi 1</span><span><i class="garis-legenda abu"></i>Nilai menjadi 0</span><span data-tahap="2"><i class="garis-legenda pita"></i>Rentang threshold sesuai</span><span><i class="garis-legenda ambang"></i>Threshold 128</span></div>
+    <p class="catatan lembut bawah" data-tahap="2">Threshold 128 sesuai pada kondisi normal dan redup, tetapi tidak pada kondisi silau karena jaraknya ke nilai garis 120 kurang dari 10.</p>
+  </div>
+</section>
+
+<!-- SLIDE 6. Pola P4 dua kondisi berdampingan -->
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Pengaruh kondisi pencahayaan</p><h2 id="judul6">Threshold 100 pada dua kondisi</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Normal</h3>
+        <svg viewBox="0 0 490 352" role="img" aria-label="Citra biner 32 kolom dan 20 baris pada kondisi normal dengan threshold 100. Nilai garis 25 dan nilai lantai 230. Kolom 12 sampai 19 bernilai 1 dan digambar hitam, sehingga garis terlihat selebar 8 kolom.">
+          <text x="5" y="26" font-weight="700">Nilai garis 25</text>
+          <text x="485" y="26" text-anchor="end" class="lembut">Nilai lantai 230</text>
+          <g class="kisi" data-frame="binerNormal100" data-biner="ya" data-x="5" data-y="44" data-sel="15" data-kolom="0" data-baris="0" data-nk="32" data-nb="20"></g>
+          <rect x="5" y="44" width="480" height="300" fill="none" stroke="var(--abu-garis)" stroke-width="2"/>
+        </svg>
+        <p><strong>Semua nilai garis berada di bawah 100.</strong><br>Garis terlihat selebar delapan kolom.</p>
+      </div>
+      <div>
+        <h3>Silau</h3>
+        <svg viewBox="0 0 490 352" role="img" aria-label="Citra biner 32 kolom dan 20 baris pada kondisi silau dengan threshold 100. Nilai garis 120 dan nilai lantai 250. Tidak ada piksel bernilai 1, seluruh citra digambar putih dan garis hilang.">
+          <text x="5" y="26" font-weight="700">Nilai garis 120</text>
+          <text x="485" y="26" text-anchor="end" class="lembut">Nilai lantai 250</text>
+          <g class="kisi" data-frame="binerSilau100" data-biner="ya" data-x="5" data-y="44" data-sel="15" data-kolom="0" data-baris="0" data-nk="32" data-nb="20"></g>
+          <rect x="5" y="44" width="480" height="300" fill="none" stroke="var(--abu-garis)" stroke-width="2"/>
+        </svg>
+        <p><strong>Semua nilai piksel berada di atas 100.</strong><br>Seluruh citra dianggap lantai, garis hilang.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7. Pola P6 grafik fungsi dan tabel -->
+<section class="slide" aria-labelledby="judul7" hidden>
+  <header class="judul"><p class="kicker">Kode Level 2 pada simulator</p><h2 id="judul7">Fungsi biner dan kasus uji</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg viewBox="0 0 700 375" width="700" height="375" role="img" aria-label="Grafik hasil biner terhadap nilai piksel pada threshold 128. Hasil bernilai 1 untuk nilai piksel 0 sampai 127, lalu turun menjadi 0 mulai nilai 128 sampai 255. Titik uji nilai 30 menghasilkan 1 dan titik uji nilai 220 menghasilkan 0. Lingkaran kosong pada nilai 128 menunjukkan bahwa nilai yang sama dengan threshold menghasilkan 0.">
+        <text x="68" y="30">Hasil biner</text>
+        <rect x="68" y="130" width="287.2" height="165" fill="var(--oranye-muda)"/>
+        <path d="M68 130 H640 M68 295 H640" fill="none" stroke="var(--abu-garis)" stroke-width="1"/>
+        <path d="M68 100 V295 H640" fill="none" stroke="var(--teks-lembut)" stroke-width="2"/>
+        <text x="52" y="137" text-anchor="end" class="label-kecil lembut">1</text>
+        <text x="52" y="302" text-anchor="end" class="label-kecil lembut">0</text>
+        <path d="M68 130 H355.2 V295 H640" fill="none" stroke="var(--oranye)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M355.2 92 V304" fill="none" stroke="var(--merah)" stroke-width="3" stroke-dasharray="8 6" stroke-linecap="round"/>
+        <text x="367" y="112" class="merah" font-weight="700">Threshold 128</text>
+        <circle cx="355.2" cy="130" r="8" fill="var(--putih)" stroke="var(--oranye)" stroke-width="3"/>
+        <circle cx="355.2" cy="295" r="8" fill="var(--oranye)" stroke="var(--putih)" stroke-width="3"/>
+        <circle cx="135.3" cy="130" r="8" fill="var(--oranye)" stroke="var(--putih)" stroke-width="3"/>
+        <circle cx="561.5" cy="295" r="8" fill="var(--teks-lembut)" stroke="var(--putih)" stroke-width="3"/>
+        <text x="135.3" y="108" text-anchor="middle" font-weight="700" class="oranye">Nilai 30</text>
+        <text x="561.5" y="275" text-anchor="middle" font-weight="700" class="lembut">Nilai 220</text>
+        <g text-anchor="middle" class="label-kecil">
+          <text x="68" y="326" class="lembut">0</text><text x="135.3" y="326">30</text><text x="355.2" y="326" class="merah">128</text><text x="561.5" y="326">220</text><text x="640" y="326" class="lembut">255</text>
+        </g>
+        <text x="640" y="363" text-anchor="end" class="label-kecil lembut">Nilai piksel</text>
+      </svg>
+      <p class="catatan" style="margin-top:14px"><strong>Hasil biner 1 jika nilai piksel lebih kecil dari threshold, selain itu 0</strong><br><span class="lembut">Contoh biner(30, 128) = 1 dan biner(220, 128) = 0.</span></p>
+    </div>
+    <div style="padding-top:8px">
+      <h3>Kasus uji fungsi biner</h3>
+      <table class="tabel"><thead><tr><th>Nilai<br>piksel</th><th>Threshold</th><th style="text-align:right">Hasil<br>biner</th></tr></thead><tbody>
+        <tr><td>30</td><td>128</td><td>1</td></tr>
+        <tr><td>220</td><td>128</td><td>0</td></tr>
+        <tr><td>100</td><td>100</td><td>0</td></tr>
+      </tbody></table>
+      <p class="catatan lembut" style="margin-top:26px">Nilai yang sama dengan threshold menghasilkan 0. Simulator memakai satu threshold tetap, sedangkan pada perangkat keras threshold sering disesuaikan mengikuti pencahayaan.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8. Pola P7 kegiatan simulator -->
+<section class="slide" aria-labelledby="judul8" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 13</p><h2 id="judul8">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Threshold</h3><p>Geser slider Threshold dari 0 sampai 255.<br>Amati lebar garis pada citra biner dan histogram.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Kondisi pencahayaan</h3><p>Pilih kondisi Normal, Redup, dan Silau.<br>Tentukan threshold yang sesuai pada minimal dua kondisi.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Fungsi biner</h3><p>Aktifkan kode biner(nilaiPiksel, threshold) pada Level 2.<br>Jalankan Uji fungsi biner hingga semua kasus lulus.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Threshold yang sesuai telah ditemukan pada minimal dua dari tiga kondisi pencahayaan.<br>Fungsi biner(nilaiPiksel, threshold) telah lulus semua kasus uji.</p></div>
+  </div>
+</section>
+
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 13 · Thresholding</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 8</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab13-thresholding.js, engine/kamera.js, render/kameraView.js.
+  // Nilai piksel mengikuti buatFrame pada engine/kamera.js untuk tiga kondisi pencahayaan. Aturan biner mengikuti binerDariPiksel, yaitu 1 jika nilai lebih kecil dari threshold.
+  // Rentang threshold sesuai mengikuti _cekBersih pada labs/lab13-thresholding.js dengan MARGIN_BERSIH 10. Histogram memakai 32 bin seperti gambarHistogram pada render/kameraView.js.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+
+  // ===== R9. Kisi piksel bernilai. Salinan templates/cuplikan-kisi-piksel.js =====
+  const FRAME_LEBAR = 32, FRAME_TINGGI = 20;           // engine/kamera.js FRAME_LEBAR, FRAME_TINGGI
+  const LEBAR_GARIS_PIKSEL = 6, TRANSISI_PIKSEL = 2.5; // engine/kamera.js
+  const KONDISI_PENCAHAYAAN = {normal: {gelap: 25, terang: 230}, redup: {gelap: 65, terang: 150}, silau: {gelap: 120, terang: 250}}; // engine/kamera.js
+
+  // posisiGaris berupa nilai kolom atau fungsi (baris) => kolom, sama seperti engine.
+  function buatFrameDeck(posisiGaris = FRAME_LEBAR / 2, kondisi = 'normal') {
+    const {gelap, terang} = KONDISI_PENCAHAYAAN[kondisi], setengah = LEBAR_GARIS_PIKSEL / 2;
+    return Array.from({length: FRAME_TINGGI}, (_, baris) => Array.from({length: FRAME_LEBAR}, (_, kolom) => {
+      const pusat = typeof posisiGaris === 'function' ? posisiGaris(baris) : posisiGaris;
+      const jarak = Math.abs(kolom + 0.5 - pusat);
+      const fraksiHitam = jarak <= setengah ? 1 : jarak >= setengah + TRANSISI_PIKSEL ? 0 : 1 - (jarak - setengah) / TRANSISI_PIKSEL;
+      return Math.round(terang - (terang - gelap) * fraksiHitam);
+    }));
+  }
+  function frameBiner(frame, ambang) { return frame.map((baris) => baris.map((v) => (v < ambang ? 1 : 0))); }
+
+  // Enam tingkat keabuan dari token. Ambang berada di tengah antara nilai 0, 25, 66, 148, 230, dan 255.
+  function warnaPiksel(nilai) {
+    if (nilai < 13) return 'var(--lintasan)';
+    if (nilai < 46) return 'var(--teks)';
+    if (nilai < 107) return 'var(--robot-roda)';
+    if (nilai < 189) return 'var(--teks-lembut)';
+    if (nilai < 243) return 'var(--abu-garis)';
+    return 'var(--putih)';
+  }
+  // Citra biner digambar seperti kanvas simulator, yaitu nilai 1 hitam dan nilai 0 putih.
+  const warnaBiner = (v) => (v ? 'var(--lintasan)' : 'var(--putih)');
+  const warnaTeksBiner = (v) => (v ? 'var(--putih)' : 'var(--teks)');
+
+  function gambarKisi(g, o) {
+    g.replaceChildren();
+    const add = (tag, attr, isi) => g.appendChild(elemen(tag, attr, isi));
+    const bulat1 = (n) => Math.round(n * 10) / 10;
+    const {frame, x, y, sel, kolomAwal, barisAwal, lebar, tinggi} = o;
+    const warna = o.warna || warnaPiksel, warnaTeks = o.warnaTeks || ((nilai) => (nilai < 189 ? 'var(--putih)' : 'var(--teks)'));
+    const tebalKisi = sel >= 30 ? 2 : 1, ukuranHuruf = sel >= 70 ? 22 : 20, label = [];
+    for (let b = 0; b < frame.length; b++) for (let k = 0; k < frame[0].length; k++) {
+      const xa = x + (k - kolomAwal) * sel, ya = y + (b - barisAwal) * sel;
+      const x1 = Math.max(xa, x), y1 = Math.max(ya, y), x2 = Math.min(xa + sel, x + lebar), y2 = Math.min(ya + sel, y + tinggi);
+      if (x2 - x1 < 1 || y2 - y1 < 1) continue;
+      const nilai = frame[b][k];
+      add('rect', {x: bulat1(x1), y: bulat1(y1), width: bulat1(x2 - x1), height: bulat1(y2 - y1), fill: warna(nilai), stroke: 'var(--putih)', 'stroke-width': tebalKisi});
+      const utuh = x2 - x1 > sel - 0.5 && y2 - y1 > sel - 0.5;
+      if (o.tulisNilai && utuh && sel >= 60) label.push([xa + sel / 2, ya + sel / 2 + ukuranHuruf * 0.35, nilai]);
+    }
+    for (const [tx, ty, nilai] of label) add('text', {x: bulat1(tx), y: bulat1(ty), 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:' + ukuranHuruf + 'px;fill:' + warnaTeks(nilai)}, String(nilai));
+    if (o.yNomorKolom) for (let k = Math.ceil(kolomAwal); (k + 1 - kolomAwal) * sel <= lebar + 0.5; k++)
+      add('text', {x: bulat1(x + (k - kolomAwal + 0.5) * sel), y: o.yNomorKolom, 'text-anchor': 'middle', class: 'label-kecil lembut'}, String(k));
+    if (o.barisPindai !== undefined) {
+      const hantu = add('rect', {class: 'hantu', 'aria-hidden': 'true', x: -sel / 2, y: -sel / 2, width: sel, height: sel, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 5});
+      hantu.style.setProperty('--px', (x + sel / 2) + 'px');
+      hantu.style.setProperty('--py', (y + (o.barisPindai + 0.5) * sel) + 'px');
+      hantu.style.setProperty('--maju', ((Math.round(lebar / sel) - 1) * sel) + 'px');
+    }
+  }
+
+  // Pemasang. Frame per kondisi dan hasil biner yang dipakai slide 3 dan 6. data-biner="ya" memakai warna citra biner.
+  const frameNormal = buatFrameDeck(), frameSilau = buatFrameDeck(undefined, 'silau');
+  const FRAME = {asli: frameNormal, biner128: frameBiner(frameNormal, 128), binerNormal100: frameBiner(frameNormal, 100), binerSilau100: frameBiner(frameSilau, 100)};
+  document.querySelectorAll('.kisi').forEach((g) => {
+    const d = g.dataset, sel = Number(d.sel), biner = d.biner === 'ya';
+    gambarKisi(g, {frame: FRAME[d.frame], x: Number(d.x), y: Number(d.y), sel, kolomAwal: Number(d.kolom), barisAwal: Number(d.baris),
+      lebar: Number(d.nk) * sel, tinggi: Number(d.nb) * sel, tulisNilai: d.nilai === 'ya',
+      yNomorKolom: d.nomorKolom ? Number(d.nomorKolom) : 0, barisPindai: d.pindai !== undefined ? Number(d.pindai) : undefined,
+      warna: biner ? warnaBiner : undefined, warnaTeks: biner ? warnaTeksBiner : undefined});
+  });
+
+  // ===== SLIDE 4. Citra biner pada empat nilai threshold, kondisi normal =====
+  const grafikAmbang = document.getElementById('grafikAmbang');
+  const NILAI_NORMAL = [25, 66, 148, 230];                    // nilai unik frame normal, hasil-engine.json
+  const xSkala = (v) => Math.round((110 + (v / 255) * 480) * 10) / 10;
+  const KET_AMBANG = {
+    20: 'Semua nilai piksel berada di atas threshold. Tidak ada piksel bernilai 1 dan garis hilang.',
+    60: 'Hanya nilai 25 yang berada di bawah threshold. Garis terlihat selebar enam kolom.',
+    128: 'Nilai 25 dan 66 berada di bawah threshold. Garis terlihat selebar delapan kolom.',
+    240: 'Semua nilai piksel berada di bawah threshold. Seluruh citra bernilai 1 dan dianggap garis.',
+  };
+  function tampilNilai(ambang) {
+    grafikAmbang.replaceChildren();
+    const add = (tag, attr, isi) => grafikAmbang.appendChild(elemen(tag, attr, isi));
+    const biner = frameBiner(frameNormal, ambang);
+    add('text', {x: 110, y: 20, 'font-weight': 700}, 'Citra biner');
+    gambarKisi(add('g', {}), {frame: biner, x: 110, y: 30, sel: 15, kolomAwal: 0, barisAwal: 0, lebar: 480, tinggi: 300, warna: warnaBiner, warnaTeks: warnaTeksBiner});
+    add('rect', {x: 110, y: 30, width: 480, height: 300, fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 2});
+    // Skala nilai piksel 0 sampai 255 dengan tanda empat nilai frame dan penanda threshold.
+    add('path', {d: 'M110 358 H590', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-linecap': 'round'});
+    for (const v of NILAI_NORMAL) add('circle', {cx: xSkala(v), cy: 358, r: 7, fill: v < ambang ? 'var(--oranye)' : 'var(--teks-lembut)', stroke: 'var(--putih)', 'stroke-width': 3});
+    for (const v of [0, ...NILAI_NORMAL, 255]) add('text', {x: xSkala(v), y: 382, 'text-anchor': 'middle', class: 'label-kecil' + (v === 0 || v === 255 ? ' lembut' : '')}, String(v));
+    const xT = xSkala(ambang);
+    add('path', {d: 'M' + xT + ' 332 V368', fill: 'none', stroke: 'var(--merah)', 'stroke-width': 3, 'stroke-dasharray': '8 6', 'stroke-linecap': 'round'});
+    add('text', {x: ambang > 200 ? xT - 8 : xT + 8, y: 345, 'text-anchor': ambang > 200 ? 'end' : 'start', class: 'label-kecil merah', 'font-weight': 700}, 'Threshold');
+    const kolom1 = biner[0].map((v, i) => (v ? i : -1)).filter((i) => i >= 0);
+    const lebarGaris = kolom1.length;
+    document.getElementById('nilaiKini').textContent = String(ambang);
+    document.getElementById('uraiKini').textContent = KET_AMBANG[ambang];
+    document.querySelectorAll('[data-nilai]').forEach((tombol) => tombol.setAttribute('aria-pressed', String(Number(tombol.dataset.nilai) === ambang)));
+    grafikAmbang.setAttribute('aria-label', 'Citra biner 32 kolom dan 20 baris pada threshold ' + ambang + ' dan kondisi pencahayaan normal. '
+      + (lebarGaris ? 'Kolom ' + kolom1[0] + ' sampai ' + kolom1[kolom1.length - 1] + ' bernilai 1 dan digambar hitam, sehingga garis terlihat selebar ' + lebarGaris + ' kolom. ' : 'Tidak ada piksel bernilai 1, seluruh citra digambar putih. ')
+      + 'Skala di bawah citra menandai nilai 25, 66, 148, dan 230 terhadap posisi threshold.');
+  }
+  document.querySelectorAll('[data-nilai]').forEach((tombol) => tombol.addEventListener('click', () => tampilNilai(Number(tombol.dataset.nilai))));
+  tampilNilai(128);
+
+  // ===== SLIDE 5. Tiga histogram 32 bin seperti gambarHistogram pada render/kameraView.js =====
+  const grafikHistogram = document.getElementById('grafikHistogram');
+  const AMBANG_HISTOGRAM = 128, MARGIN_BERSIH = 10;             // labs/lab13-thresholding.js nilaiAwal dan MARGIN_BERSIH
+  const JUMLAH_BIN = 32, LEBAR_BIN = 256 / JUMLAH_BIN;           // render/kameraView.js gambarHistogram
+  const xHist = (v) => Math.round((150 + (v / 256) * 950) * 10) / 10, LEBAR_BAR = 950 / JUMLAH_BIN;
+  const DASAR = {normal: 80, redup: 184, silau: 288}, NAMA = {normal: 'Normal', redup: 'Redup', silau: 'Silau'};
+  (function gambarHistogramDeck() {
+    const add = (tag, attr, isi) => grafikHistogram.appendChild(elemen(tag, attr, isi));
+    // Lapisan belakang. Pita rentang threshold sesuai, yaitu gelap + 10 < threshold < terang − 10, digambar lebih dahulu agar tidak menutup label baris lain.
+    for (const kondisi of Object.keys(DASAR)) {
+      const dasar = DASAR[kondisi], {gelap, terang} = KONDISI_PENCAHAYAAN[kondisi];
+      add('rect', {x: xHist(gelap + MARGIN_BERSIH), y: dasar - 68, width: Math.round((xHist(terang - MARGIN_BERSIH) - xHist(gelap + MARGIN_BERSIH)) * 10) / 10, height: 70, fill: 'var(--oranye-muda)', 'data-tahap': 2});
+    }
+    for (const kondisi of Object.keys(DASAR)) {
+      const frame = buatFrameDeck(undefined, kondisi), dasar = DASAR[kondisi];
+      const hitung = new Array(JUMLAH_BIN).fill(0);
+      for (const baris of frame) for (const v of baris) hitung[Math.min(JUMLAH_BIN - 1, Math.floor(v / LEBAR_BIN))] += 1;
+      const maksimum = Math.max(...hitung);
+      add('path', {d: 'M150 ' + dasar + ' H1100', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-linecap': 'round'});
+      add('text', {x: 0, y: dasar - 24, 'font-size': 24, 'font-weight': 700}, NAMA[kondisi]);
+      hitung.forEach((n, i) => {
+        if (!n) return;
+        const tinggi = Math.round((n / maksimum) * 62 * 10) / 10, nilaiBin = i * LEBAR_BIN;
+        add('rect', {x: Math.round((150 + i * LEBAR_BAR) * 10) / 10, y: Math.round((dasar - tinggi) * 10) / 10, width: Math.round(LEBAR_BAR * 10) / 10, height: tinggi, fill: nilaiBin < AMBANG_HISTOGRAM ? 'var(--oranye)' : 'var(--teks-lembut)'});
+      });
+      // Label nilai piksel pada pusat bin yang terisi.
+      const nilaiUnik = [...new Set(frame.flat())].sort((a, b) => a - b);
+      for (const v of nilaiUnik) add('text', {x: Math.round((150 + (Math.floor(v / LEBAR_BIN) + 0.5) * LEBAR_BAR) * 10) / 10, y: dasar + 22, 'text-anchor': 'middle', class: 'label-kecil lembut'}, String(v));
+    }
+    add('path', {d: 'M150 332 H1100', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-linecap': 'round'});
+    add('path', {d: 'M150 324 V340 M1100 324 V340', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    add('text', {x: 150, y: 354, 'text-anchor': 'middle', class: 'label-kecil lembut'}, '0');
+    add('text', {x: 1100, y: 354, 'text-anchor': 'middle', class: 'label-kecil lembut'}, '255');
+    const xT = xHist(AMBANG_HISTOGRAM);
+    add('path', {d: 'M' + xT + ' 4 V334', fill: 'none', stroke: 'var(--merah)', 'stroke-width': 3, 'stroke-dasharray': '8 6', 'stroke-linecap': 'round'});
+    add('text', {x: xT, y: 354, 'text-anchor': 'middle', class: 'merah', 'font-weight': 700}, 'Threshold 128');
+  })();
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

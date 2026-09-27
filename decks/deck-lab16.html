@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 16. Eksperimen Komparatif</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK. Pakai apa adanya. Hapus pola yang tidak dipakai ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P2 diagram lebar penuh */
+.legend{display:flex;gap:28px;align-items:center;font-size:17px}.legend span{display:flex;gap:10px;align-items:center}.garis-legenda{width:34px;height:4px;background:var(--oranye)}.garis-legenda.sinyal{height:0;border-top:3px dashed var(--teks-lembut);background:none}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+.sisipan{border-top:1px solid var(--abu-garis);margin-top:28px;padding-top:22px}
+.peringatan{border-left:4px solid var(--merah);padding:0 0 0 24px;margin-top:30px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P5 grafik interaktif dan rumus */
+.rumus{font-size:29px;font-weight:700;line-height:1.5;margin-top:20px}
+.baris-rumus{display:flex;align-items:center;gap:16px;margin-top:8px}.fraksi{display:inline-flex;flex-direction:column;text-align:center;min-width:166px;font-size:22px}.fraksi span:first-child{border-bottom:2px solid var(--teks);padding:0 5px 5px}.fraksi span:last-child{padding-top:5px}
+.pilihan{display:flex;gap:14px;margin-top:27px}
+.pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+/* P6 grafik data dan tabel */
+.tabel{width:100%;border-collapse:collapse;font-size:21px;margin-top:25px}
+.tabel th{font-size:15px;line-height:1.5;color:var(--teks-lembut);font-weight:600;text-align:left;padding:0 0 16px}
+.tabel td{border-top:1px solid var(--abu-garis);padding:19px 0}
+.tabel td:first-child{font-weight:700}.tabel td:last-child{text-align:right}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI ===== */
+.tabel td{white-space:nowrap}
+.garis-legenda.gelap{background:var(--teks)}
+/* Slide 4. Cuplikan berkas CSV. Isi sel ditulis skrip dari baris berkas asli, termasuk titik desimalnya. */
+.csv{border-collapse:collapse;font-size:20px;font-variant-numeric:tabular-nums}
+.csv th{font-size:19px;font-weight:700;text-align:left;padding:0 34px 8px 0;color:var(--teks)}
+.csv td{border-top:1px solid var(--abu-garis);padding:3px 34px 3px 0;line-height:1.35;white-space:nowrap}
+.csv td.lompat{color:var(--teks-lembut);font-size:17px;border-top:1px dashed var(--teks-lembut)}
+.csv td.kurung{border-top:0;border-left:3px solid var(--teks);padding:0 0 0 20px;font-size:17px;line-height:1.45;white-space:nowrap}
+.csv td.kurung.kamera{border-left-color:var(--oranye)}.csv td.kurung.gabungan{border-left-color:var(--teks-lembut)}
+.csv td.kurung strong{font-size:19px}
+.csv .mode-kamera{color:var(--oranye)}
+/* Slide 5. Bayangan robot menyusuri titik posisi dari CSV. Satu satunya animasi pada deck. */
+svg .hantu{opacity:0;pointer-events:none;offset-rotate:auto;animation:susurJejak 8s linear infinite}
+@keyframes susurJejak{
+0%{opacity:0;offset-distance:0%}
+6%{opacity:.6;offset-distance:0%}
+80%{opacity:.6;offset-distance:100%}
+90%{opacity:.6;offset-distance:100%}
+96%,100%{opacity:0;offset-distance:100%}
+}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 16, Eksperimen Komparatif">
+
+<!-- SLIDE 1. Pola P1 pembuka -->
+<section class="slide aktif" aria-labelledby="judul1" data-video="skip">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 16 · Modul 5</p>
+      <h1 id="judul1">Sesi<br><span class="oranye">terukur</span></h1>
+      <p class="ringkas">Membandingkan dua mode sensor dengan data.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Sesi terukur mencatat error dan posisi robot selama 30 detik.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Rata-rata error absolut per sesi</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Batang rata-rata error absolut satu sesi 30 detik pada pengaturan awal simulator. Lintasan Halus 5,88 untuk Photodiode dan 6,01 untuk Kamera. Lintasan Tajam 7,92 dan 8,60. Lintasan Zigzag 16,58 dan 16,89. Semua batang memakai skala yang sama.">
+        <rect x="360" y="9" width="18" height="18" rx="3" fill="var(--teks)"/><text x="388" y="25" class="label-kecil">Photodiode</text>
+        <rect x="520" y="9" width="18" height="18" rx="3" fill="var(--oranye)"/><text x="548" y="25" class="label-kecil">Kamera</text>
+        <rect x="30" y="173.1" width="72" height="52.9" rx="3" fill="var(--teks)"/>
+        <rect x="118" y="171.9" width="72" height="54.1" rx="3" fill="var(--oranye)"/>
+        <rect x="260" y="154.7" width="72" height="71.3" rx="3" fill="var(--teks)"/>
+        <rect x="348" y="148.6" width="72" height="77.4" rx="3" fill="var(--oranye)"/>
+        <rect x="490" y="76.8" width="72" height="149.2" rx="3" fill="var(--teks)"/>
+        <rect x="578" y="74" width="72" height="152" rx="3" fill="var(--oranye)"/>
+        <path d="M10 226 H670" fill="none" stroke="var(--teks-lembut)" stroke-width="2"/>
+        <g font-weight="700" text-anchor="middle">
+          <text x="66" y="162" class="label-kecil">5,88</text><text x="154" y="161" class="label-kecil oranye">6,01</text>
+          <text x="296" y="144" class="label-kecil">7,92</text><text x="384" y="138" class="label-kecil oranye">8,60</text>
+          <text x="526" y="66" class="label-kecil">16,58</text><text x="614" y="63" class="label-kecil oranye">16,89</text>
+        </g>
+        <g text-anchor="middle"><text x="110" y="252">Halus</text><text x="340" y="252">Tajam</text><text x="570" y="252">Zigzag</text></g>
+        <text x="10" y="276" class="label-kecil lembut">Sesi 30 s, pengaturan awal simulator</text>
+      </svg>
+      <p class="simpulan-visual">Selisih antarlintasan jauh lebih besar daripada selisih antarmode sensor. Perbandingan mode sensor karena itu dilakukan pada lintasan dan pengaturan yang sama.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. Pola P2 diagram lebar penuh -->
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Rancangan eksperimen</p><h2 id="judul2">Tiga peran pengaturan pada sesi</h2></header>
+  <div class="isi">
+    <svg viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Diagram rancangan eksperimen. Variabel bebas berupa mode sensor Photodiode atau Kamera masuk ke sesi terukur 30 detik. Variabel kontrol dijaga sama, yaitu lintasan, kecepatan dasar, threshold kamera, Kp, Kd, Ki, dan sumber kendali. Sesi mencatat variabel terikat pada kolom error dan kolom keluarJalur.">
+      <defs>
+        <marker id="panahSinyal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L8 5 L1 9" fill="none" stroke="var(--teks-lembut)" stroke-width="1.5"/></marker>
+      </defs>
+      <rect x="330" y="2" width="492" height="164" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="576" y="36" text-anchor="middle" class="label-kecil lembut">Variabel kontrol</text>
+      <text x="370" y="76">Lintasan</text><text x="370" y="110">Kecepatan dasar</text><text x="370" y="144">Threshold kamera</text>
+      <text x="630" y="76">Kp, Kd, Ki</text><text x="630" y="110">Sumber kendali</text>
+      <path d="M576 166 V222" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <text x="594" y="202" class="label-kecil">Dijaga sama</text>
+      <rect x="2" y="206" width="248" height="150" rx="12" fill="var(--oranye-muda)" stroke="var(--oranye)" stroke-width="3"/>
+      <text x="126" y="240" text-anchor="middle" class="label-kecil lembut">Variabel bebas</text>
+      <text x="126" y="280" text-anchor="middle" font-size="24" font-weight="700">Mode sensor</text>
+      <text x="126" y="314" text-anchor="middle" class="label-kecil">Photodiode atau Kamera</text>
+      <path d="M250 291 H348" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <text x="299" y="272" text-anchor="middle" class="label-kecil">Diubah</text>
+      <rect x="360" y="234" width="432" height="114" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="576" y="282" text-anchor="middle" font-size="24" font-weight="700">Sesi terukur 30 s</text>
+      <text x="576" y="316" text-anchor="middle" class="label-kecil lembut">10 baris data per detik</text>
+      <path d="M792 291 H890" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <text x="841" y="272" text-anchor="middle" class="label-kecil">Dicatat</text>
+      <rect x="902" y="206" width="248" height="150" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="1026" y="240" text-anchor="middle" class="label-kecil lembut">Variabel terikat</text>
+      <text x="1026" y="282" text-anchor="middle">Kolom error</text>
+      <text x="1026" y="316" text-anchor="middle">Kolom keluarJalur</text>
+    </svg>
+    <p class="catatan lembut bawah">Lintasan, kecepatan dasar, Kp, Kd, Ki, atau threshold kamera juga dapat menjadi variabel bebas. Pengulangan berarti menjalankan sesi lagi dengan semua pengaturan yang sama.</p>
+  </div>
+</section>
+
+<!-- SLIDE 3. Pola P4 dua keadaan berdampingan -->
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Perbandingan dua sesi</p><h2 id="judul3">Satu pengaturan berubah dalam satu waktu</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Tiga pengaturan berubah</h3>
+        <svg class="banding" data-kasus="tidakAdil" viewBox="0 0 490 352" role="img" aria-label="Sesi Photodiode pada lintasan Halus dengan kecepatan dasar 20 persen menghasilkan rata-rata error absolut 2,89. Sesi Kamera pada lintasan Zigzag dengan kecepatan dasar 70 persen menghasilkan 24,63. Selisihnya 21,74."></svg>
+        <p><strong>Mode, lintasan, dan kecepatan dasar berbeda.</strong><br>Penyebab selisih 21,74 tidak dapat dipisahkan.</p>
+      </div>
+      <div>
+        <h3>Satu pengaturan berubah</h3>
+        <svg class="banding" data-kasus="adil" viewBox="0 0 490 352" role="img" aria-label="Sesi Photodiode dan sesi Kamera pada lintasan Zigzag dengan kecepatan dasar 35 persen. Rata-rata error absolut 16,58 dan 16,89. Selisihnya 0,31."></svg>
+        <p><strong>Hanya mode sensor yang berbeda.</strong><br>Selisih 0,31 dibandingkan dengan hasil pengulangan.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. Pola P2 dengan tabel HTML. Isi tabel ditulis skrip dari berkas CSV hasil engine -->
+<section class="slide" aria-labelledby="judul4" hidden>
+  <header class="judul"><p class="kicker">Berkas hasil ekspor</p><h2 id="judul4">Baris data dan baris ringkasan</h2></header>
+  <div class="isi">
+    <table class="csv" id="tabelCsv" aria-label="Cuplikan berkas CSV dari satu sesi Photodiode dan satu sesi Kamera pada lintasan Zigzag. Kepala kolom waktu, mode, lintasan, error, posisiX, posisiY, keluarJalur. Setiap sesi memuat 301 baris. Baris terakhir adalah RINGKASAN dengan rata-rata error absolut 16,73 dan jumlah sampel 602."></table>
+    <p class="catatan lembut bawah">Kolom dipisahkan koma dan desimal ditulis dengan titik. Kecepatan dasar, Kp, Kd, Ki, threshold, dan sumber kendali tidak tercatat di berkas sehingga perlu dicatat terpisah untuk setiap sesi.</p>
+  </div>
+</section>
+
+<!-- SLIDE 5. Pola P3 visual kiri, teks kanan. Satu satunya slide beranimasi -->
+<section class="slide" aria-labelledby="judul5" hidden>
+  <header class="judul"><p class="kicker">Kolom posisi dan keluar jalur</p><h2 id="judul5">Jejak robot dari kolom posisi</h2></header>
+  <div class="isi terbagi">
+    <svg id="gambarPosisi" viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Lintasan Zigzag utuh dengan 301 titik oranye dari kolom posisiX dan posisiY sesi Kamera. Titik mulai di koordinat 140, 0 lalu mengikuti garis berlawanan arah jarum jam sekitar satu seperempat putaran sampai koordinat minus 4, 154 pada detik 30,01. Pusat robot memotong lekukan garis, tetapi larik sensor tetap membaca garis sehingga keluarJalur tetap 0."></svg>
+    <div class="teks-samping">
+      <h3>Setiap titik adalah satu baris CSV.</h3>
+      <p>Kolom posisiX dan posisiY sesi Kamera pada lintasan Zigzag membentuk jejak robot.</p>
+      <p>Kolom keluarJalur menghitung kejadian garis hilang dari semua sensor. Nilainya tetap 0 walaupun pusat robot memotong lekukan garis.</p>
+      <p class="catatan lembut">Posisi memakai satuan koordinat lintasan simulator, bukan sentimeter.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6. Pola P5 grafik interaktif -->
+<section class="slide" aria-labelledby="judul6" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Hasil sesi pada pengaturan awal</p><h2 id="judul6">Error kedua mode pada tiga lintasan</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikError" viewBox="0 0 700 330" width="700" height="330" role="img" aria-label="Error terhadap waktu selama satu sesi 30 detik pada lintasan Tajam. Kurva gelap Photodiode dan kurva oranye Kamera melonjak di setiap tikungan. Rata-rata error absolut 7,92 dan 8,60."></svg>
+      <div class="pilihan" role="group" aria-label="Pilih lintasan">
+        <button type="button" data-nilai="belokanHalus" aria-pressed="false">Halus</button>
+        <button type="button" data-nilai="tajam" aria-pressed="true">Tajam</button>
+        <button type="button" data-nilai="zigzag" aria-pressed="false">Zigzag</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>Lintasan <span id="nilaiKini" class="oranye">Tajam</span></h3>
+      <p id="uraiKini">Uraian</p>
+      <table class="tabel"><thead><tr><th>Mode</th><th style="text-align:right">Rata-rata<br>error absolut</th></tr></thead><tbody>
+        <tr><td>Photodiode</td><td id="rataPhotodiode">7,92</td></tr>
+        <tr><td class="oranye">Kamera</td><td id="rataKamera">8,60</td></tr>
+      </tbody></table>
+    </div>
+    <p class="catatan lembut bawah">Error positif berarti garis condong ke kanan. Setiap kurva memuat 301 sampel dari satu sesi 30 s.</p>
+  </div>
+</section>
+
+<!-- SLIDE 7. Pola P6 grafik data dan tabel -->
+<section class="slide" aria-labelledby="judul7" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Hasil pada model simulator</p><h2 id="judul7">Pengaruh kecepatan dasar terhadap error</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikKecepatan" viewBox="0 0 700 375" width="700" height="375" role="img" aria-label="Grafik rata-rata error absolut terhadap kecepatan dasar pada lintasan Halus. Photodiode 5,88, 9,42, 14,13, dan 18,91 pada 35, 50, 70, dan 85 persen. Kamera 6,01, 9,15, 12,54, 18,29, dan 33,17 pada 35 sampai 100 persen. Pada 100 persen sesi Photodiode berhenti setelah 5,41 detik dengan rata-rata 12,81 dari 55 baris."></svg>
+      <p class="catatan" style="margin-top:14px"><strong>Rata-rata error absolut = Σ |error| ÷ jumlah baris</strong><br><span class="lembut">Lintasan Halus, Kp 0,6, Kd 0,15, Ki 0, threshold 128.</span></p>
+    </div>
+    <div style="padding-top:8px">
+      <h3>Nilai tiap sesi 30 s</h3>
+      <table class="tabel"><thead><tr><th>Kecepatan<br>dasar</th><th>Photodiode</th><th style="text-align:right">Kamera</th></tr></thead><tbody>
+        <tr><td>35%</td><td>5,88</td><td class="oranye">6,01</td></tr>
+        <tr><td>70%</td><td>14,13</td><td class="oranye">12,54</td></tr>
+        <tr><td>100%</td><td class="merah">Berhenti</td><td class="oranye">33,17</td></tr>
+      </tbody></table>
+      <p class="catatan lembut" style="margin-top:26px">Sesi Photodiode 100% berhenti setelah 55 baris karena garis hilang. Model tidak memuat jeda olah citra yang ada pada kamera perangkat keras.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8. Pola P3 visual kiri, teks kanan -->
+<section class="slide" aria-labelledby="judul8" hidden>
+  <header class="judul"><p class="kicker">Pengolahan data untuk laporan</p><h2 id="judul8">Rata-rata per sesi dan baris ringkasan</h2></header>
+  <div class="isi terbagi">
+    <svg viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Rata-rata error absolut empat sesi pada lintasan Zigzag dengan pengaturan awal dalam satu log. Sesi 1 Photodiode 16,58. Sesi 2 Kamera 16,89. Sesi 3 Photodiode 16,41. Sesi 4 Kamera 17,04. Baris RINGKASAN berkas CSV 16,73. Semua batang memakai skala yang sama.">
+      <text x="0" y="30">Sesi 1, Photodiode</text><text x="635" y="30" text-anchor="end" font-weight="700">16,58</text>
+      <rect x="0" y="45" width="497.4" height="22" rx="3" fill="var(--teks)"/>
+      <text x="0" y="113">Sesi 2, Kamera</text><text x="635" y="113" text-anchor="end" font-weight="700" class="oranye">16,89</text>
+      <rect x="0" y="128" width="506.7" height="22" rx="3" fill="var(--oranye)"/>
+      <text x="0" y="196">Sesi 3, Photodiode</text><text x="635" y="196" text-anchor="end" font-weight="700">16,41</text>
+      <rect x="0" y="211" width="492.3" height="22" rx="3" fill="var(--teks)"/>
+      <text x="0" y="279">Sesi 4, Kamera</text><text x="635" y="279" text-anchor="end" font-weight="700" class="oranye">17,04</text>
+      <rect x="0" y="294" width="511.2" height="22" rx="3" fill="var(--oranye)"/>
+      <text x="0" y="362">Baris RINGKASAN</text><text x="635" y="362" text-anchor="end" font-weight="700" class="lembut">16,73</text>
+      <rect x="0" y="377" width="501.9" height="22" rx="3" fill="var(--teks-lembut)"/>
+      <text x="0" y="440" class="label-kecil lembut">Lintasan Zigzag, pengaturan awal, satu log</text>
+    </svg>
+    <div class="teks-samping">
+      <h3>Baris RINGKASAN menggabungkan semua sesi.</h3>
+      <p>Nilai 16,73 adalah rata-rata 1204 baris dari kedua mode. Rata-rata Photodiode 16,50 dan Kamera 16,96.</p>
+      <p>Pengulangan dengan pengaturan sama berselisih 0,17 pada Photodiode dan 0,15 pada Kamera.</p>
+      <p class="catatan lembut">Model simulator tidak memiliki derau sensor. Pada perangkat keras, hasil pengulangan umumnya berselisih lebih besar.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 9. Pola P7 kegiatan simulator -->
+<section class="slide" aria-labelledby="judul9" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 16</p><h2 id="judul9">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Sesi Photodiode</h3><p>Pilih lintasan dan catat semua pengaturan kendali.<br>Jalankan sesi terukur 30 detik pada mode Photodiode.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Sesi Kamera</h3><p>Pilih mode Kamera tanpa mengubah pengaturan lain.<br>Bandingkan grafik error dan jumlah keluar jalur.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Ekspor CSV</h3><p>Tekan Ekspor CSV setelah kedua sesi selesai.<br>Hitung rata-rata error absolut untuk setiap mode.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Satu sesi terukur mode Photodiode dan satu sesi terukur mode Kamera telah dijalankan.<br>Data telah diekspor ke berkas CSV minimal satu kali.</p></div>
+  </div>
+</section>
+
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 16 · Eksperimen komparatif</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 9</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab16-eksperimen.js (buatCSV, langkahSesi, kontrol), engine/simulasiLintasan.js, engine/kameraRobot.js,
+  // engine/kendali.js (kendaliPID), engine/lintasan.js (buatLintasanZigzag), engine/robot.js, render/kanvas.js (fisika 120 Hz).
+  // Semua nilai, deret error, posisi, dan baris CSV berasal dari output/deck-lab16/hitung-data.mjs yang menjalankan definisi lab di Node.
+  // Nama kolom dan isi sel CSV ditampilkan persis seperti berkas, termasuk titik desimal.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+  function koma(nilai, digit) { return nilai.toFixed(digit).replace('.', ',').replace('-', '−'); }
+
+  // ===== KONSTANTA SIMULATOR =====
+  const ROBOT_LEBAR_RODA = 40;       // engine/robot.js ROBOT_LEBAR_RODA
+  const ROBOT_JEJARI = 22;           // engine/robot.js ROBOT_JEJARI
+  const LEBAR_GARIS_LINTASAN = 24;   // engine/lintasan.js LEBAR_GARIS_LINTASAN
+  const SELANG_LOG = 0.1;            // labs/lab16-eksperimen.js langkahSesi, 10 baris per detik
+
+/*__DATA__*/
+  // Data hasil output/deck-lab16/hitung-data.mjs (labs/lab16-eksperimen.js dijalankan di Node, fisika 1/120 s). Jangan menyunting dengan tangan.
+  // ERROR_SESI: kolom error setiap baris log (10 per detik, 301 baris) satu sesi 30 s pada pengaturan awal, dibulatkan 1 desimal.
+  const ERROR_SESI = {"belokanHalus":{"photodiode":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0.2,0.4,0.7,7.3,5.8,10.3,9.5,12.5,12.1,15.1,14,15.2,15,15.2,15.2,15.1,15.2,15.2,15.2,15.2,15.1,15.1,15.1,14.9,14.9,14.8,14.7,14.6,14.5,14.3,14.3,14.2,14,14,13.8,13.8,13.7,13.5,13.6,13.4,13.3,13.4,13.2,13.2,13.3,13.1,12.9,13.4,12.7,13.6,13,13.3,13.2,13.3,12.8,13.7,12.9,13.4,12.9,12.7,12,11.4,10.4,9.6,8.4,7.7,5.8,7.9,3,6.6,2.3,4,2.6,2.7,2.3,2.1,1.9,1.7,1.5,1.4,1.3,1.1,1,0.9,0.8,0.7,0.6,0.6,0.5,0.4,0.4,0.3,0.3,0.2,0.2,0.2,0.1,0.1,0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-0.1,-0.1,-0.1,-0.1,-0.2,-0.2,-0.3,-0.3,-0.3,-0.3,-0.4,-0.4,-0.5,-0.4,-0.4,-0.3,-0.2,-0.1,0,0,0,0,0.2,6.1,6.4,9.1,9.8,11.6,13.1,15.2,15.8,15.8,15.9,16,16,16,16.1,16.1,16.1,16.1,16.1,16,16,16,15.9,15.9,15.8,15.7,15.6,15.5,15.3,15.2,15,14.8,14.6,14.4,14.2,14,13.6,13.6,13.3,13.1,13.1,12.8,12.8,12.8,12.2,13.1,12,13.2,11.8,13.5,11.4,14,11.6,13.8,12.4,12.8,11.7,11.4,10.1,9.7,7.7,8.8,4,9.5,2.3,6.6,2.1,3.7,2.5,2.5,2.2,2,1.8,1.6,1.5,1.3,1.2,1.1,1,0.9,0.8,0.7,0.6,0.6,0.5,0.4,0.4,0.3,0.3,0.2],"kamera":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0.5,0.7,1,1.2,2.5,3.1,4,5.4,6.2,7.3,8.3,9.3,10.3,10.8,11.4,12.2,13.2,13.3,13.7,14.3,14.3,15.1,14.7,15.1,15.1,15.3,15.1,15.3,15.3,15.4,15.1,15.1,15.1,14.7,15.1,14.7,14.7,14.7,14.7,14.5,14.5,14.5,14.5,14.3,14.5,14.1,14.3,14.1,13.9,14.3,13.9,14.1,13.7,14.3,13.9,14.3,13.9,13.9,13.7,13.7,13.3,13.3,13.3,12.6,12.2,10.9,10.6,10.2,10,8.5,6.9,4.8,4.8,4.8,3.6,2.6,2.2,2,2,2,2,2,2,1.6,1.2,0.9,0.3,-0.1,-0.5,-0.6,-0.8,-0.9,-1,-1.1,-1.2,-1.1,-1.2,-1.1,-1.1,-1,-1,-0.6,-1.6,0,-1,0,-0.1,0,0,0,0,0,0,-0.1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.2,-0.1,0.8,1,2.4,2.8,3.9,5.4,6.1,7.5,8.5,9.3,10.5,10.6,11.4,12.8,13.2,13.3,14.3,14.5,14.3,15.2,14.7,15.3,15.1,15.3,15.4,15.3,15.3,15.4,15.1,15.3,15.1,15.1,15.1,14.7,14.7,14.7,14.7,14.5,14.5,14.5,14.5,14.3,14.5,13.9,14.3,14.1,13.9,14.3,13.9,14.3,13.7,14.1,13.7,14.3,13.9,13.9,13.7,13.5,13.3,13.7,13.1,12.6,12,10.9,10.6,10.2,10,8.2,6.3,5.1,4.8,4.8,3.3,2.8,2,2,2,2,2,2,2,1.5,1.1,0.8,0.3,-0.2,-0.5,-0.6,-0.8,-0.9,-1,-1.1,-1.1,-1.2,-1.1,-1.1,-1,-1.1,-0.7,-1.5,0]},"tajam":{"photodiode":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3.1,17.6,0,29.6,0,30.2,7.1,21.3,10.3,22.8,12.7,25.1,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16,15.5,14.6,12.9,8.4,3.3,3.8,2,1.9,1.7,1.9,5.2,7.7,9.2,10.4,11.6,12.5,13.9,15.8,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.1,15.7,15.1,13.8,11.3,3.8,7.6,1.2,1.8,1.1,0.8,0.6,0.4,0.3,0.2,0.1,0,0,0,0,0,0,0,-0.1,-0.2,-0.3,-0.4,-0.5,-0.7,-0.9,-1.1,-1.3,-1.6,-1.9,-2.2,-2.5,-2.7,-2.8,-2.9,-2.9,-2.9,-2.8,-2.7,-2.6,-1.9,-1.1,-0.5,2.5,21,-0.3,28.8,0.7,28.3,7.7,19.7,9.9,21.3,13.1,24.9,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.2,15.8,15.2,14.2,12,5.3,6.4,1.9,3.6,2.8,9.9,4.2,15.7,8.6,14.2,12.5,15.2,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16,15.5,14.8,13.4,10.7,4,7.8,1.4,2,1.3,1,0.8,0.6,0.4,0.3,0.2,0.1,0,0,0,0,0,0,0,0,-0.1,-0.1,-0.2,-0.3,-0.4,-0.5,-0.7,-0.8,-1,-1.2,-1.4,-1.6,-1.9,-2.1,-2.2,-2.3,-2.4,-2.5,-2.5,-2.3,-1.6,-0.8,-0.3,8,6.7,17.4,8.5,19.4,9.5,20.3,14.2,21.8,14.8,27.4,16.3,19.5,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16,15.4,14.5,12.5,5.7,5.6,2.1,3.2,2.6,8.3,4.9,13.8],"kamera":[0,-4.9,-2.4,-3.3,-3,-3,-2.9,-2.8,-2.5,-2.3,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-1.9,-1.3,-1,-0.7,-0.3,0,0,0.2,0.5,0.5,0.7,0.7,0.8,0.8,0.9,0.7,0.9,0.6,1.1,0,1.2,0,0.5,0,0,0.1,0.5,0.7,1.2,2.3,7.1,8.6,11.7,11.8,15.9,12.5,20,12.9,20.8,15.1,21.7,17.6,21.9,19.4,20.8,20.1,20.1,18.9,18.1,17,16.2,14.9,12.8,11.7,10.2,10.2,10.2,7.1,6,4.1,4.8,3,4.1,4.2,6.8,9.4,11.7,12.9,14.1,15.4,16.1,16.6,18,18.1,18.9,19.6,19.4,19.7,19.6,19.6,18.8,18.3,16.8,15.9,15.3,13.7,11.9,10.8,10.2,10.2,8.5,4.8,5.7,2.8,3.6,2.3,2,2,2,1.9,1.4,1.1,0.4,-0.1,-0.5,-0.9,-1,-1.2,-1.3,-1.4,-1.5,-1.6,-1.6,-1.6,-1.6,-1.5,-1.3,-1.2,-0.9,-0.9,-0.2,-1.7,0,0,0,0,0,0,0.2,0.1,2.3,6.1,7.5,14,7.6,22,5.8,27.5,5.5,27.8,8.7,25.9,13.7,23.9,17.3,21.4,19.7,20.1,18.9,18.3,16.4,16.2,14.9,13,11.7,10.2,10.2,10.2,7.4,6,4.8,4.1,3.5,4.3,4.9,7.2,10.2,12.2,13.6,14.8,15.8,16.1,17.4,17.7,18.4,19.4,19,19.9,19.6,19.9,19.7,18.6,18.3,16.8,15.9,14.9,13,11.7,10.4,10.2,10.2,7.7,5.7,4.8,3.9,3,2.5,2,2,2,1.9,1.4,1.1,0.4,-0.1,-0.5,-0.9,-1,-1.2,-1.3,-1.4,-1.5,-1.6,-1.6,-1.7,-1.6,-1.5,-1.4,-1.1,-1.1,-0.6,-1.9,0,-0.6,0,0,0,0,0,0.3,0.4,2.2,7.7,8.6,14.4,9.6,21.4,6.4,27.2,6.9,26.4,9.8,24.4,14.9,22.9,18,21.4,19.8,19.5,18.7,17.6,16.1,15.7,14.3,12.1,11.5,10.2,10.2,10.2,6,6,3.3,5.1,3,4.8,5.7,9.1,10,13.1,12.5,16.1,14.1,18.1,15.9,19.3,17.4,20.3,18.8,20.1,19.4,19.9]},"zigzag":{"photodiode":[-20.3,0.2,-22.2,-12.3,-26.3,0.6,-32.6,0.3,-33,-5,-33,-13.8,-33.3,-14.5,-34.7,-10.1,-38.8,-11.1,-28.6,-16.3,-26.3,-16.3,-20.5,-16.3,-16.3,-16.3,-16.3,-16.3,-16.3,-16.3,-16.3,-16.3,-16.3,-16.3,-10.4,-9.2,-0.2,1.7,7,9.5,9.7,10.5,13.1,16.3,16.3,16.3,16.3,16.3,16.3,16.3,-0.6,16.3,-13.6,16.3,-22.3,-2.9,-23.7,-18.8,-22.5,-21.1,-21.9,-21.5,-20.1,-20.4,-20.4,-21,-22.1,-25.3,-20.7,-23.9,-16.3,-20.1,-16.3,-16.3,-16.4,-16.4,-16.4,-16.3,-16.3,-12.4,-9.9,-8.9,-0.4,5.3,8.3,8.5,9.6,10.9,14.2,15.8,15.5,15.3,14.9,14.1,7.2,-12.2,16.3,-23.2,16.3,-27.9,16.2,-29.1,-5.3,-33,-20.8,-30.4,-23.6,-31.4,-15.1,-33.1,-10.8,-33.1,-11,-28.6,-16.3,-27.2,-16.3,-24.1,-16.3,-16.3,-16.3,-16.4,-16.4,-16.4,-16.3,-16.3,-13.7,-10,-9.1,-0.2,3,9.1,9,9.9,11.1,15,16.3,16.1,16.1,15.8,15.4,14.8,-5.3,16.3,-17.8,16.3,-25,1.7,-26.5,-15.1,-24.5,-22.1,-24.3,-23.7,-19,-22.7,-17.6,-21.2,-21,-23.4,-23.2,-17.2,-25.2,-16.3,-16.3,-16.3,-16.3,-16.4,-16.4,-16.4,-16.3,-16.3,-12.9,-10,-9,-0.2,3.2,8.9,8.8,9.8,11.1,15.1,16.1,15.9,15.7,15.3,14.8,13.9,-9,16.3,-22.4,16.3,-25.9,9.5,-28.2,-11.8,-26.2,-22.1,-26.5,-21.7,-30,-12.3,-32.5,-9.8,-29.6,-11.5,-28.5,-16.3,-25.7,-16.3,-17.7,-16.3,-16.3,-16.4,-16.4,-16.4,-16.3,-16.3,-16.3,-10.3,-9.2,-1.3,1.4,8.9,8.6,9.5,10.6,13.2,16.3,16,15.8,15.6,15.2,14.7,-2.7,16.1,-16.9,16.3,-24,8,-28,-10.8,-26.1,-21.9,-26.1,-22.3,-28.7,-14.6,-32.5,-9.7,-29.7,-11.3,-28.6,-16.3,-26.1,-16.3,-19.8,-16.3,-16.3,-16.3,-16.4,-16.4,-16.3,-16.3,-16.3,-10.4,-9.2,-1.9,1,8.8,8.5,9.4,10.5,12.7,16.3,16,15.8,15.6,15.3,14.7,-1.2,16,-15,16.3,-24.1,7.2,-28.6,-8.4,-27.1,-21.8,-26.8,-21.6,-30.7,-12,-32.7,-9.7,-30.6,-11.1,-28.6,-16.3,-26.4],"kamera":[-29.4,-16.1,-2.8,-30.5,5,-39.1,7.3,-38.8,3,-39.5,-0.3,-39.6,-2.2,-40.2,-8.1,-40.8,-13.1,-42.2,-16.9,-41.8,-16.4,-41.4,-16.9,-39.2,-16.7,-34.3,-18.4,-29.4,-20.2,-24.9,-21,-21.9,-20.1,-18.7,-17.2,-15.9,-10.3,-7.3,-2.5,0.4,4.1,6.6,10.2,12.4,14.4,15.4,16.9,17.3,17.4,16.7,15.5,15.5,10.3,4.8,1.3,-0.4,-9.3,-7.7,-17.3,-8.7,-25.5,-7.4,-32.7,-11.4,-34.7,-15.1,-35.7,-15.6,-36.6,-16.2,-34.8,-17.7,-31.4,-19.7,-27.3,-21.8,-23.7,-21.6,-21.6,-20.6,-17.8,-16.9,-11.8,-8.1,-3,0.7,4.8,7.2,10.6,12.3,14,16,16.3,16.8,16.1,15.5,15.1,11.8,6.2,2.4,-1.5,-3.7,-10.8,-10.1,-17.9,-9.8,-25.1,-9.7,-30.3,-10.9,-33.5,-12.9,-36.1,-14.3,-36,-15.8,-33.7,-17.9,-29.6,-20.7,-25.6,-21.8,-22.7,-21.4,-21,-17.8,-17.1,-11.8,-8.1,-3,0.2,4.4,6.7,10,12.2,14.1,15.7,16.3,16.8,16.5,15.3,15.1,11.6,7.3,2.8,-1.2,-6.5,-6.5,-14.4,-9.3,-21.7,-8.8,-28.3,-9.5,-32.8,-12.1,-35,-13.8,-37,-15.8,-35.7,-16.6,-31.4,-19.1,-27.9,-21.4,-24.4,-21.5,-21.9,-21,-18.9,-16.9,-12.9,-7.2,-4.6,0.4,3.2,6.4,9.7,12,13.8,15.8,16.1,16.6,16.5,15.5,15.1,12.5,8.4,2.5,2.3,-7.9,-0.7,-25.3,4.9,-34.8,1.2,-35.7,-4.4,-36.4,-11.1,-36,-16.1,-34.1,-17.2,-34.8,-16.3,-35.8,-15.5,-33.9,-17.1,-29.7,-19.7,-26.2,-21.1,-22.8,-21.1,-20.9,-19,-17.6,-14.9,-9.1,-7,-0.6,0.7,6,8,11.1,12.9,15.1,15.7,16.5,16.6,15.9,15.5,14.9,10.8,5.3,-0.2,-0.4,-10.5,-3.1,-27.5,2,-35,-2.2,-36,-8.7,-36.8,-15.6,-34.9,-17.7,-34.3,-17.5,-34.8,-16.4,-34.4,-17,-31,-18.8,-27.4,-21.1,-24.4,-21.5,-21.6,-20.7,-18.5,-17.3,-13.5,-8,-5.4,-0.7,2.6,6.4,8.8,11.5,13.5,15.1,16.2,16.5,16.2,15.7,15.5,14.1,9.6,4.3,1.6,-5.3,-2.1,-18.4,0,-32.2,-4.7,-35.7,-10.9,-36,-15.9,-34.4,-17.2,-34.6,-16.5]}};
+  // POSISI_KAMERA: kolom posisiX,posisiY sesi Kamera pada lintasan Zigzag, 301 baris.
+  const POSISI_KAMERA = '140.2,0.2 142.9,3.5 144.8,7.2 146.8,10.8 147.9,13.9 149,16.2 149.3,17.5 150,19.4 150.3,20.6 150.9,22.5 151.2,23.8 151.8,25.9 151.9,27.5 152.5,30 152.6,31.9 153,35.1 152.9,37.5 153.1,41.4 152.8,44.2 152.4,48.1 151.5,51.3 150.5,55.2 149.1,58.3 147.4,62.1 145.4,65.1 143.1,68.6 140.3,71.7 137.3,74.6 134,77.3 130.6,79.7 127,81.8 123.2,83.7 119.3,85.3 115.3,86.6 111.3,87.7 107.2,88.5 103,89.2 98.9,89.8 94.7,90.5 90.6,91.2 86.5,92 82.4,93 78.4,94.2 74.4,95.7 70.6,97.3 66.8,99.3 63.3,101.5 59.8,103.9 56.6,106.6 53.5,109.4 50.6,112.5 47.9,115.7 45.3,119 42.8,122.4 40.3,125.7 37.6,129 34.9,132.2 31.9,135.1 28.9,138 25.5,140.5 22.2,143.1 18.5,145.1 15.1,147.2 11.9,148.6 8.2,150.2 4.8,151.2 0.8,152.4 -3.1,152.8 -7.2,153.2 -11.2,153 -15.4,152.6 -19.5,151.6 -23.5,150.4 -27.3,148.8 -31.1,146.9 -34.6,144.6 -38,142.1 -41.1,139.4 -44.1,136.3 -46.8,133.2 -49.3,129.8 -51.6,126.3 -53.7,122.7 -55.8,119 -57.9,115.3 -60,111.7 -62.3,108.2 -64.7,104.8 -67.3,101.5 -70.1,98.3 -73.1,95.4 -76.2,92.6 -79.6,90 -83.1,87.7 -86.7,85.6 -90.5,83.8 -94.3,82.1 -98.2,80.6 -102.2,79.2 -106.2,77.8 -110.1,76.4 -114,74.7 -117.8,73 -121.4,70.9 -125,68.7 -128.3,66.1 -131.7,63.6 -134.6,60.6 -137.5,57.7 -139.9,54.4 -142.4,51.2 -144.2,47.9 -146.2,44.3 -147.4,40.7 -148.8,36.8 -149.4,32.9 -150,28.7 -150,24.6 -149.8,20.4 -149.1,16.2 -148.1,12.2 -146.8,8.2 -145.2,4.3 -143.3,0.6 -141.1,-3 -138.7,-6.5 -136.1,-9.8 -133.4,-13 -130.5,-16.1 -127.7,-19.2 -125,-22.3 -122.3,-25.6 -119.8,-28.9 -117.4,-32.4 -115.3,-36 -113.4,-39.8 -111.7,-43.6 -110.3,-47.6 -109.1,-51.6 -108.3,-55.7 -107.6,-59.9 -107.2,-64.1 -107,-68.3 -106.9,-72.5 -106.8,-76.6 -106.7,-80.8 -106.4,-85 -105.8,-89.2 -105.1,-93.3 -104,-97.4 -102.8,-101.4 -101.1,-105.2 -99.5,-109.1 -97.3,-112.7 -95.2,-116.2 -93,-119 -90.4,-122.3 -87.8,-124.8 -84.7,-127.6 -81.6,-129.7 -78,-131.9 -74.3,-133.5 -70.4,-135 -66.3,-136 -62.2,-136.8 -58,-137.2 -53.8,-137.2 -49.7,-136.9 -45.5,-136.3 -41.4,-135.4 -37.4,-134.2 -33.4,-132.8 -29.6,-131.1 -25.7,-129.4 -21.9,-127.7 -18,-126 -14.1,-124.5 -10.2,-123.1 -6.2,-121.9 -2.1,-120.9 2.1,-120.2 6.2,-119.7 10.4,-119.6 14.6,-119.7 18.8,-120.1 23,-120.7 27.1,-121.6 31.1,-122.7 35.2,-123.9 39.2,-125.1 43.2,-126.2 47.3,-127.3 51.4,-128 55.4,-128.8 58.6,-129 60.9,-129.3 62.4,-129.3 64.4,-129.5 66,-129.5 69,-129.6 71.5,-129.3 75.5,-129.1 79,-128.3 83.1,-127.4 87,-125.9 90.8,-124.2 94.4,-122 97.9,-119.7 100.9,-116.8 103.9,-113.9 106.4,-110.6 108.8,-107.1 110.7,-103.4 112.4,-99.6 113.8,-95.6 114.9,-91.5 115.7,-87.4 116.1,-83.2 116.3,-79 116.2,-74.8 115.9,-70.7 115.4,-66.5 114.9,-62.3 114.5,-58.1 114.1,-54 113.9,-49.8 113.9,-45.6 114.1,-41.4 114.6,-37.2 115.3,-33.1 116.3,-29 117.6,-25 119.2,-21.1 121,-17.3 122.9,-13.6 125.1,-10 127.5,-6.5 129.9,-3.1 132.3,0.4 134.5,3.9 136.8,7.5 138.6,11.3 140.5,14.8 141.5,17.6 142.6,19.7 143,21.2 143.9,23.4 144.4,25.5 145.6,29.2 146.1,32.2 146.8,36.3 146.8,40.4 146.8,44.6 146.1,48.7 145.2,52.9 143.8,56.8 142.2,60.7 140,64.2 137.7,67.7 135,70.9 132.1,74 129,76.7 125.6,79.2 122,81.4 118.3,83.3 114.4,85 110.5,86.4 106.4,87.6 102.3,88.5 98.2,89.3 94.1,90.1 90,91 85.9,92 81.9,93.1 77.9,94.4 74,96 70.1,97.7 66.5,99.8 62.9,102 59.6,104.5 56.3,107.2 53.3,110.1 50.4,113.2 47.7,116.4 45.2,119.7 42.7,123.1 40.1,126.4 37.5,129.7 34.6,132.8 31.8,135.9 28.5,138.5 25.7,141.2 23.4,142.8 20.9,144.9 18.6,146.2 15.2,148.4 12.1,149.9 8.3,151.6 4.2,152.7 0.2,153.7 -4,154';
+  // BARIS_CSV: baris asli dari output/deck-lab16/contoh-zigzag.csv (fungsi buatCSV).
+  const BARIS_CSV = ["waktu,mode,lintasan,error,posisiX,posisiY,keluarJalur","0.01,photodiode,zigzag,-20.33,140.2,0.2,0","0.11,photodiode,zigzag,0.21,142.8,3.6,0","0.21,photodiode,zigzag,-22.21,145.3,7.0,0","30.01,photodiode,zigzag,-26.39,-35.2,149.9,0","0.01,kamera,zigzag,-29.38,140.2,0.2,0","0.11,kamera,zigzag,-16.08,142.9,3.5,0","30.01,kamera,zigzag,-16.53,-4.0,154.0,0","RINGKASAN,,,rata-rata error absolut 16.73,,,jumlah sampel 602"];
+  /*__AKHIR_DATA__*/
+
+  // ===== SLIDE 3. Dua pasang sesi pada skala yang sama, 0 sampai 25, 16 px per satuan =====
+  const BANDING = {
+    tidakAdil: [{label: 'Photodiode, Halus, 20%', nilai: 2.89, warna: 'var(--teks)', kelas: ''}, {label: 'Kamera, Zigzag, 70%', nilai: 24.63, warna: 'var(--oranye)', kelas: 'oranye'}],
+    adil: [{label: 'Photodiode, Zigzag, 35%', nilai: 16.58, warna: 'var(--teks)', kelas: ''}, {label: 'Kamera, Zigzag, 35%', nilai: 16.89, warna: 'var(--oranye)', kelas: 'oranye'}],
+  };
+  function gambarBanding(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const X = (v) => 20 + v * 16;
+    const [a, b] = BANDING[svg.dataset.kasus];
+    const baris = [...[a, b].map((s) => ({...s, x0: X(0), x1: X(s.nilai), teks: koma(s.nilai, 2)})),
+      {label: 'Selisih', x0: X(Math.min(a.nilai, b.nilai)), x1: X(Math.max(a.nilai, b.nilai)), warna: 'var(--teks-lembut)', kelas: 'lembut', teks: koma(Math.abs(b.nilai - a.nilai), 2)}];
+    baris.forEach((r, i) => {
+      const y = 44 + i * 84;
+      add('text', {x: 20, y}, r.label);
+      add('text', {x: 470, y, 'text-anchor': 'end', 'font-weight': 700, class: r.kelas}, r.teks);
+      add('rect', {x: r.x0.toFixed(1), y: y + 14, width: Math.max(2, r.x1 - r.x0).toFixed(1), height: 22, rx: 3, fill: r.warna});
+    });
+    add('path', {d: 'M20 296 H420', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    for (const v of [0, 5, 10, 15, 20, 25]) {
+      add('path', {d: 'M' + X(v) + ' 290 V296', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+      add('text', {x: X(v), y: 318, 'text-anchor': 'middle', class: 'label-kecil lembut'}, String(v));
+    }
+    add('text', {x: 420, y: 344, 'text-anchor': 'end', class: 'label-kecil'}, 'Rata-rata error absolut');
+  }
+  document.querySelectorAll('.banding').forEach(gambarBanding);
+
+  // ===== SLIDE 4. Cuplikan berkas CSV. Setiap sel diambil dari baris berkas asli tanpa diubah =====
+  (function isiTabelCsv(tabel) {
+    const [kepala, p1, p2, p3, pAkhir, k1, k2, kAkhir, ringkasan] = BARIS_CSV;
+    const tr = (induk) => induk.appendChild(document.createElement('tr'));
+    const sel = (baris, tag, teks, kelas, rentang) => {
+      const node = baris.appendChild(document.createElement(tag));
+      node.textContent = teks;
+      if (kelas) node.className = kelas;
+      if (rentang) for (const [k, v] of Object.entries(rentang)) node.setAttribute(k, v);
+      return node;
+    };
+    const kurung = (baris, judul, isi, kelas, jumlahBaris) => {
+      const node = sel(baris, 'td', '', 'kurung ' + kelas, {rowspan: jumlahBaris});
+      node.append(Object.assign(document.createElement('strong'), {textContent: judul}), document.createElement('br'), isi);
+    };
+    const thead = tabel.appendChild(document.createElement('thead'));
+    const barisKepala = tr(thead);
+    kepala.split(',').forEach((t) => sel(barisKepala, 'th', t));
+    sel(barisKepala, 'th', '');
+    const tbody = tabel.appendChild(document.createElement('tbody'));
+    const barisData = (teks) => {
+      const b = tr(tbody);
+      teks.split(',').forEach((t, i) => sel(b, 'td', t, i === 1 && t === 'kamera' ? 'mode-kamera' : ''));
+      return b;
+    };
+    const barisLompat = (teks) => { const b = tr(tbody); sel(b, 'td', teks, 'lompat', {colspan: 7}); return b; };
+    kurung(barisData(p1), 'Sesi Photodiode', '301 baris', '', 5);
+    barisData(p2); barisData(p3); barisLompat('297 baris lain'); barisData(pAkhir);
+    kurung(barisData(k1), 'Sesi Kamera', '301 baris', 'kamera', 4);
+    barisData(k2); barisLompat('298 baris lain'); barisData(kAkhir);
+    // Baris RINGKASAN. Sel ke-4 memuat teks panjang, ditampilkan melebar ke kolom kosong seperti pada spreadsheet.
+    const r = ringkasan.split(',');
+    const b = tr(tbody);
+    sel(b, 'td', r[0]); sel(b, 'td', r[1]); sel(b, 'td', r[2]);
+    sel(b, 'td', r[3], '', {colspan: 3});
+    sel(b, 'td', r[6]);
+    kurung(b, 'Baris ringkasan', 'Rata-rata semua sesi', 'gabungan', 1);
+  })(document.getElementById('tabelCsv'));
+
+  // ===== R8. Badan robot, bentuk mengikuti render/lintasanView.js dan deck-lab11.html. Robot menghadap sumbu x positif =====
+  function gambarBadanRobot(induk, cx, cy, K) {
+    const isi = (tag, attr) => induk.appendChild(elemen(tag, attr));
+    const j = ROBOT_JEJARI * K, sumbu = (ROBOT_LEBAR_RODA / 2 + 4) * K;
+    for (const dy of [-sumbu, sumbu]) isi('rect', {x: (cx - j / 2).toFixed(1), y: (cy + dy - 4 * K).toFixed(1), width: j.toFixed(1), height: (8 * K).toFixed(1), rx: 6, fill: 'var(--robot-roda)'});
+    isi('rect', {x: (cx - j).toFixed(1), y: (cy - j * 0.7).toFixed(1), width: (j * 2).toFixed(1), height: (j * 1.4).toFixed(1), rx: 18, fill: 'var(--oranye-muda)', stroke: 'var(--oranye)', 'stroke-width': 3});
+    isi('path', {d: 'M' + (cx + j * 0.3).toFixed(1) + ' ' + (cy - j * 0.35).toFixed(1) + ' L' + (cx + j * 0.9).toFixed(1) + ' ' + cy.toFixed(1) + ' L' + (cx + j * 0.3).toFixed(1) + ' ' + (cy + j * 0.35).toFixed(1) + ' Z', fill: 'var(--oranye)'});
+  }
+
+  // ===== SLIDE 5. Lintasan Zigzag utuh dan titik posisi dari CSV sesi Kamera =====
+  // Pemetaan. X = 270 + 1,1 × x dan Y = 205 − 1,1 × y, karena sumbu y simulator mengarah ke atas.
+  (function gambarPosisi(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const K = 1.1, X = (x) => 270 + K * x, Y = (y) => 205 - K * y;
+    // Garis lintasan dari rumus engine/lintasan.js buatLintasanZigzag, r = 140 + 32 sin(5θ), 96 titik, tertutup.
+    const titikLintasan = [];
+    for (let i = 0; i < 96; i++) {
+      const s = 2 * Math.PI * i / 96, r = 140 + 32 * Math.sin(5 * s);
+      titikLintasan.push(X(r * Math.cos(s)).toFixed(1) + ' ' + Y(r * Math.sin(s)).toFixed(1));
+    }
+    // Sumbu koordinat simulator sebagai bingkai grafik.
+    add('path', {d: 'M60 14 V408 H480', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    for (const v of [-150, 0, 150]) {
+      add('path', {d: 'M60 ' + Y(v).toFixed(1) + ' H66', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+      add('text', {x: 50, y: (Y(v) + 6).toFixed(1), 'text-anchor': 'end', class: 'label-kecil lembut'}, koma(v, 0));
+      add('path', {d: 'M' + X(v).toFixed(1) + ' 402 V408', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+      add('text', {x: X(v).toFixed(1), y: 432, 'text-anchor': 'middle', class: 'label-kecil lembut'}, koma(v, 0));
+    }
+    add('text', {x: 496, y: 414, class: 'label-kecil'}, 'Kolom posisiX');
+    add('text', {x: 76, y: 22, class: 'label-kecil'}, 'Kolom posisiY');
+    add('path', {d: 'M' + titikLintasan.join(' L') + ' Z', fill: 'none', stroke: 'var(--lintasan)', 'stroke-width': (LEBAR_GARIS_LINTASAN * K).toFixed(1), 'stroke-linejoin': 'round'});
+    // Titik posisi, satu titik untuk satu baris CSV.
+    const titik = POSISI_KAMERA.split(' ').map((p) => p.split(',').map(Number)).map(([x, y]) => [X(x), Y(y)]);
+    titik.forEach(([x, y]) => add('circle', {cx: x.toFixed(1), cy: y.toFixed(1), r: 3.5, fill: 'var(--oranye)'}));
+    // Penanda awal dan akhir sesi.
+    const [xa, ya] = titik[0], [xb, yb] = titik[titik.length - 1];
+    add('circle', {cx: xa.toFixed(1), cy: ya.toFixed(1), r: 9, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 3});
+    add('rect', {x: (xb - 8).toFixed(1), y: (yb - 8).toFixed(1), width: 16, height: 16, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 3});
+    // Keterangan.
+    add('circle', {cx: 512, cy: 150, r: 4, fill: 'var(--oranye)'});
+    add('text', {x: 530, y: 156, class: 'label-kecil'}, 'Satu baris CSV');
+    add('circle', {cx: 512, cy: 192, r: 9, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 3});
+    add('text', {x: 530, y: 198, class: 'label-kecil'}, 'Awal, 0,01 s');
+    add('rect', {x: 504, y: 226, width: 16, height: 16, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 3});
+    add('text', {x: 530, y: 240, class: 'label-kecil'}, 'Akhir, 30,01 s');
+    // Bayangan robot menyusuri titik posisi. Digambar berpusat di 0,0 lalu dibawa oleh offset-path.
+    const hantu = add('g', {class: 'hantu', 'aria-hidden': 'true'});
+    gambarBadanRobot(hantu, 0, 0, K);
+    hantu.style.setProperty('offset-path', "path('M" + titik.map(([x, y]) => x.toFixed(1) + ' ' + y.toFixed(1)).join(' L') + "')");
+  })(document.getElementById('gambarPosisi'));
+
+  // ===== SLIDE 6. Error terhadap waktu, dua mode, tiga lintasan =====
+  // Pemetaan x(t) = 68 + t ÷ 30 × 572 dan y(e) = 155 − 2,3 × e. Skala sama untuk ketiga lintasan.
+  const NAMA_LINTASAN = {belokanHalus: 'Halus', tajam: 'Tajam', zigzag: 'Zigzag'};
+  const RATA = {belokanHalus: [5.88, 6.01], tajam: [7.92, 8.60], zigzag: [16.58, 16.89]};
+  const URAI = {
+    belokanHalus: 'Error bernilai nol di ruas lurus dan naik sampai sekitar 16 di setiap tikungan. Kedua kurva hampir berimpit.',
+    tajam: 'Error melonjak di setiap tikungan tajam, dengan puncak 30,2 pada Photodiode dan 27,8 pada Kamera.',
+    zigzag: 'Error sebagian besar negatif dan bergetar antarsampel. Nilai terendah −38,8 dan −42,2.',
+  };
+  const grafikError = document.getElementById('grafikError');
+  function tampilNilai(nama) {
+    grafikError.replaceChildren();
+    const add = (tag, attr, isi) => grafikError.appendChild(elemen(tag, attr, isi));
+    const x = (t) => 68 + t / 30 * 572, y = (e) => 155 - 2.3 * e;
+    add('text', {x: 4, y: 22, 'font-size': 19}, 'Error');
+    add('path', {d: 'M390 16 H420', fill: 'none', stroke: 'var(--teks)', 'stroke-width': 4, 'stroke-linecap': 'round'});
+    add('text', {x: 430, y: 22, class: 'label-kecil'}, 'Photodiode');
+    add('path', {d: 'M550 16 H580', fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linecap': 'round'});
+    add('text', {x: 590, y: 22, class: 'label-kecil'}, 'Kamera');
+    add('path', {d: 'M68 40 H640 M68 270 H640', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    add('path', {d: 'M68 34 V270 H648', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    add('path', {d: 'M68 155 H640', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-dasharray': '8 6'});
+    for (const v of [50, 0, -50]) add('text', {x: 52, y: y(v) + 6, 'text-anchor': 'end', class: 'label-kecil lembut'}, koma(v, 0));
+    const kurva = (data, warna) => add('path', {d: 'M' + data.map((e, i) => x(0.01 + i * SELANG_LOG).toFixed(1) + ' ' + y(e).toFixed(1)).join(' L'), fill: 'none', stroke: warna, 'stroke-width': 3, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+    kurva(ERROR_SESI[nama].photodiode, 'var(--teks)');
+    kurva(ERROR_SESI[nama].kamera, 'var(--oranye)');
+    for (const t of [0, 10, 20, 30]) add('text', {x: x(t).toFixed(1), y: 294, 'text-anchor': 'middle', class: 'label-kecil'}, String(t));
+    add('text', {x: 640, y: 322, 'text-anchor': 'end', class: 'label-kecil'}, 'Waktu (s)');
+
+    document.getElementById('nilaiKini').textContent = NAMA_LINTASAN[nama];
+    document.getElementById('uraiKini').textContent = URAI[nama];
+    document.getElementById('rataPhotodiode').textContent = koma(RATA[nama][0], 2);
+    document.getElementById('rataKamera').textContent = koma(RATA[nama][1], 2);
+    document.querySelectorAll('[data-nilai]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.nilai === nama)));
+    grafikError.setAttribute('aria-label', 'Error terhadap waktu selama satu sesi 30 detik pada lintasan ' + NAMA_LINTASAN[nama] + ', pengaturan awal simulator. Kurva gelap Photodiode dan kurva oranye Kamera. ' + URAI[nama] + ' Rata-rata error absolut ' + koma(RATA[nama][0], 2) + ' dan ' + koma(RATA[nama][1], 2) + '.');
+  }
+  document.querySelectorAll('[data-nilai]').forEach((b) => b.addEventListener('click', () => tampilNilai(b.dataset.nilai)));
+  tampilNilai('tajam');
+
+  // ===== SLIDE 7. Rata-rata error absolut terhadap kecepatan dasar, lintasan Halus =====
+  // Pemetaan x(v) = 68 + (v − 30) ÷ 70 × 572 dan y(e) = 295 − e ÷ 40 × 232.
+  (function gambarKecepatan(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const x = (v) => 68 + (v - 30) / 70 * 572, y = (e) => 295 - e / 40 * 232;
+    const PHOTODIODE = [[35, 5.88], [50, 9.42], [70, 14.13], [85, 18.91]];
+    const KAMERA = [[35, 6.01], [50, 9.15], [70, 12.54], [85, 18.29], [100, 33.17]];
+    const BERHENTI = [100, 12.81];   // sesi Photodiode berhenti pada 5,41 s, 55 baris
+    add('text', {x: 4, y: 24, 'font-size': 19}, 'Rata-rata error absolut');
+    add('path', {d: 'M300 58 H330', fill: 'none', stroke: 'var(--teks)', 'stroke-width': 4, 'stroke-linecap': 'round'});
+    add('text', {x: 340, y: 64, class: 'label-kecil'}, 'Photodiode');
+    add('path', {d: 'M300 90 H330', fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linecap': 'round'});
+    add('text', {x: 340, y: 96, class: 'label-kecil'}, 'Kamera');
+    add('path', {d: 'M68 63 H650 M68 179 H650', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    add('path', {d: 'M68 48 V295 H658', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    for (const v of [40, 20, 0]) add('text', {x: 52, y: y(v) + 6, 'text-anchor': 'end', class: 'label-kecil lembut'}, String(v));
+    const garis = (data, warna) => add('path', {d: 'M' + data.map(([v, e]) => x(v).toFixed(1) + ' ' + y(e).toFixed(1)).join(' L'), fill: 'none', stroke: warna, 'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+    garis(PHOTODIODE, 'var(--teks)');
+    garis(KAMERA, 'var(--oranye)');
+    PHOTODIODE.forEach(([v, e]) => add('circle', {cx: x(v).toFixed(1), cy: y(e).toFixed(1), r: 7, fill: 'var(--teks)', stroke: 'var(--putih)', 'stroke-width': 3}));
+    KAMERA.forEach(([v, e]) => add('circle', {cx: x(v).toFixed(1), cy: y(e).toFixed(1), r: 7, fill: 'var(--oranye)', stroke: 'var(--putih)', 'stroke-width': 3}));
+    add('circle', {cx: x(BERHENTI[0]).toFixed(1), cy: y(BERHENTI[1]).toFixed(1), r: 7, fill: 'var(--merah)', stroke: 'var(--putih)', 'stroke-width': 3});
+    add('text', {x: 624, y: 258, 'text-anchor': 'end', class: 'label-kecil merah', 'font-weight': 700}, 'Berhenti pada 5,41 s');
+    add('text', {x: 624, y: 94, 'text-anchor': 'end', 'font-weight': 700, class: 'oranye'}, '33,17');
+    for (const v of [35, 50, 70, 85, 100]) add('text', {x: x(v).toFixed(1), y: 326, 'text-anchor': 'middle', class: 'label-kecil'}, v + '%');
+    add('text', {x: 650, y: 363, 'text-anchor': 'end', class: 'label-kecil'}, 'Kecepatan dasar');
+  })(document.getElementById('grafikKecepatan'));
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

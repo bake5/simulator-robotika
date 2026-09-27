@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 7. Array 8 Photodiode</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK. Pakai apa adanya ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P5 grafik interaktif dan rumus */
+.rumus{font-size:29px;font-weight:700;line-height:1.5;margin-top:20px}
+.baris-rumus{display:flex;align-items:center;gap:16px;margin-top:8px}.fraksi{display:inline-flex;flex-direction:column;text-align:center;min-width:166px;font-size:22px}.fraksi span:first-child{border-bottom:2px solid var(--teks);padding:0 5px 5px}.fraksi span:last-child{padding-top:5px}
+.pilihan{display:flex;gap:14px;margin-top:27px}
+.pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+/* P6 grafik data dan tabel */
+.tabel{width:100%;border-collapse:collapse;font-size:21px;margin-top:25px}
+.tabel th{font-size:15px;line-height:1.5;color:var(--teks-lembut);font-weight:600;text-align:left;padding:0 0 16px}
+.tabel td{border-top:1px solid var(--abu-garis);padding:19px 0}
+.tabel td:first-child{font-weight:700}.tabel td:last-child{text-align:right}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI ===== */
+.rumus .hasil-rumus{font-size:24px;font-weight:400;margin-top:10px}
+.tabel td{white-space:nowrap}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 7, Array 8 Photodiode">
+
+<!-- SLIDE 1. P1 pembuka -->
+<section class="slide aktif" aria-labelledby="judul1">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 7 · Modul 2</p>
+      <h1 id="judul1">Larik<br><span class="oranye">sensor</span></h1>
+      <p class="ringkas">Menghitung posisi garis dari delapan bacaan sensor.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Larik sensor adalah delapan photodiode yang dipasang berjajar dengan jarak sama.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Bacaan delapan sensor sekaligus</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Diagram batang bacaan ADC delapan sensor pada simulator saat garis berada di bawah sensor S6. Sensor S0 sampai S5 dan S7 membaca 890. Sensor S6 membaca 182. Semua batang memakai skala yang sama.">
+        <text x="0" y="24" class="label-kecil lembut">Bacaan ADC</text>
+        <path d="M40 200 H660" stroke="var(--teks-lembut)" stroke-width="2"/>
+        <rect x="39" y="69.5" width="46" height="130.5" rx="3" fill="var(--teks-lembut)"/><text x="62" y="58" text-anchor="middle" font-weight="700">890</text><text x="62" y="230" text-anchor="middle" class="label-kecil lembut">S0</text>
+        <rect x="121" y="69.5" width="46" height="130.5" rx="3" fill="var(--teks-lembut)"/><text x="144" y="58" text-anchor="middle" font-weight="700">890</text><text x="144" y="230" text-anchor="middle" class="label-kecil lembut">S1</text>
+        <rect x="203" y="69.5" width="46" height="130.5" rx="3" fill="var(--teks-lembut)"/><text x="226" y="58" text-anchor="middle" font-weight="700">890</text><text x="226" y="230" text-anchor="middle" class="label-kecil lembut">S2</text>
+        <rect x="285" y="69.5" width="46" height="130.5" rx="3" fill="var(--teks-lembut)"/><text x="308" y="58" text-anchor="middle" font-weight="700">890</text><text x="308" y="230" text-anchor="middle" class="label-kecil lembut">S3</text>
+        <rect x="367" y="69.5" width="46" height="130.5" rx="3" fill="var(--teks-lembut)"/><text x="390" y="58" text-anchor="middle" font-weight="700">890</text><text x="390" y="230" text-anchor="middle" class="label-kecil lembut">S4</text>
+        <rect x="449" y="69.5" width="46" height="130.5" rx="3" fill="var(--teks-lembut)"/><text x="472" y="58" text-anchor="middle" font-weight="700">890</text><text x="472" y="230" text-anchor="middle" class="label-kecil lembut">S5</text>
+        <rect x="531" y="173.3" width="46" height="26.7" rx="3" fill="var(--oranye)"/><text x="554" y="162" text-anchor="middle" font-weight="700" class="oranye">182</text><text x="554" y="230" text-anchor="middle" class="label-kecil oranye">S6</text>
+        <rect x="613" y="69.5" width="46" height="130.5" rx="3" fill="var(--teks-lembut)"/><text x="636" y="58" text-anchor="middle" font-weight="700">890</text><text x="636" y="230" text-anchor="middle" class="label-kecil lembut">S7</text>
+        <text x="0" y="269" class="label-kecil lembut">Nilai ADC pada simulator Lab 7</text>
+      </svg>
+      <p class="simpulan-visual">Tujuh sensor membaca 890 dan satu sensor membaca 182. Letak bacaan rendah pada larik menunjukkan letak garis.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. P3 struktur larik -->
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Susunan larik sensor</p><h2 id="judul2">Delapan sensor dan indeksnya</h2></header>
+  <div class="isi terbagi">
+    <svg class="larik" data-mode="struktur" data-geser="0" viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Delapan sensor S0 sampai S7 berjajar di atas permukaan putih dengan garis hitam di tengah larik. Jarak antarsensor 20 satuan, lebar garis 24 satuan. S3 dan S4 membaca 182, sensor lain membaca 890."></svg>
+    <div class="teks-samping">
+      <h3>Indeks 0 di kiri dan indeks 7 di kanan.</h3>
+      <p>Jarak antarsensor 20 satuan dan lebar garis 24 satuan. Garis menutupi paling banyak dua sensor bersebelahan.</p>
+      <p class="catatan lembut">Satuan posisi adalah satuan model simulator, bukan milimeter. Tengah larik berada pada indeks 3,5.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3. P5 pola bacaan dengan tombol letak garis -->
+<section class="slide" aria-labelledby="judul3" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Pola bacaan larik</p><h2 id="judul3">Bacaan saat garis berpindah</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikBacaan" class="larik" data-mode="bacaan" data-geser="0" viewBox="0 0 700 380" width="700" height="380" role="img" aria-label="Garis di bawah S3 dan S4. Kedua sensor membaca 182, enam sensor lainnya membaca 890."></svg>
+      <div class="pilihan" role="group" aria-label="Pilih letak garis" style="margin-top:16px">
+        <button type="button" data-nilai="-50" aria-pressed="false">Kiri</button>
+        <button type="button" data-nilai="0" aria-pressed="true">Tengah</button>
+        <button type="button" data-nilai="50" aria-pressed="false">Kanan</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>Garis di bawah <span id="nilaiKini" class="oranye">S3 dan S4</span></h3>
+      <p id="uraiKini">Dua sensor bersebelahan membaca 182 dan enam sensor lainnya membaca 890. Bacaan rendah berada di tengah larik.</p>
+      <p class="catatan lembut">Jika semua sensor membaca 890, simulator menandai kemungkinan garis di luar jangkauan larik.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. P2 lebar penuh, dari bacaan ke bobot -->
+<section class="slide" aria-labelledby="judul4" hidden>
+  <header class="judul"><p class="kicker">Dari bacaan ke bobot</p><h2 id="judul4">Bobot kegelapan setiap sensor</h2></header>
+  <div class="isi">
+    <svg class="larik" data-mode="bobot" data-geser="50" viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Garis di bawah S6. Baris bacaan ADC menunjukkan 890 pada tujuh sensor dan 182 pada S6. Baris bobot menunjukkan 133 pada tujuh sensor dan 841 pada S6. Batang bobot S6 jauh lebih tinggi daripada batang lain."></svg>
+    <p class="catatan" style="margin-top:14px"><strong>Bobot = 1023 − bacaan ADC</strong><br><span class="lembut">Sensor di atas garis mendapat bobot 841, sensor di atas putih mendapat bobot 133.</span></p>
+    <p class="catatan lembut bawah">Sensor di atas putih membaca 890, bukan 1023, sehingga tetap memiliki bobot 133.</p>
+  </div>
+</section>
+
+<!-- SLIDE 5. P3 rata-rata berbobot -->
+<section class="slide" aria-labelledby="judul5" hidden>
+  <header class="judul"><p class="kicker">Rata-rata berbobot</p><h2 id="judul5">Posisi garis dari bobot sensor</h2></header>
+  <div class="isi terbagi">
+    <svg class="larik" data-mode="posisi" data-geser="50" viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Garis di bawah S6. Baris bobot berisi 133 pada tujuh sensor dan 841 pada S6. Baris i kali bobot berisi 0, 133, 266, 399, 532, 665, 5046, dan 931. Penanda hijau pada penggaris indeks menunjukkan posisi 4,50, di kanan tengah larik 3,5."></svg>
+    <div class="teks-samping">
+      <h3>Titik berat bobot berada pada indeks 4,50.</h3>
+      <div class="rumus" aria-label="Posisi indeks sama dengan jumlah i kali bobot dibagi jumlah bobot, yaitu 7972 dibagi 1772 sama dengan 4,50">posisiIndeks =<div class="baris-rumus"><span class="fraksi"><span class="oranye">Σ(i × bobot)</span><span>Σ(bobot)</span></span></div><div class="hasil-rumus">= 7972 ÷ 1772 = <span class="oranye">4,50</span></div></div>
+      <p>Bobot 841 pada S6 menarik hasil ke kanan. Bobot 133 dari tujuh sensor putih menahan hasil di dekat tengah.</p>
+      <p class="catatan lembut" style="margin-top:14px">Posisi berupa pecahan.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6. P4 tanda error pada dua sisi -->
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Posisi garis terhadap tengah larik</p><h2 id="judul6">Tanda error pada dua sisi</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Garis di kiri</h3>
+        <svg class="larik" data-mode="error" data-geser="-50" viewBox="0 0 490 352" role="img" aria-label="Garis di bawah S1. S1 membaca 182, sensor lain membaca 890. Posisi 2,50 berada di kiri tengah larik 3,5. Error −28,5."></svg>
+        <p><strong>Posisi 2,50, di kiri tengah larik.</strong><br>Error bernilai negatif, yaitu −28,5.</p>
+      </div>
+      <div>
+        <h3>Garis di kanan</h3>
+        <svg class="larik" data-mode="error" data-geser="50" viewBox="0 0 490 352" role="img" aria-label="Garis di bawah S6. S6 membaca 182, sensor lain membaca 890. Posisi 4,50 berada di kanan tengah larik 3,5. Error 28,5."></svg>
+        <p><strong>Posisi 4,50, di kanan tengah larik.</strong><br>Error bernilai positif, yaitu 28,5.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7. P6 grafik error terhadap letak garis -->
+<section class="slide" aria-labelledby="judul7" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Hasil pada model simulator</p><h2 id="judul7">Rentang error yang tercapai</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikError" viewBox="0 0 700 375" width="700" height="375" role="img" aria-label="Grafik error terhadap letak garis dari S0 sampai S7 pada model simulator. Error −40,0 saat garis di bawah S0, 0,0 di tengah, dan 40,0 di bawah S7. Kurva melonjak sampai 48,9 saat garis menutupi S6 dan S7 sekaligus, lalu turun kembali."></svg>
+      <p class="catatan" style="margin-top:14px"><strong>Error = (posisi − 3,5) ÷ 3,5 × 100</strong><br><span class="lembut">Contoh (4,90 − 3,5) ÷ 3,5 × 100 = 40,0. Puncak 48,9 saat garis menutupi S6 dan S7.</span></p>
+    </div>
+    <div style="padding-top:8px">
+      <h3>Contoh pembacaan</h3>
+      <table class="tabel"><thead><tr><th>Letak<br>garis</th><th>Posisi<br>(indeks)</th><th style="text-align:right">Error</th></tr></thead><tbody>
+        <tr><td>Bawah S0</td><td>2,10</td><td>−40,0</td></tr>
+        <tr><td>Tengah</td><td>3,50</td><td>0,0</td></tr>
+        <tr><td>Bawah S7</td><td>4,90</td><td>40,0</td></tr>
+      </tbody></table>
+      <p class="catatan lembut" style="margin-top:26px">Sensor putih pada simulator membaca 890, bukan 1023, sehingga error ujung hanya ±40. Kalibrasi bacaan putih pada perangkat keras memperlebar rentang ini.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8. P7 kegiatan simulator -->
+<section class="slide" aria-labelledby="judul8" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 7</p><h2 id="judul8">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Pola bacaan</h3><p>Geser garis dari ujung kiri ke ujung kanan larik.<br>Amati batang yang turun pada diagram bacaan sensor.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Rumus posisi</h3><p>Aktifkan Tampilkan rumus. Cocokkan bobot, jumlah bobot,<br>posisi, dan error dengan bacaan pada diagram batang.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Kode Level 2</h3><p>Aktifkan kode hitungError(sensor) di dalam komentar.<br>Jalankan Uji 3 posisi sampai ketiga kasus lulus.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Garis telah digeser hingga batas kiri dan batas kanan.<br>Fungsi hitungError(sensor) telah lulus ketiga uji posisi.</p></div>
+  </div>
+</section>
+
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 7 · Array 8 photodiode</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 8</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab07-array-sensor.js, engine/rangkaian.js (buatArraySensor, hitungErrorReferensi,
+  // adcDariCahaya, fraksiHitamDariPosisi), render/rangkaianView.js (gambarArraySensor).
+  // Letak garis ditulis sebagai data-geser dalam satuan posisi, kanan positif, sama dengan arah pada kanvas
+  // simulator (garis digambar di x = cx − posisiGaris × skala, sehingga geser = −posisiGaris).
+  // Indeks 0 berada paling kiri. Label S0 sampai S7 mengikuti label batang pada kanvas.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+
+  // ===== Salinan rantai engine/rangkaian.js: posisi lokal → fraksi hitam → reflektansi → resistansi → ADC =====
+  const SENSOR_JUMLAH = 8, SENSOR_SPASI = 20, INDEKS_TENGAH = 3.5;       // SENSOR_JUMLAH, SENSOR_SPASI, INDEKS_TENGAH
+  const LEBAR_GARIS = 24, LEBAR_TRANSISI = 6;                            // LEBAR_GARIS, LEBAR_TRANSISI
+  const REFLEKTANSI_PUTIH = 99, REFLEKTANSI_HITAM = 8;                   // REFLEKTANSI_PUTIH, REFLEKTANSI_HITAM
+  const PD_R_MIN = 1000, PD_R_MAKS = 50000, PD_R_TETAP = 10000;          // PD_R_MIN, PD_R_MAKS, PD_R_TETAP
+  const TEGANGAN_SUMBER = 5, ADC_MAKS = 1023;                            // TEGANGAN_SUMBER, ADC_MAKS
+  const jepit = (nilai) => Math.max(0, Math.min(1, nilai));
+  function offsetSensor(i) { return (i - INDEKS_TENGAH) * SENSOR_SPASI; }
+  function fraksiHitamDariPosisi(posisiLokal) {
+    const masukDariKiri = jepit((posisiLokal - (-LEBAR_GARIS / 2 - LEBAR_TRANSISI)) / LEBAR_TRANSISI);
+    const belumKeluarKanan = jepit((LEBAR_GARIS / 2 + LEBAR_TRANSISI - posisiLokal) / LEBAR_TRANSISI);
+    return Math.min(masukDariKiri, belumKeluarKanan);
+  }
+  function adcDariPosisi(posisiLokal) {
+    const reflektansi = REFLEKTANSI_PUTIH - (REFLEKTANSI_PUTIH - REFLEKTANSI_HITAM) * fraksiHitamDariPosisi(posisiLokal);
+    const resistansi = PD_R_MAKS - (PD_R_MAKS - PD_R_MIN) * (reflektansi / 100);
+    const arus = TEGANGAN_SUMBER / (resistansi + PD_R_TETAP);
+    return Math.round((arus * PD_R_TETAP / TEGANGAN_SUMBER) * ADC_MAKS);
+  }
+  // Bacaan delapan sensor untuk garis pada letak geser. Sama dengan buatArraySensor().sensorADC pada posisiGaris = −geser.
+  function bacaanLarik(geser) {
+    const adc = [], bobot = [];
+    let totalBobot = 0, totalTertimbang = 0;
+    for (let i = 0; i < SENSOR_JUMLAH; i++) {
+      adc.push(adcDariPosisi(offsetSensor(i) - geser));
+      bobot.push(ADC_MAKS - adc[i]);
+      totalBobot += bobot[i];
+      totalTertimbang += i * bobot[i];
+    }
+    const posisi = totalTertimbang / totalBobot;   // hitungErrorReferensi
+    const error = (posisi - INDEKS_TENGAH) / INDEKS_TENGAH * 100;
+    return { adc, bobot, totalBobot, totalTertimbang, posisi, error, hilang: adc.every((a) => a > 600) };
+  }
+  function koma(nilai, digit) { return nilai.toFixed(digit).replace('.', ',').replace('-', '−'); }
+  const ADC_PUTIH = adcDariPosisi(100);   // 890
+
+  // ===== Larik 8 sensor di atas garis (R9). Satu fungsi, lima mode tata letak =====
+  // Semua angka dalam satuan viewBox. K = piksel per satuan posisi. permukaan = [x, y, lebar, tinggi].
+  const TATA = {
+    struktur: { K: 4, tengah: 350, yIndeks: 128, permukaan: [30, 150, 640, 140], kotak: 56, yKotak: 220, yAdc: 322,
+      garisTengah: [106, 296], yLabelTengah: 96, ukuran: true },
+    bacaan: { K: 4, tengah: 350, yIndeks: 66, permukaan: [30, 90, 640, 160], kotak: 56, yKotak: 170, yAdc: 282,
+      garisTengah: [44, 256], yLabelTengah: 32 },
+    bobot: { K: 5, tengah: 700, yIndeks: 28, permukaan: [290, 44, 820, 110], kotak: 70, yKotak: 99, yAdc: 194, yBobot: 246,
+      batangBobot: { dasar: 350, tinggi: 88, lebar: 56 }, xLabel: 40 },
+    posisi: { K: 3.6, tengah: 390, yIndeks: 62, permukaan: [100, 84, 580, 120], kotak: 50, yKotak: 144, yBobot: 250, yIB: 296,
+      penggaris: 340, yLabelPosisi: 376, garisTengah: [44, 350], yLabelTengah: 418, xLabel: 30 },
+    error: { K: 2.8, tengah: 245, yIndeks: 22, permukaan: [20, 36, 450, 100], kotak: 40, yKotak: 86, yAdc: 164,
+      penggaris: 204, yLabelPosisi: 232, kurung: [256, 268], yLabelError: 300, garisTengah: [36, 208], yLabelTengah: 334 },
+  };
+
+  function gambarLarik(svg) {
+    svg.replaceChildren();
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const t = TATA[svg.dataset.mode];
+    const geser = Number(svg.dataset.geser);
+    const data = bacaanLarik(geser);
+    const xSensor = (i) => t.tengah + offsetSensor(i) * t.K;
+    const xIndeks = (indeks) => t.tengah + (indeks - INDEKS_TENGAH) * SENSOR_SPASI * t.K;
+    const [px, py, pl, pt] = t.permukaan;
+    const xGaris = t.tengah + geser * t.K, lebarGaris = LEBAR_GARIS * t.K;
+    const gelap = (i) => data.adc[i] < ADC_PUTIH;
+
+    // 1. Permukaan putih, garis hitam, garis tengah larik.
+    add('rect', { x: px, y: py, width: pl, height: pt, rx: 12, fill: 'var(--putih)', stroke: 'var(--abu-garis)', 'stroke-width': 2 });
+    add('rect', { x: (xGaris - lebarGaris / 2).toFixed(1), y: py + 1, width: lebarGaris.toFixed(1), height: pt - 2, fill: 'var(--lintasan)' });
+    if (t.garisTengah) {
+      add('path', { d: 'M' + t.tengah + ' ' + t.garisTengah[0] + ' V' + t.garisTengah[1], fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-dasharray': '6 6' });
+      add('text', { x: t.tengah, y: t.yLabelTengah, 'text-anchor': 'middle', class: 'label-kecil lembut' }, t.yLabelTengah < py ? 'Tengah larik' : 'Tengah 3,5');
+    }
+    // 2. Kotak sensor, indeks di atas, nilai di bawah.
+    for (let i = 0; i < SENSOR_JUMLAH; i++) {
+      const x = xSensor(i), g = gelap(i), s = t.kotak;
+      add('text', { x, y: t.yIndeks, 'text-anchor': 'middle', class: g ? 'oranye' : 'lembut', 'font-weight': g ? 700 : 400 }, 'S' + i);
+      add('rect', { x: x - s / 2, y: t.yKotak - s / 2, width: s, height: s, rx: 6, fill: g ? 'var(--teks)' : 'var(--abu-garis)',
+        stroke: g ? 'var(--oranye)' : 'var(--teks-lembut)', 'stroke-width': g ? 3 : 2 });
+      if (t.yAdc) add('text', { x, y: t.yAdc, 'text-anchor': 'middle', class: g ? 'oranye' : 'lembut', 'font-weight': g ? 700 : 400 }, String(data.adc[i]));
+      if (t.yBobot) add('text', { x, y: t.yBobot, 'text-anchor': 'middle', class: g ? 'oranye' : '', 'font-weight': 700 }, String(data.bobot[i]));
+      if (t.yIB) add('text', { x, y: t.yIB, 'text-anchor': 'middle', class: g ? 'oranye' : 'lembut', 'font-weight': g ? 700 : 400 }, String(i * data.bobot[i]));
+      if (t.batangBobot) {
+        const b = t.batangBobot, tinggi = data.bobot[i] / ADC_MAKS * b.tinggi;
+        add('rect', { x: x - b.lebar / 2, y: (b.dasar - tinggi).toFixed(1), width: b.lebar, height: tinggi.toFixed(1), rx: 3, fill: g ? 'var(--oranye)' : 'var(--teks-lembut)' });
+      }
+    }
+    // 3. Label baris di kolom kiri.
+    if (t.xLabel) {
+      add('text', { x: t.xLabel, y: t.yIndeks, class: 'lembut' }, 'Indeks');
+      if (t.yAdc) add('text', { x: t.xLabel, y: t.yAdc }, 'Bacaan ADC');
+      if (t.yBobot) add('text', { x: t.xLabel, y: t.yBobot }, 'Bobot');
+      if (t.yIB) add('text', { x: t.xLabel, y: t.yIB }, 'i × bobot');
+    }
+    // 4. Kurung ukuran pada mode struktur: jarak antarsensor dan lebar garis.
+    if (t.ukuran) {
+      const yK = t.yAdc + 30, x5 = xSensor(5), x6 = xSensor(6);
+      add('path', { d: 'M' + x5 + ' ' + yK + ' V' + (yK + 12) + ' H' + x6 + ' V' + yK, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 2, 'stroke-linejoin': 'round' });
+      add('text', { x: (x5 + x6) / 2, y: yK + 42, 'text-anchor': 'middle' }, '20 satuan');
+      const g0 = (xGaris - lebarGaris / 2).toFixed(1), g1 = (xGaris + lebarGaris / 2).toFixed(1);
+      add('path', { d: 'M' + g0 + ' ' + yK + ' V' + (yK + 12) + ' H' + g1 + ' V' + yK, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 2, 'stroke-linejoin': 'round' });
+      add('text', { x: xGaris, y: yK + 42, 'text-anchor': 'middle' }, 'Garis 24 satuan');
+    }
+    // 5. Penggaris indeks dan penanda posisi hasil rata-rata berbobot (segitiga hijau seperti pada kanvas).
+    if (t.penggaris) {
+      const y = t.penggaris, xP = xIndeks(data.posisi);
+      add('path', { d: 'M' + xSensor(0) + ' ' + y + ' H' + xSensor(7), fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2 });
+      for (let i = 0; i < SENSOR_JUMLAH; i++) add('path', { d: 'M' + xSensor(i) + ' ' + (y - 5) + ' V' + (y + 5), fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2 });
+      add('path', { d: 'M' + xP.toFixed(1) + ' ' + y + ' L' + (xP - 9).toFixed(1) + ' ' + (y - 16) + ' H' + (xP + 9).toFixed(1) + ' Z', fill: 'var(--hijau)' });
+      add('text', { x: xP.toFixed(1), y: t.yLabelPosisi, 'text-anchor': 'middle', class: 'hijau', 'font-weight': 700 }, 'Posisi ' + koma(data.posisi, 2));
+      // 6. Kurung error dari tengah larik ke posisi.
+      if (t.kurung) {
+        const [k0, k1] = t.kurung;
+        add('path', { d: 'M' + t.tengah + ' ' + k0 + ' V' + k1 + ' H' + xP.toFixed(1) + ' V' + k0, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 2, 'stroke-linejoin': 'round' });
+        add('text', { x: ((t.tengah + xP) / 2).toFixed(1), y: t.yLabelError, 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:24px' }, 'Error ' + koma(data.error, 1));
+      }
+    }
+    return data;
+  }
+  document.querySelectorAll('.larik').forEach((svg) => gambarLarik(svg));
+
+  // ===== SLIDE 3. Tombol letak garis =====
+  const grafikBacaan = document.getElementById('grafikBacaan');
+  const URAIAN = {
+    '-50': { nama: 'S1', urai: 'Sensor S1 membaca 182 dan tujuh sensor lainnya membaca 890. Bacaan rendah berada di sisi kiri larik.' },
+    '0': { nama: 'S3 dan S4', urai: 'Dua sensor bersebelahan membaca 182 dan enam sensor lainnya membaca 890. Bacaan rendah berada di tengah larik.' },
+    '50': { nama: 'S6', urai: 'Sensor S6 membaca 182 dan tujuh sensor lainnya membaca 890. Bacaan rendah berada di sisi kanan larik.' },
+  };
+  function tampilNilai(geser) {
+    grafikBacaan.dataset.geser = String(geser);
+    const data = gambarLarik(grafikBacaan);
+    const u = URAIAN[String(geser)];
+    document.getElementById('nilaiKini').textContent = u.nama;
+    document.getElementById('uraiKini').textContent = u.urai;
+    document.querySelectorAll('.pilihan [data-nilai]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.nilai) === geser)));
+    grafikBacaan.setAttribute('aria-label', 'Garis di bawah ' + u.nama + '. Bacaan ADC dari S0 sampai S7 adalah ' + data.adc.join(', ') + '.');
+  }
+  document.querySelectorAll('.pilihan [data-nilai]').forEach((b) => b.addEventListener('click', () => tampilNilai(Number(b.dataset.nilai))));
+  tampilNilai(0);
+
+  // ===== SLIDE 7. Grafik error terhadap letak garis, dihitung dari salinan rantai engine (R5) =====
+  function gambarGrafikError(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const xDari = (g) => 68 + (g + 70) / 140 * 572;
+    const yDari = (e) => 179 - e / 50 * 116;
+    add('text', { x: 4, y: 24, style: 'font-size:19px' }, 'Error');
+    add('path', { d: 'M68 63 H650 M68 295 H650', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1 });
+    add('path', { d: 'M68 48 V310 M68 179 H658', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2 });
+    [[50, 70], [0, 186], [-50, 302]].forEach(([nilai, y]) => add('text', { x: 52, y, 'text-anchor': 'end', class: 'label-kecil lembut' }, koma(nilai, 0)));
+    let d = '';
+    let puncak = { error: 0, geser: 0 };
+    for (let g = -70; g <= 70; g += 1) {
+      const e = bacaanLarik(g).error;
+      d += (g === -70 ? 'M' : ' L') + xDari(g).toFixed(1) + ' ' + yDari(e).toFixed(1);
+      if (e > puncak.error) puncak = { error: e, geser: g };
+    }
+    add('path', { d, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+    [-70, 0, 70].forEach((g) => add('circle', { cx: xDari(g).toFixed(1), cy: yDari(bacaanLarik(g).error).toFixed(1), r: 7, fill: 'var(--oranye)', stroke: 'var(--putih)', 'stroke-width': 3 }));
+    for (let i = 0; i < SENSOR_JUMLAH; i++) {
+      const x = xDari(offsetSensor(i)).toFixed(1);
+      add('path', { d: 'M' + x + ' 310 V318', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2 });
+      add('text', { x, y: 340, 'text-anchor': 'middle', class: 'label-kecil' }, 'S' + i);
+    }
+    add('text', { x: 650, y: 372, 'text-anchor': 'end', class: 'label-kecil' }, 'Letak garis');
+    add('text', { x: xDari(puncak.geser).toFixed(1), y: 50, 'text-anchor': 'middle', 'font-weight': 700, class: 'oranye' }, koma(puncak.error, 1));
+    return puncak;
+  }
+  gambarGrafikError(document.getElementById('grafikError'));
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

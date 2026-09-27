@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 11. Kendali Proporsional, PD, PID</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK. Pakai apa adanya. Hapus pola yang tidak dipakai ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P2 diagram lebar penuh */
+.legend{display:flex;gap:28px;align-items:center;font-size:17px}.legend span{display:flex;gap:10px;align-items:center}.garis-legenda{width:34px;height:4px;background:var(--oranye)}.garis-legenda.sinyal{height:0;border-top:3px dashed var(--teks-lembut);background:none}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+.sisipan{border-top:1px solid var(--abu-garis);margin-top:28px;padding-top:22px}
+.peringatan{border-left:4px solid var(--merah);padding:0 0 0 24px;margin-top:30px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P5 grafik interaktif dan rumus */
+.rumus{font-size:29px;font-weight:700;line-height:1.5;margin-top:20px}
+.baris-rumus{display:flex;align-items:center;gap:16px;margin-top:8px}.fraksi{display:inline-flex;flex-direction:column;text-align:center;min-width:166px;font-size:22px}.fraksi span:first-child{border-bottom:2px solid var(--teks);padding:0 5px 5px}.fraksi span:last-child{padding-top:5px}
+.pilihan{display:flex;gap:14px;margin-top:27px}
+.pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+/* P6 grafik data dan tabel */
+.tabel{width:100%;border-collapse:collapse;font-size:21px;margin-top:25px}
+.tabel th{font-size:15px;line-height:1.5;color:var(--teks-lembut);font-weight:600;text-align:left;padding:0 0 16px}
+.tabel td{border-top:1px solid var(--abu-garis);padding:19px 0}
+.tabel td:first-child{font-weight:700}.tabel td:last-child{text-align:right}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI ===== */
+.garis-legenda.gelap{background:var(--teks)}
+.garis-legenda.pembanding{background:var(--teks-lembut)}
+.tabel td{white-space:nowrap}
+svg .hantu{opacity:0;pointer-events:none;offset-rotate:auto;animation:susurJejak 7s linear infinite}
+@keyframes susurJejak{
+0%{opacity:0;offset-distance:0%}
+6%{opacity:.55;offset-distance:0%}
+74%{opacity:.55;offset-distance:100%}
+86%{opacity:.55;offset-distance:100%}
+94%,100%{opacity:0;offset-distance:100%}
+}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 11, Kendali Proporsional, PD, PID">
+
+<!-- SLIDE 1. Pola P1 pembuka -->
+<section class="slide aktif" aria-labelledby="judul1" data-video="skip">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 11 · Modul 3</p>
+      <h1 id="judul1">Kendali<br><span class="oranye">PID</span></h1>
+      <p class="ringkas">Mengatur besar koreksi sesuai besar error.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Koreksi mengubah kecepatan kedua roda agar robot kembali ke garis.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Overshoot maksimum pada tiga nilai Kp</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Overshoot maksimum pada lintasan Halus simulator dengan Kd 0 dan Ki 0. Kp 0,1 menghasilkan 48,9 dan robot keluar lintasan. Kp 0,6 menghasilkan 16,3. Kp 3 menghasilkan 7,4. Batang menggunakan skala yang sama.">
+        <text x="0" y="30">Kp 0,1, robot keluar lintasan</text><text x="635" y="30" text-anchor="end" font-weight="700" class="merah">48,9</text>
+        <rect x="0" y="45" width="600" height="22" rx="3" fill="var(--merah)"/>
+        <text x="0" y="113">Kp 0,6</text><text x="635" y="113" text-anchor="end" font-weight="700" class="oranye">16,3</text>
+        <rect x="0" y="128" width="200" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="196">Kp 3</text><text x="635" y="196" text-anchor="end" font-weight="700" class="oranye">7,4</text>
+        <rect x="0" y="211" width="90.8" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="269" class="label-kecil lembut">Nilai pada lintasan Halus simulator</text>
+      </svg>
+      <p class="simpulan-visual">Koreksi kendali P sebanding dengan error. Nilai Kp menentukan seberapa jauh garis bergeser dari tengah larik sensor di tikungan.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. Pola P2 diagram lebar penuh -->
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Struktur kendali PID</p><h2 id="judul2">Tiga parameter dari satu nilai error</h2></header>
+  <div class="isi">
+    <svg viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Nilai error dari larik sensor masuk ke tiga blok sejajar. Blok P menghitung Kp kali error. Blok I menghitung Ki kali jumlah error kali dt. Blok D menghitung Kd kali perubahan error dibagi dt. Ketiga keluaran dijumlahkan menjadi koreksi. Roda kiri berputar sebesar kecepatan dasar ditambah koreksi, roda kanan sebesar kecepatan dasar dikurangi koreksi.">
+      <defs>
+        <marker id="panahSinyal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L8 5 L1 9" fill="none" stroke="var(--teks-lembut)" stroke-width="1.5"/></marker>
+      </defs>
+      <rect x="20" y="103" width="180" height="160" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="110" y="177" text-anchor="middle" font-size="24" font-weight="700">Error</text>
+      <text x="110" y="211" text-anchor="middle" class="label-kecil lembut">Dari larik sensor</text>
+      <path d="M200 183 H270 V66 H328" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" stroke-linejoin="round" marker-end="url(#panahSinyal)"/>
+      <path d="M200 183 H328" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <path d="M200 183 H270 V300 H328" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" stroke-linejoin="round" marker-end="url(#panahSinyal)"/>
+      <rect x="340" y="20" width="300" height="92" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="490" y="60" text-anchor="middle" font-size="24" font-weight="700">P = Kp × error</text>
+      <text x="490" y="92" text-anchor="middle" class="label-kecil lembut">Sebanding dengan error</text>
+      <rect x="340" y="137" width="300" height="92" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="490" y="177" text-anchor="middle" font-size="24" font-weight="700">I = Ki × Σ error·dt</text>
+      <text x="490" y="209" text-anchor="middle" class="label-kecil lembut">Menjumlahkan error</text>
+      <rect x="340" y="254" width="300" height="92" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="490" y="294" text-anchor="middle" font-size="24" font-weight="700">D = Kd × Δerror ÷ dt</text>
+      <text x="490" y="326" text-anchor="middle" class="label-kecil lembut">Laju perubahan error</text>
+      <path d="M640 66 H700 V183 H716" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" stroke-linejoin="round" marker-end="url(#panahSinyal)"/>
+      <path d="M640 183 H716" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <path d="M640 300 H700 V183 H716" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" stroke-linejoin="round" marker-end="url(#panahSinyal)"/>
+      <circle cx="760" cy="183" r="32" fill="var(--oranye-muda)" stroke="var(--oranye)" stroke-width="3"/>
+      <text x="760" y="195" text-anchor="middle" font-size="34" font-weight="700">Σ</text>
+      <path d="M792 183 H888" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <text x="840" y="166" text-anchor="middle" class="label-kecil">Koreksi</text>
+      <rect x="900" y="103" width="232" height="160" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="1016" y="160" text-anchor="middle" font-size="24" font-weight="700">Kecepatan roda</text>
+      <text x="1016" y="194" text-anchor="middle" class="label-kecil lembut">Kiri = dasar + koreksi</text>
+      <text x="1016" y="222" text-anchor="middle" class="label-kecil lembut">Kanan = dasar − koreksi</text>
+    </svg>
+    <p class="catatan lembut bawah">Nilai awal simulator Kp 0,6, Kd 0,15, dan Ki 0. Ketiga parameter dihitung 10 kali per detik dengan dt 0,1 s.</p>
+  </div>
+</section>
+
+<!-- SLIDE 3. Pola P3 visual kiri, teks kanan -->
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Parameter proporsional</p><h2 id="judul3">Selisih roda sebanding dengan error</h2></header>
+  <div class="isi terbagi">
+    <svg viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Grafik selisih kecepatan roda kiri dan kanan terhadap error pada kecepatan dasar 35 persen. Kendali P dengan Kp 0,6 berupa garis lurus dari minus 72 persen pada error minus 60 sampai 72 persen pada error 60. Pada error 16 selisihnya 19,2 persen. Kendali on-off berupa tangga bernilai minus 29,8 persen untuk error negatif dan 29,8 persen untuk error nol atau positif.">
+      <text x="4" y="24" font-size="19">Kecepatan kiri − kecepatan kanan (%)</text>
+      <g stroke="var(--abu-garis)" stroke-width="1"><path d="M82 182.5 H658 M82 250 H658 M82 317.5 H658"/></g>
+      <path d="M82 110 V385 H666" fill="none" stroke="var(--teks-lembut)" stroke-width="2"/>
+      <g class="lembut" text-anchor="end"><text x="66" y="121" class="label-kecil">80</text><text x="66" y="188.5" class="label-kecil">40</text><text x="66" y="256" class="label-kecil">0</text><text x="66" y="323.5" class="label-kecil">−40</text><text x="66" y="391" class="label-kecil">−80</text></g>
+      <path d="M82 300.2 H370 V199.8 H658" fill="none" stroke="var(--teks-lembut)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M82 371.5 L658 128.5" fill="none" stroke="var(--oranye)" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="446.8" cy="217.6" r="7" fill="var(--oranye)" stroke="var(--putih)" stroke-width="3"/>
+      <text x="462" y="245" font-weight="700" class="oranye">19,2%</text>
+      <text x="520" y="104" font-weight="700" class="oranye">Kp 0,6</text>
+      <text x="600" y="232" font-weight="700" class="lembut">On-off</text>
+      <g text-anchor="middle" font-size="17"><text x="82" y="416">−60</text><text x="226" y="416">−30</text><text x="370" y="416">0</text><text x="514" y="416">30</text><text x="658" y="416">60</text></g>
+      <text x="658" y="444" text-anchor="end" class="label-kecil">Error</text>
+    </svg>
+    <div class="teks-samping">
+      <h3>Selisih roda sebanding dengan error.</h3>
+      <p>Pada Kp 0,6 dan error 16, koreksi 9,6 sehingga roda kiri 44,6% dan roda kanan 25,4%.</p>
+      <p>Kendali on-off memberi selisih tetap 29,8% ke salah satu arah, berapa pun besar error.</p>
+      <p class="catatan lembut">Nilai berlaku pada kecepatan dasar 35%. Simulator menjepit kecepatan roda pada −100% sampai 100%.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. Pola P5 gambar interaktif. Satu satunya slide beranimasi -->
+<section class="slide" aria-labelledby="judul4" hidden>
+  <header class="judul"><p class="kicker">Hasil kendali P pada tikungan</p><h2 id="judul4">Jejak robot pada tiga nilai Kp</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="gambarJejak" viewBox="0 0 700 380" width="700" height="380" role="img" aria-label="Robot menyusuri tikungan lintasan Halus dengan Kp 0,6, Kd 0, dan Ki 0. Jejak hijau berada di atas garis sepanjang tikungan. Overshoot maksimum 16,3."></svg>
+      <div class="pilihan" style="margin-top:16px" role="group" aria-label="Pilih nilai Kp">
+        <button type="button" data-nilai="0.1" aria-pressed="false">Kp 0,1</button>
+        <button type="button" data-nilai="0.6" aria-pressed="true">Kp 0,6</button>
+        <button type="button" data-nilai="3" aria-pressed="false">Kp 3</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>Kp <span id="nilaiKini" class="oranye">0,6</span></h3>
+      <p id="uraiKini">Roda 45% dan 25% sepanjang tikungan. Error naik sampai 16 lalu bertahan di nilai itu sampai tikungan berakhir.</p>
+      <div class="rumus">Overshoot maksimum <span id="overshootKini" class="oranye">16,3</span></div>
+      <p class="catatan lembut">Kd 0 dan Ki 0 pada kecepatan dasar 35%. Overshoot maksimum adalah nilai error terbesar yang ditampilkan panel simulator.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5. Pola P4 dua kondisi berdampingan -->
+<section class="slide" aria-labelledby="judul5" hidden>
+  <header class="judul"><p class="kicker">Dua kendali pada tikungan yang sama</p><h2 id="judul5">Pergantian keadaan dan koreksi tetap</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Kendali on-off</h3>
+        <svg class="banding" data-kasus="onoff" viewBox="0 0 490 352" role="img" aria-label="Robot dengan kendali on-off Lab 10 pada seperempat tikungan pertama lintasan Halus, kecepatan dasar 35 persen, keputusan 5 kali per detik. Jejak hijau berada di atas garis dan sedikit berkelok. Titik oranye menandai posisi robot setiap satu detik dan berjarak rapat karena robot hanya maju 24 satuan posisi per detik."></svg>
+        <p><strong>Arah belok berganti 158 kali dalam satu putaran.</strong><br>Roda 35% dan 5% bergantian pada 5 keputusan per detik, robot maju 24 satuan per detik.</p>
+      </div>
+      <div>
+        <h3>Kendali P dengan Kp 0,6</h3>
+        <svg class="banding" data-kasus="p" viewBox="0 0 490 352" role="img" aria-label="Robot dengan kendali P, Kp 0,6, pada seperempat tikungan yang sama. Jejak hijau berada di atas garis. Titik oranye menandai posisi robot setiap satu detik dan berjarak lebih renggang karena robot maju 42 satuan posisi per detik. Roda kiri tetap 45 persen dan roda kanan tetap 25 persen sepanjang tikungan."></svg>
+        <p><strong>Roda tetap 45% dan 25% sepanjang tikungan.</strong><br>Di ruas lurus 35% dan 35%, robot maju 42 satuan per detik.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6. Pola P2 grafik lebar penuh, dua panel -->
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Parameter turunan</p><h2 id="judul6">Parameter D bekerja saat error berubah</h2></header>
+  <div class="isi">
+    <svg id="grafikSukuD" viewBox="0 0 1152 370" width="1152" height="370" role="img" aria-label="Dua grafik terhadap waktu dari detik 6,5 sampai 12 pada Kp 0,6 dan Kd 0,15. Grafik atas menunjukkan error naik dari 0 menjadi sekitar 15 saat robot memasuki tikungan pada detik 7,15, lalu bertahan. Grafik bawah menunjukkan parameter D melonjak sampai 10,1 saat error mulai naik, berganti tanda beberapa kali, lalu mendekati nol selama error tetap."></svg>
+    <div class="legend" style="margin-top:14px"><span><i class="garis-legenda gelap"></i>Error</span><span><i class="garis-legenda"></i>Parameter D</span></div>
+    <p class="catatan lembut bawah">Kd 1 membuat parameter D mencapai ±115. Roda bergantian 100% dan −98%, robot tidak menyelesaikan putaran dalam 60 s.</p>
+  </div>
+</section>
+
+<!-- SLIDE 7. Pola P2 grafik lebar penuh -->
+<section class="slide" aria-labelledby="judul7" hidden>
+  <header class="judul"><p class="kicker">Parameter integral</p><h2 id="judul7">Penghilangan error menetap oleh parameter I</h2></header>
+  <div class="isi">
+    <svg id="grafikSukuI" viewBox="0 0 1152 370" width="1152" height="370" role="img" aria-label="Grafik error terhadap waktu dari detik 6 sampai 17 pada Kp 0,6 dan Kd 0,15. Dengan Ki 0 error bertahan antara 11 dan 15 sepanjang tikungan dari detik 7,15 sampai 13,4, lalu turun ke nol di ruas lurus. Dengan Ki 0,3 error turun ke sekitar 1 sejak detik 9,5, lalu berbalik ke minus 14,9 setelah tikungan berakhir dan kembali ke nol."></svg>
+    <div class="legend" style="margin-top:14px"><span><i class="garis-legenda pembanding"></i>Ki 0</span><span><i class="garis-legenda"></i>Ki 0,3</span></div>
+    <p class="catatan lembut bawah">Parameter I naik sampai 8,1 dan mengambil alih koreksi di tikungan. Setelah tikungan berakhir, sisa parameter I membalik error ke −14,9 selama sekitar 1,8 s.</p>
+  </div>
+</section>
+
+<!-- SLIDE 8. Pola P6 grafik data dan tabel -->
+<section class="slide" aria-labelledby="judul8" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Hasil pada model simulator</p><h2 id="judul8">Akibat Ki yang terlalu besar</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikWindup" viewBox="0 0 700 375" width="700" height="375" role="img" aria-label="Grafik error terhadap waktu dari detik 0 sampai 20 pada Kp 0,2, Kd 0, dan Ki 0,5 di lintasan Halus. Error nol sampai detik 7, naik ke 16 di tikungan, lalu berayun makin lebar sampai minus 48,9 dan 48 sejak detik 12."></svg>
+      <p class="catatan" style="margin-top:14px"><strong>Parameter I = Ki × Σ error·dt</strong><br><span class="lembut">Contoh 0,5 × 30,6 = 15,3 pada detik ke-9,5.</span></p>
+    </div>
+    <div style="padding-top:8px">
+      <h3>Nilai pada panel simulator</h3>
+      <table class="tabel"><thead><tr><th>Konfigurasi</th><th>Overshoot<br>maksimum</th><th style="text-align:right">Osilasi</th></tr></thead><tbody>
+        <tr><td>Kp 0,6 Kd 0,15 Ki 0</td><td>16,1</td><td>0×</td></tr>
+        <tr><td>Kp 0,6 Kd 0,15 Ki 0,3</td><td>14,9</td><td>2×</td></tr>
+        <tr><td>Kp 0,2 Kd 0 Ki 0,5</td><td>48,9</td><td>36×</td></tr>
+      </tbody></table>
+      <p class="catatan lembut" style="margin-top:26px">Simulator tidak membatasi nilai integral. Pada perangkat keras, batas integral (anti-windup) lazim ditambahkan agar koreksi tidak menumpuk.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 9. Pola P7 kegiatan simulator -->
+<section class="slide" aria-labelledby="judul9" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 11</p><h2 id="judul9">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Parameter P</h3><p>Atur Kd dan Ki ke 0, lalu jalankan Kp 0,6 sebagai A.<br>Jalankan Kp 3 sebagai B, bandingkan overshoot dan jejak.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Parameter D dan I</h3><p>Kembalikan Kp 0,6 dan Kd 0,15, lalu tambahkan Ki 0,3.<br>Amati grafik error, lalu coba Kp 0,2 dengan Ki 0,5.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Fungsi kendali</h3><p>Aktifkan fungsi kendali(sensor) pada kode Level 2 atau 3.<br>Jalankan robot pada lintasan Tajam dengan kode tersebut.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Fungsi kendali(sensor) telah menyelesaikan lintasan Tajam dengan keluar jalur kurang dari tiga kali.<br>Putaran yang diselesaikan dengan kendali bawaan slider tidak memenuhi kriteria ini.</p></div>
+  </div>
+</section>
+
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 11 · Kendali P, PD, PID</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 9</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab11-kendali-pid.js, engine/kendali.js, engine/simulasiLintasan.js, engine/lintasan.js, engine/robot.js, engine/rangkaian.js, render/pidView.js, render/lintasanView.js.
+  // Semua jejak dan deret error berasal dari hasil engine (output/deck-lab11/hitung-data.mjs). Pada model simulator, kendali P tidak berosilasi
+  // di lintasan Halus dalam rentang slider Kp, sehingga deck tidak menggambarkan osilasi akibat Kp besar.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+
+  // ===== KONSTANTA SIMULATOR =====
+  const ROBOT_LEBAR_RODA = 40;       // engine/robot.js ROBOT_LEBAR_RODA
+  const ROBOT_JEJARI = 22;           // engine/robot.js ROBOT_JEJARI
+  const LEBAR_GARIS_LINTASAN = 24;   // engine/lintasan.js LEBAR_GARIS_LINTASAN
+  const SELANG_KEPUTUSAN = 0.1;      // labs/lab11-kendali-pid.js, keputusan kendali 10 kali per detik
+  const SELANG_SAMPEL = 0.05;        // labs/lab11-kendali-pid.js catatSampel, 20 sampel per detik
+  const T_MASUK_TIKUNGAN = 7.15;     // hasil engine, saat batang sensor mulai membaca tikungan pada kecepatan dasar 35
+  const T_KELUAR_TIKUNGAN = 13.4;    // hasil engine, saat pusat robot melewati x = 150 pada ruas bawah (Ki 0,3)
+
+  function koma(nilai, digit) { return nilai.toFixed(digit).replace('.', ',').replace('-', '−'); }
+
+/*__DATA__*/
+  // Data hasil engine/simulasiLintasan.js dengan kendaliPID dan kendaliOnOffReferensi pada lintasan belokanHalus, kecepatan dasar 35,
+  // fisika 120 Hz, keputusan 10 Hz untuk PID dan 5 Hz untuk on-off (laju Lab 10). Dihasilkan oleh output/deck-lab11/hitung-data.mjs dan susun-data.mjs. Jangan menyunting nilai dengan tangan.
+  // JEJAK_KP: jejak pusat robot tiap 0,05 s untuk slide 4, format "x,y,diJalur". Kunci adalah nilai Kp dengan Kd 0 dan Ki 0.
+  const JEJAK_KP = {
+    '0.1': '53.7,80,1 55.8,80,1 57.9,80,1 60,80,1 62.1,80,1 64.2,80,1 66.3,80,1 68.4,80,1 70.5,80,1 72.6,80,1 74.7,80,1 76.8,80,1 78.9,80,1 81,80,1 83.1,80,1 85.2,80,1 87.3,80,1 89.4,80,1 91.5,80,1 93.6,80,1 95.7,80,1 97.8,80,1 99.9,80,1 102,80,1 104.1,80,1 106.2,80,1 108.3,80,1 110.4,80,1 112.5,80,1 114.6,80,1 116.7,80,1 118.8,80,1 120.9,80,1 123,80,1 125.1,80,1 127.2,80,1 129.3,80,1 131.4,80,1 133.5,80,1 135.6,80,1 137.7,80,1 139.8,80,1 141.9,80,1 144,80,1 146.1,80,1 148.2,80,1 150.3,80,1 152.4,80,1 154.5,80,1 156.6,80,1 158.7,80,1 160.8,80,1 162.9,79.99,1 165,79.98,1 167.1,79.97,1 169.2,79.95,1 171.3,79.92,1 173.4,79.87,1 175.5,79.82,1 177.6,79.76,1 179.7,79.69,1 181.79,79.61,1 183.89,79.51,1 185.99,79.4,1 188.09,79.27,1 190.18,79.13,1 192.27,78.96,1 194.37,78.78,1 196.46,78.57,1 198.54,78.33,1 200.63,78.07,1 202.71,77.78,1 204.78,77.46,1 206.85,77.11,1 208.92,76.73,1 210.98,76.33,1 213.03,75.89,1 215.08,75.43,1 217.12,74.93,1 219.15,74.41,1 221.18,73.86,1 223.2,73.27,1 225.21,72.66,1 227.21,72.03,1 229.2,71.36,1 231.18,70.66,1 233.15,69.94,1 235.11,69.18,1 237.06,68.4,1 239,67.59,1 240.92,66.75,1 242.83,65.88,1 244.73,64.98,1 246.62,64.06,1 248.49,63.11,1 250.35,62.14,1 252.2,61.14,1 254.04,60.12,1 255.86,59.07,1 257.67,58.01,1 259.47,56.93,1 261.25,55.82,1 263.03,54.7,0 264.79,53.56,0 266.55,52.41,0 268.31,51.27,0 270.07,50.12,0 271.83,48.97,0 273.58,47.82,0 275.34,46.67,0 277.1,45.53,0 278.86,44.38,0 280.62,43.23,0 282.38,42.08,0 284.14,40.93,0 285.89,39.79,0 287.65,38.64,0 289.41,37.49,0 291.17,36.34,0 292.93,35.2,0 294.69,34.05,0',
+    '0.6': '53.7,80,1 55.8,80,1 57.9,80,1 60,80,1 62.1,80,1 64.2,80,1 66.3,80,1 68.4,80,1 70.5,80,1 72.6,80,1 74.7,80,1 76.8,80,1 78.9,80,1 81,80,1 83.1,80,1 85.2,80,1 87.3,80,1 89.4,80,1 91.5,80,1 93.6,80,1 95.7,80,1 97.8,80,1 99.9,80,1 102,80,1 104.1,80,1 106.2,80,1 108.3,80,1 110.4,80,1 112.5,80,1 114.6,80,1 116.7,80,1 118.8,80,1 120.9,80,1 123,80,1 125.1,80,1 127.2,80,1 129.3,80,1 131.4,80,1 133.5,80,1 135.6,80,1 137.7,80,1 139.8,80,1 141.9,80,1 144,80,1 146.1,80,1 148.2,80,1 150.3,80,1 152.4,80,1 154.5,80,1 156.6,79.99,1 158.7,79.99,1 160.8,79.98,1 162.9,79.96,1 165,79.91,1 167.1,79.82,1 169.19,79.7,1 171.29,79.53,1 173.38,79.32,1 175.46,79.05,1 177.53,78.73,1 179.6,78.35,1 181.65,77.92,1 183.69,77.42,1 185.72,76.87,1 187.73,76.26,1 189.72,75.59,1 191.69,74.86,1 193.64,74.08,1 195.57,73.24,1 197.47,72.35,1 199.34,71.4,1 201.19,70.4,1 203,69.35,1 204.79,68.24,1 206.54,67.08,1 208.26,65.88,1 209.94,64.62,1 211.58,63.31,1 213.19,61.96,1 214.75,60.56,1 216.28,59.12,1 217.76,57.63,1 219.2,56.1,1 220.6,54.53,1 221.94,52.92,1 223.24,51.27,1 224.5,49.59,1 225.7,47.87,1 226.86,46.11,1 227.96,44.33,1 229.01,42.51,1 230.01,40.66,1 230.96,38.79,1 231.86,36.89,1 232.7,34.96,1 233.48,33.02,1 234.21,31.05,1 234.89,29.06,1 235.51,27.05,1 236.08,25.03,1 236.59,23,1 237.04,20.95,1 237.44,18.88,1 237.79,16.81,1 238.08,14.73,1 238.31,12.65,1 238.49,10.55,1 238.61,8.46,1 238.68,6.36,1 238.7,4.26,1 238.67,2.16,1 238.58,0.06,1 238.44,-2.04,1 238.26,-4.13,1 238.02,-6.21,1',
+    '3': '53.7,80,1 55.8,80,1 57.9,80,1 60,80,1 62.1,80,1 64.2,80,1 66.3,80,1 68.4,80,1 70.5,80,1 72.6,80,1 74.7,80,1 76.8,80,1 78.9,80,1 81,80,1 83.1,80,1 85.2,80,1 87.3,80,1 89.4,80,1 91.5,80,1 93.6,80,1 95.7,80,1 97.8,80,1 99.9,80,1 102,80,1 104.1,80,1 106.2,80,1 108.3,80,1 110.4,80,1 112.5,80,1 114.6,80,1 116.7,80,1 118.8,80,1 120.9,80,1 123,80,1 125.1,80,1 127.2,80,1 129.3,80,1 131.4,80,1 133.5,80,1 135.6,80,1 137.7,80,1 139.8,80,1 141.9,80,1 144,80,1 146.1,80,1 148.2,80,1 150.3,80,1 152.4,79.99,1 154.5,79.98,1 156.6,79.96,1 158.7,79.94,1 160.8,79.9,1 162.9,79.81,1 164.99,79.59,1 167.07,79.3,1 169.14,79,1 171.21,78.64,1 173.26,78.18,1 175.29,77.65,1 177.32,77.1,1 179.33,76.51,1 181.32,75.81,1 183.27,75.06,1 185.23,74.28,1 187.16,73.47,1 189.06,72.56,1 190.93,71.6,1 192.79,70.63,1 194.62,69.6,1 196.4,68.49,1 198.13,67.31,1 199.86,66.11,1 201.57,64.89,1 203.23,63.61,1 204.86,62.28,1 206.48,60.95,1 208.05,59.56,1 209.54,58.08,1 210.97,56.54,1 212.39,54.99,1 213.8,53.43,1 215.18,51.85,1 216.52,50.23,1 217.76,48.54,1 218.94,46.8,1 220.1,45.05,1 221.24,43.29,1 222.37,41.51,1 223.44,39.71,1 224.4,37.84,1 225.3,35.95,1 226.18,34.04,1 227.04,32.13,1 227.89,30.2,1 228.67,28.25,1 229.34,26.26,1 229.93,24.25,1 230.5,22.23,1 231.06,20.2,1 231.59,18.17,1 232.07,16.13,1 232.43,14.06,1 232.72,11.98,1 232.99,9.9,1 233.24,7.81,1 233.47,5.72,1 233.63,3.63,1 233.67,1.53,1 233.64,-0.57,1 233.59,-2.67,1 233.52,-4.77,1 233.43,-6.87,1',
+  };
+  const OVERSHOOT_KP = {'0.1': 48.9, '0.6': 16.3, '3': 7.4};
+  // JEJAK_BANDING: jejak tiap 0,05 s untuk slide 5, on-off (engine/kendali.js kendaliOnOffReferensi, dua keadaan, keputusan 5 Hz seperti labs/lab10-kendali-onoff.js) dan Kp 0,6 (10 Hz).
+  const JEJAK_BANDING = {
+    onoff: '122.66,78.05,1 123.85,77.87,1 125.04,77.68,1 126.24,77.54,1 127.45,77.45,1 128.65,77.42,1 129.86,77.44,1 131.07,77.52,1 132.27,77.65,1 133.46,77.83,1 134.65,78.02,1 135.85,78.16,1 137.06,78.25,1 138.26,78.28,1 139.47,78.26,1 140.67,78.18,1 141.87,78.05,1 143.07,77.87,1 144.26,77.68,1 145.46,77.54,1 146.66,77.45,1 147.87,77.42,1 149.08,77.4,1 150.28,77.32,1 151.48,77.19,1 152.68,77.01,1 153.87,76.82,1 155.07,76.68,1 156.27,76.59,1 157.48,76.56,1 158.69,76.54,1 159.89,76.46,1 161.09,76.33,1 162.29,76.15,1 163.47,75.91,1 164.64,75.62,1 165.8,75.28,1 166.94,74.89,1 168.07,74.45,1 169.17,73.95,1 170.25,73.41,1 171.3,72.82,1 172.35,72.23,1 173.43,71.68,1 174.52,71.18,1 175.64,70.73,1 176.77,70.28,1 177.87,69.79,1 178.95,69.25,1 180,68.66,1 181.05,68.06,1 182.13,67.51,1 183.23,67.01,1 184.35,66.56,1 185.47,66.12,1 186.57,65.63,1 187.65,65.09,1 188.71,64.5,1 189.73,63.86,1 190.73,63.18,1 191.7,62.46,1 192.63,61.69,1 193.56,60.92,1 194.52,60.19,1 195.51,59.5,1 196.53,58.85,1 197.56,58.22,1 198.55,57.54,1 199.52,56.81,1 200.45,56.05,1 201.35,55.24,1 202.21,54.39,1 203.03,53.51,1 203.82,52.59,1 204.59,51.66,1 205.41,50.77,1 206.26,49.92,1 207.15,49.11,1 208.05,48.3,1 208.91,47.45,1 209.73,46.57,1 210.51,45.65,1 211.25,44.69,1 211.95,43.71,1 212.6,42.69,1 213.21,41.65,1 213.77,40.58,1 214.28,39.48,1 214.74,38.37,1 215.15,37.23,1 215.55,36.09,1 216.01,34.97,1 216.51,33.87,1 217.06,32.8,1 217.62,31.73,1 218.13,30.64,1 218.59,29.52,1 219,28.38,1 219.4,27.25,1 219.86,26.13,1 220.36,25.03,1 220.91,23.96,1 221.47,22.88,1 221.98,21.79,1 222.44,20.67,1 222.85,19.54,1 223.21,18.39,1 223.52,17.22,1 223.78,16.04,1 223.98,14.85,1 224.13,13.65,1 224.22,12.45,1 224.27,11.24,1 224.25,10.03,1 224.23,8.83,1 224.27,7.62,1 224.35,6.42,1 224.49,5.22,1 224.64,4.02,1 224.74,2.81,1 224.78,1.61,1 224.77,0.4,1',
+    p: '123,80,1 125.1,80,1 127.2,80,1 129.3,80,1 131.4,80,1 133.5,80,1 135.6,80,1 137.7,80,1 139.8,80,1 141.9,80,1 144,80,1 146.1,80,1 148.2,80,1 150.3,80,1 152.4,80,1 154.5,80,1 156.6,79.99,1 158.7,79.99,1 160.8,79.98,1 162.9,79.96,1 165,79.91,1 167.1,79.82,1 169.19,79.7,1 171.29,79.53,1 173.38,79.32,1 175.46,79.05,1 177.53,78.73,1 179.6,78.35,1 181.65,77.92,1 183.69,77.42,1 185.72,76.87,1 187.73,76.26,1 189.72,75.59,1 191.69,74.86,1 193.64,74.08,1 195.57,73.24,1 197.47,72.35,1 199.34,71.4,1 201.19,70.4,1 203,69.35,1 204.79,68.24,1 206.54,67.08,1 208.26,65.88,1 209.94,64.62,1 211.58,63.31,1 213.19,61.96,1 214.75,60.56,1 216.28,59.12,1 217.76,57.63,1 219.2,56.1,1 220.6,54.53,1 221.94,52.92,1 223.24,51.27,1 224.5,49.59,1 225.7,47.87,1 226.86,46.11,1 227.96,44.33,1 229.01,42.51,1 230.01,40.66,1 230.96,38.79,1 231.86,36.89,1 232.7,34.96,1 233.48,33.02,1 234.21,31.05,1 234.89,29.06,1 235.51,27.05,1 236.08,25.03,1 236.59,23,1 237.04,20.95,1 237.44,18.88,1 237.79,16.81,1 238.08,14.73,1 238.31,12.65,1 238.49,10.55,1 238.61,8.46,1 238.68,6.36,1 238.7,4.26,1 238.67,2.16,1 238.58,0.06,1',
+  };
+  // Slide 6. Error dan suku D pada setiap keputusan kendali (10 Hz) sejak t 6,5 s, Kp 0,6 Kd 0,15 Ki 0.
+  const ERROR_KEPUTUSAN_PD = [0,0,0,0,0,0,0.1,0.4,0.7,7.4,5.1,10.4,9.2,12.4,11.9,15.1,13.7,15.2,14.9,15.1,15.2,15.1,15.2,15.2,15.2,15.2,15.1,15.1,15,14.9,14.9,14.8,14.7,14.6,14.5,14.3,14.3,14.2,14,14,13.8,13.8,13.7,13.5,13.5,13.4,13.2,13.4,13.2,13.2,13.3,13.1,12.8,13.5,12.6,13.6];
+  const SUKU_D_PD = [0,0,0,0,0,0.1,0.2,0.3,0.5,10.1,-3.5,8,-1.7,4.8,-0.7,4.8,-2.1,2.2,-0.4,0.3,0,0,0.1,0,-0.1,0,-0.1,-0.1,0,-0.2,-0.1,-0.1,-0.2,-0.1,-0.1,-0.3,0,-0.2,-0.3,0,-0.3,-0.1,-0.1,-0.3,0.1,-0.2,-0.3,0.3,-0.3,0,0.1,-0.3,-0.4,1,-1.3,1.5];
+  // Slide 7. Error tiap 0,05 s sejak t 6 s sampai 17 s, Kp 0,6 Kd 0,15, Ki 0 dan Ki 0,3.
+  const ERROR_KI0 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0.1,0.2,0.4,0.5,0.7,4.5,7.4,6.3,5.1,8.3,10.4,9.8,9.2,10.7,12.4,12.3,11.9,13.1,15.1,14.8,13.7,15,15.2,15.1,14.9,15.1,15.1,15.2,15.2,15.1,15.1,15.2,15.2,15.2,15.2,15.2,15.2,15.2,15.2,15.2,15.1,15.1,15.1,15.1,15,15,14.9,14.9,14.9,14.9,14.8,14.8,14.7,14.6,14.6,14.6,14.5,14.5,14.3,14.3,14.3,14.3,14.2,14.1,14,14,14,14,13.8,13.7,13.8,13.8,13.7,13.6,13.5,13.5,13.5,13.5,13.4,13.4,13.2,13.4,13.4,13.4,13.2,13.2,13.2,13.3,13.3,13.2,13.1,13,12.8,13.4,13.5,13.3,12.6,13,13.6,13.4,12.9,13.2,13.4,13,13.1,13.4,13.4,13.2,12.7,13.6,13.8,13.5,12.9,13.1,13.4,13.2,12.9,12.8,12.7,12.4,12.1,11.8,11.5,11.1,10.5,10.1,9.6,9.1,8.4,8.2,7.8,6.9,5.3,7.3,8.5,4.4,2.9,4.1,7.6,3.6,2.2,2.9,4.1,3.3,2.6,2.7,2.8,2.5,2.3,2.2,2.1,2,1.9,1.8,1.7,1.6,1.6,1.5,1.4,1.3,1.3,1.2,1.1,1.1,1,1,0.9,0.9,0.8,0.8,0.7,0.7,0.6,0.6,0.6,0.5,0.5,0.5,0.4,0.4,0.4,0.4,0.3,0.3,0.3,0.3,0.2,0.2,0.2,0.2,0.2,0.1,0.1,0.1,0.1,0.1,0.1,0,0,0];
+  const ERROR_KI03 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0.1,0.2,0.4,0.5,0.7,4.5,7.4,6.2,4.8,8.2,10.3,9.6,8.7,10.2,11.8,11.5,10.9,11.8,13.1,12.8,12,12.5,13.1,12.9,12.2,12.5,12.4,11.7,11.3,11.4,11.4,10.5,9.6,10.1,10.5,9,7.1,8.7,10.3,7.5,2.5,8.9,13.5,5.2,1.1,2.5,11.5,2,0.9,1.5,8.4,1.6,1,1.3,5.6,1.5,1.1,1.3,2.9,1.5,1.4,1.5,1.6,2.1,2.3,1.5,1.5,1.5,2.5,1.4,1.4,1.5,2,1.6,1.4,2.1,2.8,1.5,1.3,1.3,2,1.5,1.4,1.4,1.4,1.4,1.4,1.5,1.4,1.4,1.3,1.4,1.4,1.4,1.3,1.3,1.3,1.3,1.3,1.3,1.2,1.2,1.3,1.3,1.2,1.1,1.2,1.2,1.2,1.1,1.1,1,1.1,1.1,1,1,0.9,0.9,0.8,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1,0,0,0,0,0,0,-0.1,-0.2,-0.3,-0.6,-0.9,-1.4,-4.6,-10.6,-8.6,-5.3,-13.2,-14.9,-14.2,-12.9,-13.8,-14.4,-14.5,-14.5,-14.6,-14.7,-14.7,-14.8,-14.7,-14.7,-14.7,-14.6,-14.5,-14.3,-14.2,-14,-13.7,-13.4,-13,-12.5,-12,-11.2,-10.5,-9.6,-8.9,-7.9,-7.2,-6.3,-5.7,-5.3,-4.9,-4.5,-4.2,-3.9,-3.6,-3.4,-3.2,-3,-2.8,-2.6,-2.5,-2.3,-2.2,-2.1,-2,-1.8,-1.7,-1.7,-1.6,-1.5,-1.4,-1.3,-1.3];
+  // Slide 8. Error tiap 0,05 s sejak t 0 sampai 20 s, Kp 0,2 Kd 0 Ki 0,5.
+  const ERROR_WINDUP = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.1,0.1,0.2,0.4,0.5,0.7,5.5,8,9.6,11.4,13.3,15.8,16.1,16.2,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.3,16.2,15.9,15.6,15.1,14.3,12.9,9.6,3.2,1.8,1.1,0.6,0.3,0.1,0,0,0,0,-0.2,-0.5,-0.9,-1.8,-7,-13.3,-14.8,-15.5,-16,-16.3,-16.3,-16.3,-16.3,-16.3,-16.3,-16.4,-16.4,-16.5,-16.5,-16.6,-16.8,-17.7,-22.8,-25.6,-26,-26.3,-26.2,-26.1,-25.7,-25.1,-23.2,-19.5,-16.7,-16.6,-16.5,-16.5,-16.4,-16.4,-16.3,-16.3,-16.3,-16.3,-16.3,-16.3,-13.4,-10.9,-9.7,-8.8,-8,-4.2,3.1,8.8,9.4,9.5,15.2,18.9,20.5,22.2,24.6,28.6,28.6,28.6,28.8,28.9,29.2,29.5,29.9,30.5,31.3,32.6,32.6,32.6,32.6,32.2,31.6,29.7,27,22.3,16.5,16.4,16.4,16.4,16.3,16.3,16.3,16.3,16.2,15.8,15.1,13.8,6.6,0.6,0.1,0,0,0,-7.5,-9.7,-10.9,-15.9,-27.1,-28.6,-33.5,-41,-43.8,-47.6,-47.6,-47.7,-47.8,-48,-48.5,-48.9,-48.9,-48.9,-48.8,-48.8,-48.8,-48.8,-48.9,-48.9,-48.9,-48.9,-48.9,-48.9,-48.7,-47.2,-43.1,-31.7,-32.2,-32.4,-32.6,-32.6,-32.6,-32.3,-31.5,-30.2,-27.9,-21.6,-16.4,-16.3,-16.3,-16.3,-15.5,-10.6,-9.6,-7.1,-0.7,8.3,19.1,19.4,18.1,17.2,11.9,4.8,-28.8,-43.9,-46,-47.4,-47.2,-46,-41.5,-29.6,-28.5,-24,-16.3,-16.3,-16.3,-15.8,-14.3,-7.7,-1.2,-0.2,0,0,1.8,10.1,13.7,25.4,28.6,40.8,45,47.7,48,47.8,36.8,0,0,0,0,0,0,0,0,0,0,-31.5,-39.9,-40,-47.9,-48.9,-48.9,-45.3,-31.9,-32.5];
+  /*__AKHIR_DATA__*/
+
+  // ===== R8. Robot pada lintasan garis =====
+  // Bentuk robot mengikuti render/lintasanView.js. Badan 2 × jejari kali 1,4 × jejari, roda sepanjang jejari dan setebal 8,
+  // sumbu roda pada 0,5 × lebar roda + 4. K adalah piksel per satuan posisi. Robot menghadap sumbu x positif.
+  function gambarBadanRobot(induk, cx, cy, K) {
+    const isi = (tag, attr) => induk.appendChild(elemen(tag, attr));
+    const j = ROBOT_JEJARI * K, sumbu = (ROBOT_LEBAR_RODA / 2 + 4) * K;
+    for (const dy of [-sumbu, sumbu]) isi('rect', {x: (cx - j / 2).toFixed(1), y: (cy + dy - 4 * K).toFixed(1), width: j.toFixed(1), height: (8 * K).toFixed(1), rx: 8, fill: 'var(--robot-roda)'});
+    isi('rect', {x: (cx - j).toFixed(1), y: (cy - j * 0.7).toFixed(1), width: (j * 2).toFixed(1), height: (j * 1.4).toFixed(1), rx: 24, fill: 'var(--oranye-muda)', stroke: 'var(--oranye)', 'stroke-width': 3});
+    isi('path', {d: 'M' + (cx + j * 0.3).toFixed(1) + ' ' + (cy - j * 0.35).toFixed(1) + ' L' + (cx + j * 0.9).toFixed(1) + ' ' + cy.toFixed(1) + ' L' + (cx + j * 0.3).toFixed(1) + ' ' + (cy + j * 0.35).toFixed(1) + ' Z', fill: 'var(--oranye)'});
+  }
+
+  // Mengurai string jejak "x,y,diJalur" menjadi titik layar dan memecahnya menjadi ruas hijau (di atas garis) dan merah (garis hilang).
+  function uraiJejak(teks, X, Y) {
+    const titik = teks.split(' ').map((tiga) => { const [x, y, f] = tiga.split(',').map(Number); return {x: X(x), y: Y(y), diJalur: f === 1}; });
+    const ruas = [];
+    titik.forEach((p, i) => {
+      if (i === 0 || p.diJalur !== titik[i - 1].diJalur) ruas.push({diJalur: p.diJalur, titik: i === 0 ? [p] : [titik[i - 1], p]});
+      else ruas[ruas.length - 1].titik.push(p);
+    });
+    const d = (daftar) => 'M' + daftar.map((p) => p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' L');
+    return {titik, dSemua: d(titik), ruas: ruas.map((r) => ({diJalur: r.diJalur, d: d(r.titik)}))};
+  }
+  function gambarRuasJejak(svg, ruas) {
+    for (const r of ruas) svg.appendChild(elemen('path', {d: r.d, fill: 'none', stroke: r.diJalur ? 'var(--hijau)' : 'var(--merah)', 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}));
+  }
+
+  // ===== SLIDE 4. Potongan lintasan Halus, jejak robot pada tiga nilai Kp, bayangan robot menyusuri jejak =====
+  // Pemetaan. X = (x − 40) × 2,5 dan Y = 300 − 2,5 × y. Ruas lurus y = 80 dan busur berjari jari 80 berpusat di x = 150, y = 0.
+  const URAI_KP = {
+    '0.1': 'Roda hanya 40% dan 30% saat error 49. Garis hilang dari sensor pada detik ke-10 dan robot berhenti otomatis pada detik ke-13.',
+    '0.6': 'Roda 45% dan 25% sepanjang tikungan. Error naik sampai 16 lalu bertahan di nilai itu sampai tikungan berakhir.',
+    '3': 'Roda bergantian 54% dan 16% pada satu keputusan, lalu 38% dan 32% pada keputusan berikutnya. Error bertahan antara 1 dan 7.',
+  };
+  const ARIA_KP = {
+    '0.1': 'Jejak hijau berada di atas garis sampai awal tikungan, lalu berubah merah saat garis hilang dari sensor dan robot berjalan lurus keluar tikungan. Overshoot maksimum 48,9.',
+    '0.6': 'Jejak hijau berada di atas garis sepanjang tikungan. Overshoot maksimum 16,3.',
+    '3': 'Jejak hijau berada di atas garis dan lebih dekat ke tengah garis daripada Kp 0,6. Overshoot maksimum 7,4.',
+  };
+  const gambarJejak = document.getElementById('gambarJejak');
+  function tampilNilai(kp) {
+    const kunci = String(kp);
+    gambarJejak.replaceChildren();
+    const add = (tag, attr, isi) => gambarJejak.appendChild(elemen(tag, attr, isi));
+    const K = 2.5, X = (x) => (x - 40) * K, Y = (y) => 300 - K * y;
+    const jejak = uraiJejak(JEJAK_KP[kunci], X, Y);
+
+    // 1. Garis lintasan. Ruas lurus atas lalu busur kanan yang berlanjut keluar bidang gambar.
+    add('path', {d: 'M0 100 H275 A200 200 0 0 1 475 300 A200 200 0 0 1 275 500', fill: 'none', stroke: 'var(--lintasan)', 'stroke-width': LEBAR_GARIS_LINTASAN * K});
+    // 2. Jejak robot. Hijau berarti larik sensor masih membaca garis, merah berarti garis hilang, sama dengan kanvas simulator.
+    gambarRuasJejak(gambarJejak, jejak.ruas);
+    // 3. Robot pada posisi awal.
+    gambarBadanRobot(gambarJejak, jejak.titik[0].x, jejak.titik[0].y, K);
+    // 4. Keterangan.
+    add('text', {x: 150, y: 200, class: 'label-kecil lembut'}, 'Garis lintasan');
+    add('path', {d: 'M200 262 H224', fill: 'none', stroke: 'var(--hijau)', 'stroke-width': 4, 'stroke-linecap': 'round'});
+    add('text', {x: 234, y: 268, class: 'label-kecil'}, 'Jejak di atas garis');
+    add('path', {d: 'M200 296 H224', fill: 'none', stroke: 'var(--merah)', 'stroke-width': 4, 'stroke-linecap': 'round'});
+    add('text', {x: 234, y: 302, class: 'label-kecil'}, 'Jejak setelah garis hilang');
+    if (kunci === '0.1') add('text', {x: 556, y: 140, class: 'label-kecil merah', 'font-weight': 700}, 'Garis hilang');
+    // 5. Bayangan robot. Digambar berpusat di titik 0,0 lalu dibawa menyusuri jejak melalui offset-path.
+    const hantu = add('g', {class: 'hantu', 'aria-hidden': 'true'});
+    gambarBadanRobot(hantu, 0, 0, K);
+    hantu.style.setProperty('offset-path', "path('" + jejak.dSemua + "')");
+
+    document.getElementById('nilaiKini').textContent = koma(Number(kp), kunci === '3' ? 0 : 1);
+    document.getElementById('overshootKini').textContent = koma(OVERSHOOT_KP[kunci], 1);
+    document.getElementById('uraiKini').textContent = URAI_KP[kunci];
+    document.querySelectorAll('[data-nilai]').forEach((tombol) => tombol.setAttribute('aria-pressed', String(tombol.dataset.nilai === kunci)));
+    gambarJejak.setAttribute('aria-label', 'Robot menyusuri tikungan lintasan Halus dengan Kp ' + koma(Number(kp), kunci === '3' ? 0 : 1) + ', Kd 0, dan Ki 0. ' + ARIA_KP[kunci]);
+  }
+  document.querySelectorAll('[data-nilai]').forEach((tombol) => tombol.addEventListener('click', () => tampilNilai(tombol.dataset.nilai)));
+  tampilNilai('0.6');
+
+  // ===== SLIDE 5. Seperempat tikungan yang sama untuk kendali on-off dan kendali P =====
+  // Pemetaan. X = (x − 100) × 2,4 dan Y = 290 − 2,4 × y.
+  function gambarBanding(svg) {
+    svg.replaceChildren();
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const K = 2.4, X = (x) => (x - 100) * K, Y = (y) => 290 - K * y;
+    const kasus = svg.dataset.kasus;
+    const jejak = uraiJejak(JEJAK_BANDING[kasus], X, Y);
+    add('path', {d: 'M0 98 H120 A192 192 0 0 1 312 290 A192 192 0 0 1 120 482', fill: 'none', stroke: 'var(--lintasan)', 'stroke-width': LEBAR_GARIS_LINTASAN * K});
+    gambarRuasJejak(svg, jejak.ruas);
+    // Posisi robot setiap 1 s (20 titik jejak) sejak awal potongan. Jarak antartitik menunjukkan laju maju robot.
+    jejak.titik.forEach((p, i) => {
+      if (i % Math.round(1 / SELANG_SAMPEL) !== 0) return;
+      add('circle', {cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 5, fill: 'var(--oranye)', stroke: 'var(--putih)', 'stroke-width': 2});
+    });
+    add('circle', {cx: 46, cy: 300, r: 6, fill: 'var(--oranye)', stroke: 'var(--putih)', 'stroke-width': 2});
+    add('text', {x: 62, y: 306, class: 'label-kecil'}, 'Posisi tiap 1 s');
+    gambarBadanRobot(svg, jejak.titik[0].x, jejak.titik[0].y, K);
+  }
+  document.querySelectorAll('.banding').forEach(gambarBanding);
+
+  // ===== SLIDE 6. Error dan parameter D pada setiap keputusan kendali =====
+  // Pemetaan x(t) = 68 + (t − 6,5) ÷ 5,5 × 1044. Panel atas y(e) = 170 − 6,5 × e, panel bawah y(d) = 295 − 7,5 × d.
+  (function gambarSukuD(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const x = (t) => 68 + (t - 6.5) / 5.5 * 1044, yE = (e) => 170 - 6.5 * e, yD = (d) => 295 - 7.5 * d;
+    add('text', {x: 4, y: 24, 'font-size': 19}, 'Error');
+    add('path', {d: 'M68 40 H1120 M68 105 H1120 M68 170 H1120', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    add('path', {d: 'M68 32 V170 H1128', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    for (const nilai of [20, 10, 0]) add('text', {x: 52, y: yE(nilai) + 7, 'text-anchor': 'end', class: 'label-kecil lembut'}, String(nilai));
+    add('text', {x: 1120, y: 193, 'text-anchor': 'end', 'font-size': 19}, 'Parameter D pada Kd 0,15');
+    add('path', {d: 'M68 205 H1120 M68 295 H1120', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    add('path', {d: 'M68 200 V325 H1128', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    for (const nilai of [12, 0, -4]) add('text', {x: 52, y: yD(nilai) + 7, 'text-anchor': 'end', class: 'label-kecil lembut'}, koma(nilai, 0));
+    // Saat batang sensor mulai membaca tikungan.
+    add('path', {d: 'M' + x(T_MASUK_TIKUNGAN).toFixed(1) + ' 32 V325', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-dasharray': '6 6'});
+    add('text', {x: (x(T_MASUK_TIKUNGAN) + 10).toFixed(1), y: 60, class: 'label-kecil'}, 'Masuk tikungan');
+    // Parameter D sebagai batang dari garis nol pada setiap keputusan.
+    SUKU_D_PD.forEach((d, i) => {
+      if (Math.abs(d) < 0.05) return;
+      const xi = x(6.5 + i * SELANG_KEPUTUSAN);
+      add('rect', {x: (xi - 5).toFixed(1), y: Math.min(yD(0), yD(d)).toFixed(1), width: 10, height: Math.abs(yD(d) - yD(0)).toFixed(1), fill: 'var(--oranye)'});
+    });
+    add('path', {d: 'M' + ERROR_KEPUTUSAN_PD.map((e, i) => x(6.5 + i * SELANG_KEPUTUSAN).toFixed(1) + ' ' + yE(e).toFixed(1)).join(' L'), fill: 'none', stroke: 'var(--teks)', 'stroke-width': 3, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+    for (let t = 7; t <= 12; t++) add('text', {x: x(t).toFixed(1), y: 344, 'text-anchor': 'middle', class: 'label-kecil'}, String(t));
+    add('text', {x: 1112, y: 365, 'text-anchor': 'end', class: 'label-kecil'}, 'Waktu (s)');
+  })(document.getElementById('grafikSukuD'));
+
+  // ===== SLIDE 7. Error terhadap waktu dengan Ki 0 dan Ki 0,3 =====
+  // Pemetaan x(t) = 68 + (t − 6) ÷ 11 × 1044 dan y(e) = 182 − 6,8 × e.
+  (function gambarSukuI(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const x = (t) => 68 + (t - 6) / 11 * 1044, y = (e) => 182 - 6.8 * e;
+    add('text', {x: 4, y: 24, 'font-size': 19}, 'Error');
+    add('path', {d: 'M68 46 H1120 M68 114 H1120 M68 250 H1120', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    add('path', {d: 'M68 36 V318 H1128', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    add('path', {d: 'M68 182 H1120', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-dasharray': '8 6'});
+    for (const nilai of [20, 10, 0, -10, -20]) add('text', {x: 52, y: y(nilai) + 7, 'text-anchor': 'end', class: 'label-kecil lembut'}, koma(nilai, 0));
+    const kurva = (data, warna) => add('path', {d: 'M' + data.map((e, i) => x(6 + i * SELANG_SAMPEL).toFixed(1) + ' ' + y(e).toFixed(1)).join(' L'), fill: 'none', stroke: warna, 'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+    kurva(ERROR_KI0, 'var(--teks-lembut)');
+    kurva(ERROR_KI03, 'var(--oranye)');
+    // Rentang tikungan, di bawah garis nol karena kedua kurva berada di atas nol selama tikungan.
+    const xa = x(T_MASUK_TIKUNGAN).toFixed(1), xb = x(T_KELUAR_TIKUNGAN).toFixed(1);
+    add('path', {d: 'M' + xa + ' 198 V206 H' + xb + ' V198', fill: 'none', stroke: 'var(--teks)', 'stroke-width': 2, 'stroke-linejoin': 'round'});
+    add('text', {x: ((x(T_MASUK_TIKUNGAN) + x(T_KELUAR_TIKUNGAN)) / 2).toFixed(1), y: 232, 'text-anchor': 'middle', class: 'label-kecil'}, 'Tikungan');
+    for (let t = 6; t <= 17; t++) add('text', {x: x(t).toFixed(1), y: 344, 'text-anchor': 'middle', class: 'label-kecil'}, String(t));
+    add('text', {x: 1112, y: 365, 'text-anchor': 'end', class: 'label-kecil'}, 'Waktu (s)');
+  })(document.getElementById('grafikSukuI'));
+
+  // ===== SLIDE 8. Error terhadap waktu pada Kp 0,2, Kd 0, Ki 0,5 =====
+  // Pemetaan x(t) = 68 + t ÷ 20 × 572 dan y(e) = 179 − 2,32 × e.
+  (function gambarWindup(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const x = (t) => 68 + t / 20 * 572, y = (e) => 179 - 2.32 * e;
+    add('text', {x: 4, y: 24, 'font-size': 19}, 'Error');
+    add('path', {d: 'M68 63 H650 M68 295 H650', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    add('path', {d: 'M68 48 V295 H658', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    add('path', {d: 'M68 179 H650', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-dasharray': '8 6'});
+    for (const nilai of [50, 0, -50]) add('text', {x: 52, y: y(nilai) + 7, 'text-anchor': 'end', class: 'label-kecil lembut'}, koma(nilai, 0));
+    add('path', {d: 'M' + ERROR_WINDUP.map((e, i) => x(i * SELANG_SAMPEL).toFixed(1) + ' ' + y(e).toFixed(1)).join(' L'), fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+    for (const t of [0, 5, 10, 15, 20]) add('text', {x: x(t).toFixed(1), y: 326, 'text-anchor': 'middle', class: 'label-kecil'}, String(t));
+    add('text', {x: 650, y: 363, 'text-anchor': 'end', class: 'label-kecil'}, 'Waktu (s)');
+  })(document.getElementById('grafikWindup'));
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

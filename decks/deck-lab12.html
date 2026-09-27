@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 12. Piksel dan Citra Digital</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P5 grafik interaktif */
+.pilihan{display:flex;gap:14px;margin-top:27px}
+.pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+/* P6 grafik data dan tabel */
+.tabel{width:100%;border-collapse:collapse;font-size:21px;margin-top:25px}
+.tabel th{font-size:15px;line-height:1.5;color:var(--teks-lembut);font-weight:600;text-align:left;padding:0 0 16px}
+.tabel td{border-top:1px solid var(--abu-garis);padding:19px 0}
+.tabel td:first-child{font-weight:700}.tabel td:last-child{text-align:right}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI ===== */
+.tabel td{white-space:nowrap}.tabel td:first-child{padding-right:16px}
+/* Bingkai pindai. Berpindah satu piksel setiap langkah, dari lantai ke garis. Gambar statis tetap lengkap tanpa bingkai ini. */
+svg .hantu{opacity:0;pointer-events:none;animation:pindai 8s linear infinite}
+@keyframes pindai{
+0%{opacity:0;transform:translate(var(--px),var(--py)) translateX(0px)}
+6%{opacity:1;transform:translate(var(--px),var(--py)) translateX(0px);animation-timing-function:steps(7,end)}
+76%{opacity:1;transform:translate(var(--px),var(--py)) translateX(var(--maju))}
+90%{opacity:1;transform:translate(var(--px),var(--py)) translateX(var(--maju))}
+100%{opacity:0;transform:translate(var(--px),var(--py)) translateX(var(--maju))}
+}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 12, Piksel dan Citra Digital">
+
+<!-- SLIDE 1. Pola P1 pembuka -->
+<section class="slide aktif" aria-labelledby="judul1">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 12 · Modul 4</p>
+      <h1 id="judul1">Citra<br><span class="oranye">digital</span></h1>
+      <p class="ringkas">Membaca nilai grayscale piksel pada citra digital.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Piksel adalah unsur terkecil citra digital dan menyimpan satu nilai kecerahan.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Nilai grayscale garis dan lantai</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Contoh pada simulator. Piksel pada garis bernilai 25, piksel pada lantai bernilai 230, dan nilai maksimum grayscale 255. Batang menggunakan skala yang sama.">
+        <text x="0" y="30">Piksel pada garis</text><text x="635" y="30" text-anchor="end" font-weight="700" class="oranye">25</text>
+        <rect x="0" y="45" width="58.8" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="113">Piksel pada lantai</text><text x="635" y="113" text-anchor="end" font-weight="700">230</text>
+        <rect x="0" y="128" width="541.2" height="22" rx="3" fill="var(--teks-lembut)"/>
+        <text x="0" y="196">Nilai maksimum grayscale</text><text x="635" y="196" text-anchor="end" font-weight="700" class="lembut">255</text>
+        <rect x="0" y="211" width="600" height="22" rx="3" fill="var(--abu-garis)"/>
+        <text x="0" y="269" class="label-kecil lembut">Nilai piksel pada simulator Lab 12</text>
+      </svg>
+      <p class="simpulan-visual">Piksel pada garis bernilai jauh lebih kecil daripada piksel pada lantai. Selisih nilai tersebut menjadi dasar pengenalan garis oleh kamera.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. Pola P2 diagram lebar penuh -->
+<section class="slide" aria-labelledby="judul2" hidden data-video="steps=4">
+  <header class="judul"><p class="kicker">Susunan citra digital</p><h2 id="judul2">Citra sebagai kisi piksel</h2></header>
+  <div class="isi">
+    <svg viewBox="0 0 1152 406" width="1152" height="406" role="img" aria-label="Frame kamera simulator berukuran 32 kolom dan 20 baris, seluruhnya 640 piksel. Garis gelap berada di tengah frame dan lantai terang di kedua sisinya. Bagian berukuran 8 kolom dan 5 baris pada tepi garis diperbesar sehingga kotak setiap piksel terlihat.">
+      <text x="292" y="30" text-anchor="middle" font-size="24" font-weight="700">Frame kamera</text>
+      <text x="292" y="80" text-anchor="middle" class="label-kecil lembut">32 kolom</text>
+      <text x="84" y="226" text-anchor="end" class="label-kecil lembut">20 baris</text>
+      <g class="kisi" data-frame="asli" data-x="100" data-y="100" data-sel="12" data-kolom="0" data-baris="0" data-nk="32" data-nb="20"></g>
+      <text x="292" y="378" text-anchor="middle" font-weight="700">32 × 20 = 640 piksel</text>
+      <path data-tahap="3" d="M292 196 L636 50 M292 256 L636 360" fill="none" stroke="var(--oranye)" stroke-width="2" stroke-linecap="round"/>
+      <text data-tahap="3" x="884" y="30" text-anchor="middle" font-size="24" font-weight="700">Bagian yang diperbesar</text>
+      <g data-tahap="3" class="kisi" data-frame="asli" data-x="636" data-y="50" data-sel="62" data-kolom="8" data-baris="8" data-nk="8" data-nb="5"></g>
+      <rect data-tahap="2" x="196" y="196" width="96" height="60" fill="none" stroke="var(--oranye)" stroke-width="3"/>
+      <rect data-tahap="3" x="636" y="50" width="496" height="310" fill="none" stroke="var(--oranye)" stroke-width="3"/>
+      <path data-tahap="4" d="M1072 366 V374 H1130 V366" fill="none" stroke="var(--teks)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text data-tahap="4" x="1130" y="398" text-anchor="end">Satu piksel</text>
+    </svg>
+    <p class="catatan lembut bawah">Frame simulator berupa citra sintetis 32 × 20 piksel, bukan foto dari kamera.</p>
+  </div>
+</section>
+
+<!-- SLIDE 3. Pola P3 visual kiri, teks kanan. Satu satunya animasi pada deck -->
+<section class="slide" aria-labelledby="judul3" hidden data-video="steps=2">
+  <header class="judul"><p class="kicker">Isi setiap piksel</p><h2 id="judul3">Nilai grayscale setiap piksel</h2></header>
+  <div class="isi terbagi">
+    <svg viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Kisi piksel 8 kolom dan 5 baris pada tepi garis, yaitu kolom 8 sampai 15. Setiap baris bernilai 230, 230, 230, 148, 66, 25, 25, 25 dari kiri ke kanan. Nilai 230 adalah lantai, nilai 25 adalah garis, nilai 148 dan 66 adalah tepi garis.">
+      <text x="58" y="36" text-anchor="end" class="label-kecil lembut">Kolom</text>
+      <g class="kisi" data-frame="asli" data-x="70" data-y="56" data-sel="78" data-kolom="8" data-baris="8" data-nk="8" data-nb="5" data-nilai="ya" data-nomor-kolom="36" data-pindai="2" data-tahap-nilai="2"></g>
+    </svg>
+    <div class="teks-samping">
+      <h3>Setiap piksel menyimpan satu nilai grayscale.</h3>
+      <p data-tahap="2">Piksel pada lantai bernilai 230.<br>Piksel pada garis bernilai 25.</p>
+      <p data-tahap="2">Piksel pada tepi garis bernilai 148 dan 66, yaitu peralihan dari lantai ke garis.</p>
+      <p class="catatan lembut">Nilai berasal dari frame simulator pada pencahayaan normal.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. Pola P2 skala lebar penuh -->
+<section class="slide" aria-labelledby="judul4" hidden>
+  <header class="judul"><p class="kicker">Rentang nilai grayscale</p><h2 id="judul4">Tingkat keabuan 0 sampai 255</h2></header>
+  <div class="isi">
+    <svg viewBox="0 0 1152 330" width="1152" height="330" role="img" aria-label="Skala nilai grayscale dari 0 sampai 255 dengan 256 tingkat nilai. Nilai 0 adalah hitam dan nilai 255 adalah putih. Empat nilai pada frame simulator ditandai, yaitu garis 25, tepi garis 66 dan 148, serta lantai 230.">
+      <g text-anchor="middle">
+        <text x="66" y="30">Hitam</text><text x="166" y="30">Garis</text><text x="330" y="30">Tepi garis</text><text x="658" y="30">Tepi garis</text><text x="986" y="30">Lantai</text><text x="1086" y="30">Putih</text>
+      </g>
+      <g stroke="var(--teks-lembut)" stroke-width="2">
+        <rect x="30" y="50" width="72" height="72" fill="var(--lintasan)"/>
+        <rect x="130" y="50" width="72" height="72" fill="var(--teks)"/>
+        <rect x="294" y="50" width="72" height="72" fill="var(--robot-roda)"/>
+        <rect x="622" y="50" width="72" height="72" fill="var(--teks-lembut)"/>
+        <rect x="950" y="50" width="72" height="72" fill="var(--abu-garis)"/>
+        <rect x="1050" y="50" width="72" height="72" fill="var(--putih)"/>
+      </g>
+      <path d="M66 122 V210 M166 122 V200 M330 122 V200 M658 122 V200 M986 122 V200 M1086 122 V210" fill="none" stroke="var(--teks-lembut)" stroke-width="2"/>
+      <path d="M66 200 H1086" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-linecap="round"/>
+      <g fill="var(--oranye)" stroke="var(--putih)" stroke-width="3"><circle cx="166" cy="200" r="8"/><circle cx="330" cy="200" r="8"/><circle cx="658" cy="200" r="8"/><circle cx="986" cy="200" r="8"/></g>
+      <g text-anchor="middle" font-size="24" font-weight="700">
+        <text x="66" y="246">0</text><text x="166" y="246" class="oranye">25</text><text x="330" y="246" class="oranye">66</text><text x="658" y="246" class="oranye">148</text><text x="986" y="246" class="oranye">230</text><text x="1086" y="246">255</text>
+      </g>
+      <path d="M66 270 V282 H1086 V270" fill="none" stroke="var(--teks)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="576" y="316" text-anchor="middle">256 tingkat nilai</text>
+    </svg>
+    <p style="margin-top:18px">Nilai 0 menyatakan hitam dan nilai 255 menyatakan putih. Nilai di antaranya menyatakan tingkat keabuan.</p>
+    <p class="catatan lembut bawah">Warna kotak pada slide merupakan pendekatan tingkat keabuan. Nilai 25, 66, 148, dan 230 berasal dari frame simulator.</p>
+  </div>
+</section>
+
+<!-- SLIDE 5. Pola P6 batang dan tabel -->
+<section class="slide" aria-labelledby="judul5" hidden>
+  <header class="judul"><p class="kicker">Perbandingan dengan ADC Lab 5</p><h2 id="judul5">Rentang nilai piksel dan ADC</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg viewBox="0 0 700 330" width="700" height="330" role="img" aria-label="Perbandingan jumlah tingkat nilai. ADC 10 bit memiliki 1024 tingkat dengan rentang 0 sampai 1023. Piksel 8 bit memiliki 256 tingkat dengan rentang 0 sampai 255. Batang menggunakan skala yang sama.">
+        <text x="0" y="34">ADC 10 bit</text><text x="640" y="34" text-anchor="end" font-weight="700">1024 tingkat</text>
+        <rect x="0" y="54" width="640" height="48" rx="3" fill="var(--teks-lembut)"/>
+        <text x="0" y="130" class="label-kecil lembut">0</text><text x="640" y="130" text-anchor="end" class="label-kecil lembut">1023</text>
+        <text x="0" y="190">Piksel 8 bit</text><text x="640" y="190" text-anchor="end" font-weight="700" class="oranye">256 tingkat</text>
+        <rect x="0" y="210" width="160" height="48" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="286" class="label-kecil lembut">0</text><text x="160" y="286" text-anchor="end" class="label-kecil lembut">255</text>
+        <text x="0" y="322" class="label-kecil lembut">Skala batang sama untuk keduanya</text>
+      </svg>
+      <p class="catatan" style="margin-top:14px"><strong>Jumlah tingkat = 2<sup>n</sup>, dengan n menyatakan jumlah bit</strong><br><span class="lembut">Contoh 2<sup>8</sup> = 256 dan 2<sup>10</sup> = 1024.</span></p>
+    </div>
+    <div style="padding-top:8px">
+      <h3>Perbandingan ketelitian</h3>
+      <table class="tabel"><thead><tr><th>Besaran</th><th>ADC<br>Lab 5</th><th style="text-align:right">Piksel<br>Lab 12</th></tr></thead><tbody>
+        <tr><td>Bit</td><td>10 bit</td><td>8 bit</td></tr>
+        <tr><td>Tingkat</td><td>1024</td><td>256</td></tr>
+        <tr><td>Rentang</td><td>0 sampai 1023</td><td>0 sampai 255</td></tr>
+      </tbody></table>
+      <p class="catatan lembut" style="margin-top:26px">ADC pada Lab 5 membaca cahaya pada satu titik. Kamera membaca banyak piksel sekaligus, masing-masing dengan 256 tingkat nilai.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6. Pola P4 dua kondisi berdampingan -->
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Jumlah piksel dalam satu frame</p><h2 id="judul6">Resolusi tinggi dan resolusi rendah</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Frame 32 × 20</h3>
+        <svg viewBox="0 0 490 352" role="img" aria-label="Frame simulator berukuran 32 kolom dan 20 baris, seluruhnya 640 piksel. Garis gelap di tengah memiliki tepi yang bertingkat halus.">
+          <text x="5" y="26" font-weight="700">640 piksel</text>
+          <text x="485" y="26" text-anchor="end" class="label-kecil lembut">Frame simulator Lab 12</text>
+          <g class="kisi" data-frame="asli" data-x="5" data-y="44" data-sel="15" data-kolom="0" data-baris="0" data-nk="32" data-nb="20"></g>
+        </svg>
+        <p><strong>640 nilai diproses setiap frame.</strong><br>Tepi garis halus, beban pemrosesan lebih besar.</p>
+      </div>
+      <div>
+        <h3>Frame 8 × 5</h3>
+        <svg viewBox="0 0 490 352" role="img" aria-label="Frame yang sama pada resolusi 8 kolom dan 5 baris, seluruhnya 40 piksel. Setiap piksel merupakan rata-rata 4 kali 4 piksel frame simulator. Dua kolom gelap di tengah masih menunjukkan posisi garis.">
+          <text x="5" y="26" font-weight="700">40 piksel</text>
+          <text x="485" y="26" text-anchor="end" class="label-kecil lembut">Rata-rata 4 × 4 piksel</text>
+          <g class="kisi" data-frame="rendah" data-x="5" data-y="44" data-sel="60" data-kolom="0" data-baris="0" data-nk="8" data-nb="5"></g>
+        </svg>
+        <p><strong>40 nilai diproses setiap frame.</strong><br>Tepi garis kasar, posisi garis masih dapat dikenali.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7. Pola P5 gambar interaktif -->
+<section class="slide" aria-labelledby="judul7" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Kontrol pada simulator</p><h2 id="judul7">Pengaruh Zoom terhadap tampilan</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikZoom" viewBox="0 0 700 384" width="700" height="384" role="img" aria-label="Tampilan frame pada Zoom 4 kali. Tampilan memuat kolom 12 sampai 19. Nilai piksel tetap, yaitu 66, 25, 25, 25, 25, 25, 25, 66 dari kiri ke kanan."></svg>
+      <div class="pilihan" style="margin-top:16px" role="group" aria-label="Pilih nilai Zoom">
+        <button type="button" data-nilai="2" aria-pressed="false">2×</button>
+        <button type="button" data-nilai="4" aria-pressed="true">4×</button>
+        <button type="button" data-nilai="8" aria-pressed="false">8×</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>Zoom <span id="nilaiKini" class="oranye">4×</span></h3>
+      <p id="uraiKini">Tampilan memuat delapan kolom piksel. Kotak setiap piksel dan nilainya terlihat jelas.</p>
+      <p>Zoom hanya mengubah ukuran tampilan. Jumlah piksel dan nilai setiap piksel tetap.</p>
+      <p class="catatan lembut">Slider Zoom pada simulator memiliki rentang 1× sampai 8×. Perbesaran berpusat di tengah frame.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8. Pola P7 kegiatan simulator -->
+<section class="slide" aria-labelledby="judul8" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 12</p><h2 id="judul8">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Zoom</h3><p>Geser slider Zoom hingga kotak piksel terlihat jelas.<br>Amati bahwa jumlah dan nilai piksel tidak berubah.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Nilai piksel</h3><p>Arahkan penunjuk atau ketuk satu piksel pada citra.<br>Catat nilai pada panel Nilai piksel dipilih.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Garis dan lantai</h3><p>Bandingkan nilai piksel pada garis gelap dan lantai terang.<br>Tentukan area yang memiliki nilai lebih kecil.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Nilai piksel pada area garis gelap telah diperiksa.<br>Nilai piksel pada area lantai terang telah diperiksa.</p></div>
+  </div>
+</section>
+
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 12 · Piksel dan citra digital</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 8</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab12-piksel.js, engine/kamera.js, render/kameraView.js.
+  // Nilai piksel dihitung dengan rumus nilaiPiksel pada engine/kamera.js untuk kondisi pencahayaan normal dan garis di tengah frame.
+  // Perbesaran slide 7 mengikuti geometriFrame pada render/kameraView.js, yaitu ukuran kotak = ukuran dasar × zoom dan berpusat di tengah frame.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) if (value !== null && value !== undefined) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+
+  // ===== R9. Kisi piksel bernilai. Satu fungsi gambar untuk semua kisi pada deck =====
+  const FRAME_LEBAR = 32, FRAME_TINGGI = 20;          // engine/kamera.js FRAME_LEBAR, FRAME_TINGGI
+  const LEBAR_GARIS_PIKSEL = 6, TRANSISI_PIKSEL = 2.5; // engine/kamera.js
+  const NILAI_GELAP = 25, NILAI_TERANG = 230;          // engine/kamera.js KONDISI_PENCAHAYAAN.normal
+
+  // Salinan rumus nilaiPiksel pada engine/kamera.js dengan posisi garis FRAME_LEBAR / 2.
+  function nilaiPiksel(kolom) {
+    const jarak = Math.abs(kolom + 0.5 - FRAME_LEBAR / 2), setengah = LEBAR_GARIS_PIKSEL / 2;
+    const fraksiHitam = jarak <= setengah ? 1 : jarak >= setengah + TRANSISI_PIKSEL ? 0 : 1 - (jarak - setengah) / TRANSISI_PIKSEL;
+    return Math.round(NILAI_TERANG - (NILAI_TERANG - NILAI_GELAP) * fraksiHitam);
+  }
+  const frameAsli = Array.from({length: FRAME_TINGGI}, () => Array.from({length: FRAME_LEBAR}, (_, kolom) => nilaiPiksel(kolom)));
+
+  // Resolusi rendah untuk slide 6. Setiap piksel baru adalah rata-rata blok n × n piksel. Ini ilustrasi deck, bukan fungsi simulator.
+  function rataRataBlok(frame, n) {
+    const hasil = [];
+    for (let b = 0; b < frame.length; b += n) {
+      const baris = [];
+      for (let k = 0; k < frame[0].length; k += n) {
+        let jumlah = 0;
+        for (let db = 0; db < n; db++) for (let dk = 0; dk < n; dk++) jumlah += frame[b + db][k + dk];
+        baris.push(Math.round(jumlah / (n * n)));
+      }
+      hasil.push(baris);
+    }
+    return hasil;
+  }
+  const FRAME = {asli: frameAsli, rendah: rataRataBlok(frameAsli, 4)};
+
+  // Tingkat keabuan hanya memakai token. Enam tingkat agar 0, 25, 66, 148, 230, dan 255 tetap dapat dibedakan.
+  function warnaPiksel(nilai) {
+    if (nilai < 13) return 'var(--lintasan)';
+    if (nilai < 46) return 'var(--teks)';
+    if (nilai < 107) return 'var(--robot-roda)';
+    if (nilai < 189) return 'var(--teks-lembut)';
+    if (nilai < 243) return 'var(--abu-garis)';
+    return 'var(--putih)';
+  }
+  const bulat1 = (n) => Math.round(n * 10) / 10;
+
+  // gambarKisi(g, opsi). Menggambar bagian frame ke dalam bidang x, y, lebar, tinggi. Kotak yang melewati bidang dipotong, seperti kanvas simulator.
+  // opsi: frame, x, y, sel, kolomAwal, barisAwal (boleh pecahan), lebar, tinggi, tulisNilai, yNomorKolom, barisPindai.
+  function gambarKisi(g, o) {
+    g.replaceChildren();
+    const add = (tag, attr, isi) => g.appendChild(elemen(tag, attr, isi));
+    const {frame, x, y, sel, kolomAwal, barisAwal, lebar, tinggi} = o;
+    const tebalKisi = sel >= 30 ? 2 : 1, ukuranHuruf = sel >= 70 ? 22 : 20;
+    const label = [];
+    for (let b = 0; b < frame.length; b++) for (let k = 0; k < frame[0].length; k++) {
+      const xa = x + (k - kolomAwal) * sel, ya = y + (b - barisAwal) * sel;
+      const x1 = Math.max(xa, x), y1 = Math.max(ya, y), x2 = Math.min(xa + sel, x + lebar), y2 = Math.min(ya + sel, y + tinggi);
+      if (x2 - x1 < 1 || y2 - y1 < 1) continue;
+      const nilai = frame[b][k];
+      add('rect', {x: bulat1(x1), y: bulat1(y1), width: bulat1(x2 - x1), height: bulat1(y2 - y1), fill: warnaPiksel(nilai), stroke: 'var(--putih)', 'stroke-width': tebalKisi});
+      const utuh = x2 - x1 > sel - 0.5 && y2 - y1 > sel - 0.5;
+      if (o.tulisNilai && utuh) label.push([xa + sel / 2, ya + sel / 2 + ukuranHuruf * 0.35, nilai]);
+    }
+    // Warna teks nilai dibalik pada kotak gelap.
+    for (const [tx, ty, nilai] of label) add('text', {'data-tahap': o.tahapNilai || null, x: bulat1(tx), y: bulat1(ty), 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:' + ukuranHuruf + 'px;fill:' + (nilai < 189 ? 'var(--putih)' : 'var(--teks)')}, String(nilai));
+    if (o.yNomorKolom) for (let k = Math.ceil(kolomAwal); (k + 1 - kolomAwal) * sel <= lebar + 0.5; k++)
+      add('text', {x: bulat1(x + (k - kolomAwal + 0.5) * sel), y: o.yNomorKolom, 'text-anchor': 'middle', class: 'label-kecil lembut'}, String(k));
+    // Bingkai pindai. Digambar berpusat di titik 0,0 lalu ditempatkan melalui variabel CSS. Bergerak sepanjang satu baris, dari kolom pertama ke kolom terakhir.
+    if (o.barisPindai !== undefined) {
+      const jumlahKolom = Math.round(lebar / sel);
+      const hantu = add('rect', {class: 'hantu', 'aria-hidden': 'true', x: -sel / 2, y: -sel / 2, width: sel, height: sel, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 5});
+      hantu.style.setProperty('--px', (x + sel / 2) + 'px');
+      hantu.style.setProperty('--py', (y + (o.barisPindai + 0.5) * sel) + 'px');
+      hantu.style.setProperty('--maju', ((jumlahKolom - 1) * sel) + 'px');
+    }
+  }
+  document.querySelectorAll('.kisi').forEach((g) => {
+    const d = g.dataset, sel = Number(d.sel);
+    gambarKisi(g, {frame: FRAME[d.frame], x: Number(d.x), y: Number(d.y), sel, kolomAwal: Number(d.kolom), barisAwal: Number(d.baris),
+      lebar: Number(d.nk) * sel, tinggi: Number(d.nb) * sel, tulisNilai: d.nilai === 'ya', tahapNilai: d.tahapNilai,
+      yNomorKolom: d.nomorKolom ? Number(d.nomorKolom) : 0, barisPindai: d.pindai !== undefined ? Number(d.pindai) : undefined});
+  });
+
+  // ===== SLIDE 7. Tampilan frame pada tiga nilai Zoom =====
+  const grafikZoom = document.getElementById('grafikZoom');
+  const BIDANG = {x: 46, y: 2, lebar: 608, tinggi: 380};       // ukuran dasar kotak 608 ÷ 32 = 19
+  const KET_ZOOM = {
+    2: 'Tampilan memuat enam belas kolom dan sepuluh baris piksel. Garis dan lantai terlihat bersamaan.',
+    4: 'Tampilan memuat delapan kolom piksel. Kotak setiap piksel dan nilainya terlihat jelas.',
+    8: 'Tampilan memuat empat kolom piksel di tengah garis. Semua piksel yang terlihat bernilai sama.',
+  };
+  function tampilNilai(zoom) {
+    grafikZoom.replaceChildren();
+    const g = grafikZoom.appendChild(elemen('g', {}));
+    const sel = Math.min(BIDANG.lebar / FRAME_LEBAR, BIDANG.tinggi / FRAME_TINGGI) * zoom;
+    const kolomAwal = (FRAME_LEBAR - BIDANG.lebar / sel) / 2, barisAwal = (FRAME_TINGGI - BIDANG.tinggi / sel) / 2;
+    gambarKisi(g, {frame: frameAsli, ...BIDANG, sel, kolomAwal, barisAwal, tulisNilai: sel >= 60});
+    grafikZoom.appendChild(elemen('rect', {x: BIDANG.x, y: BIDANG.y, width: BIDANG.lebar, height: BIDANG.tinggi, fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 2}));
+    const kolomPertama = Math.ceil(kolomAwal), kolomTerakhir = Math.floor(kolomAwal + BIDANG.lebar / sel) - 1;
+    const nilaiTerlihat = frameAsli[0].slice(kolomPertama, kolomTerakhir + 1);
+    document.getElementById('nilaiKini').textContent = zoom + '×';
+    document.getElementById('uraiKini').textContent = KET_ZOOM[zoom];
+    document.querySelectorAll('[data-nilai]').forEach((tombol) => tombol.setAttribute('aria-pressed', String(Number(tombol.dataset.nilai) === zoom)));
+    grafikZoom.setAttribute('aria-label', 'Tampilan frame pada Zoom ' + zoom + ' kali. Tampilan memuat kolom ' + kolomPertama + ' sampai ' + kolomTerakhir + '. Nilai piksel tetap, yaitu ' + nilaiTerlihat.join(', ') + ' dari kiri ke kanan.');
+  }
+  document.querySelectorAll('[data-nilai]').forEach((tombol) => tombol.addEventListener('click', () => tampilNilai(Number(tombol.dataset.nilai))));
+  tampilNilai(4);
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

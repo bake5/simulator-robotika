@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 8. Driver Motor</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+.nomor-besar{font-size:86px;font-weight:700;letter-spacing:-.05em;line-height:1}
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro{position:relative}.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.keterangan-arus{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+.legend{display:flex;gap:28px;align-items:center;font-size:17px}.legend span{display:flex;gap:10px;align-items:center}.garis-legenda{width:34px;height:4px;background:var(--oranye)}.garis-legenda.sinyal{height:0;border-top:3px dashed var(--teks-lembut);background:none}
+.saklar-petunjuk{border-top:1px solid var(--abu-garis);margin-top:28px;padding-top:22px}
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+.peringatan{border-left:4px solid var(--merah);padding:0 0 0 24px;margin-top:30px}
+.rumus{font-size:29px;font-weight:700;line-height:1.5;margin-top:20px}
+.baris-rumus{display:flex;align-items:center;gap:16px;margin-top:8px}.fraksi{display:inline-flex;flex-direction:column;text-align:center;min-width:166px;font-size:22px}.fraksi span:first-child{border-bottom:2px solid var(--teks);padding:0 5px 5px}.fraksi span:last-child{padding-top:5px}
+.pwm-pilihan{display:flex;gap:14px;margin-top:27px}
+.pwm-pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pwm-pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+.tabel{width:100%;border-collapse:collapse;font-size:21px;margin-top:25px}
+.tabel th{font-size:15px;line-height:1.5;color:var(--teks-lembut);font-weight:600;text-align:left;padding:0 0 16px}
+.tabel td{border-top:1px solid var(--abu-garis);padding:19px 0}
+.tabel td:first-child{font-weight:700}.tabel td:last-child{text-align:right}
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 8, Driver Motor">
+<section class="slide aktif" aria-labelledby="judul1">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 8 · Modul 3</p>
+      <h1 id="judul1">Driver<br><span class="oranye">motor</span></h1>
+      <p class="ringkas">Mengatur arah dan kecepatan motor DC.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Motor DC menggunakan sumber tegangan searah untuk menghasilkan putaran.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Kebutuhan arus motor</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Contoh pada simulator. Batas pin 20 miliampere, motor normal 250 miliampere, motor macet 800 miliampere. Batang menggunakan skala yang sama.">
+        <text x="0" y="30">Batas arus pin</text><text x="635" y="30" text-anchor="end" font-weight="700">20 mA</text>
+        <rect x="0" y="45" width="15" height="22" rx="3" fill="var(--teks-lembut)"/>
+        <text x="0" y="113">Motor berputar normal</text><text x="635" y="113" text-anchor="end" font-weight="700" class="oranye">250 mA</text>
+        <rect x="0" y="128" width="187.5" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="196">Motor macet</text><text x="635" y="196" text-anchor="end" font-weight="700" class="merah">800 mA</text>
+        <rect x="0" y="211" width="600" height="22" rx="3" fill="var(--merah)"/>
+        <text x="0" y="269" class="label-kecil lembut">Contoh nilai arus pada simulator Lab 8</text>
+      </svg>
+      <p class="keterangan-arus">Kebutuhan arus motor melebihi kemampuan pin. Driver mengatur pasokan arus dari sumber daya ke motor.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Fungsi driver</p><h2 id="judul2">Jalur sinyal dan daya</h2></header>
+  <div class="isi">
+    <svg viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Sinyal arah dan PWM dari mikrokontroler masuk ke driver. Sumber daya terhubung ke driver melalui jalur terpisah. Dua keluaran driver terhubung ke motor.">
+      <defs>
+        <marker id="panahSinyal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L8 5 L1 9" fill="none" stroke="var(--teks-lembut)" stroke-width="1.5"/></marker>
+      </defs>
+      <rect x="20" y="160" width="240" height="160" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="140" y="229" text-anchor="middle" font-size="24" font-weight="700">Mikrokontroler</text>
+      <text x="140" y="263" text-anchor="middle" class="label-kecil lembut">Mengirim sinyal kendali</text>
+      <path d="M278 205 H468" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <path d="M278 283 H468" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <text x="374" y="188" text-anchor="middle" class="label-kecil">Sinyal arah</text>
+      <text x="374" y="265" text-anchor="middle" class="label-kecil">PWM</text>
+      <rect x="490" y="151" width="230" height="181" rx="12" fill="var(--oranye-muda)" stroke="var(--oranye)" stroke-width="3"/>
+      <text x="605" y="226" text-anchor="middle" font-weight="700" style="font-size:34px">Driver</text>
+      <text x="605" y="263" text-anchor="middle">Mengatur arus motor</text>
+      <text x="605" y="34" text-anchor="middle" font-size="23" font-weight="700">Sumber daya</text>
+      <text x="605" y="64" text-anchor="middle" class="label-kecil lembut">Pasokan untuk motor</text>
+      <path d="M574 83 V149 M636 83 V149" class="arus"/>
+      <text x="550" y="106" text-anchor="end" class="oranye">+</text><text x="660" y="106" class="oranye">−</text>
+      <path d="M722 207 H839 V241 H883 M722 286 H839 V320 H1035 V241 H1008" class="arus"/>
+      <circle cx="945" cy="241" r="63" fill="var(--putih)" stroke="var(--teks)" stroke-width="4"/>
+      <text x="945" y="253" text-anchor="middle" style="font-size:34px" font-weight="700">M</text>
+      <text x="945" y="135" text-anchor="middle" font-size="24" font-weight="700">Motor DC</text>
+      <text x="794" y="183" text-anchor="middle" class="label-kecil oranye">A</text><text x="794" y="314" text-anchor="middle" class="label-kecil oranye">B</text>
+    </svg>
+    <div class="legend" style="margin-top:14px"><span><i class="garis-legenda sinyal"></i>Sinyal kendali</span><span><i class="garis-legenda"></i>Jalur daya motor</span></div>
+    <p class="catatan lembut bawah">Diagram fungsi disederhanakan. Sambungan GND mikrokontroler dan driver tidak ditampilkan.</p>
+  </div>
+</section>
+
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Rangkaian pengatur arah</p><h2 id="judul3">Empat saklar pada H-bridge</h2></header>
+  <div class="isi terbagi">
+    <svg class="rangkaian" data-mode="terbuka" viewBox="0 0 600 450" width="700" height="450" role="img" aria-label="H-bridge dengan empat saklar terbuka. S1 kiri atas, S2 kiri bawah, S3 kanan atas, S4 kanan bawah. Motor di antara titik A dan B."></svg>
+    <div class="teks-samping">
+      <h3>Titik A dan B terhubung ke motor.</h3>
+      <p>Pasangan saklar yang tertutup menentukan arah arus melalui motor.</p>
+      <div class="saklar-petunjuk">
+        <svg viewBox="0 0 350 72" width="350" height="72" role="img" aria-label="Simbol saklar terbuka memiliki celah. Simbol saklar tertutup menghubungkan kedua kontak.">
+          <path d="M8 34 H29 M29 34 L69 10 M69 34 H95 M188 34 H278" class="kawat"/>
+          <g fill="var(--putih)" stroke="var(--teks)" stroke-width="2"><circle cx="29" cy="34" r="4"/><circle cx="69" cy="34" r="4"/><circle cx="210" cy="34" r="4"/><circle cx="254" cy="34" r="4"/></g>
+          <text x="48" y="69" text-anchor="middle" class="label-kecil">Terbuka</text><text x="234" y="69" text-anchor="middle" class="label-kecil">Tertutup</text>
+        </svg>
+      </div>
+      <p class="catatan lembut">Saklar menggambarkan kerja transistor di dalam driver.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" aria-labelledby="judul4" hidden data-video="steps=2">
+  <header class="judul"><p class="kicker">Dua kondisi rangkaian</p><h2 id="judul4">Perubahan arah putaran motor</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3 class="oranye">Maju</h3>
+        <svg class="rangkaian" data-mode="maju" viewBox="0 0 600 430" role="img" aria-label="Maju. S1 dan S4 tertutup, S2 dan S3 terbuka. Arus melewati motor dari A ke B."></svg>
+        <p><strong>S1 dan S4 tertutup.</strong><br>Arus melalui motor dari A ke B.</p>
+      </div>
+      <div data-tahap="2">
+        <h3 style="color:var(--hijau)">Mundur</h3>
+        <svg class="rangkaian" data-mode="mundur" viewBox="0 0 600 430" role="img" aria-label="Mundur. S2 dan S3 tertutup, S1 dan S4 terbuka. Arus melewati motor dari B ke A."></svg>
+        <p><strong>S2 dan S3 tertutup.</strong><br>Arus melalui motor dari B ke A.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" aria-labelledby="judul5" hidden>
+  <header class="judul"><p class="kicker">Kombinasi saklar yang harus dihindari</p><h2 id="judul5">Penyebab hubung singkat</h2></header>
+  <div class="isi terbagi">
+    <svg class="rangkaian" data-mode="short" viewBox="0 0 600 450" width="700" height="450" role="img" aria-label="S1 dan S2 tertutup bersamaan. Jalur merah menghubungkan sumber 5 V langsung ke GND tanpa melalui motor. S3 dan S4 terbuka."></svg>
+    <div class="teks-samping">
+      <h3 class="merah">S1 dan S2 tertutup bersamaan</h3>
+      <p>Sumber terhubung langsung ke GND tanpa melalui motor.</p>
+      <p class="catatan">Kondisi yang sama terjadi jika S3 dan S4 tertutup bersamaan.</p>
+      <div class="peringatan"><h3 class="merah">Hanya diuji di simulator</h3><p class="catatan" style="margin-top:12px">Pada perangkat keras, arus hubung singkat dapat merusak driver atau sumber daya.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Pengaturan kecepatan</p><h2 id="judul6">Sinyal PWM dan duty cycle</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikPWM" viewBox="0 0 700 330" width="700" height="330" role="img" aria-label="Sinyal PWM dengan sumber 5 V dan duty cycle 50 persen. Bagian HIGH berlangsung selama setengah periode."></svg>
+      <div class="pwm-pilihan" role="group" aria-label="Pilih duty cycle">
+        <button type="button" data-duty="25" aria-pressed="false">25%</button>
+        <button type="button" data-duty="50" aria-pressed="true">50%</button>
+        <button type="button" data-duty="75" aria-pressed="false">75%</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>Duty cycle <span id="nilaiDuty" class="oranye">50%</span></h3>
+      <p id="uraiDuty">Tegangan berada pada 5 V selama setengah periode, lalu 0 V selama sisanya.</p>
+      <div class="rumus" aria-label="Duty cycle sama dengan waktu HIGH dibagi periode, dikalikan 100 persen">Duty cycle =<div class="baris-rumus"><span class="fraksi"><span class="oranye">waktu HIGH</span><span>periode</span></span><span>× 100%</span></div></div>
+      <p class="catatan lembut">Satu periode mencakup satu bagian HIGH dan satu bagian LOW.</p>
+    </div>
+    <p class="catatan bawah">PWM mengatur durasi HIGH pada setiap periode. Tinggi pulsa tetap 5 V.</p>
+  </div>
+</section>
+
+<section class="slide" aria-labelledby="judul7" hidden data-video="steps=2">
+  <header class="judul"><p class="kicker">Hasil pada model motor simulator</p><h2 id="judul7">Pengaruh duty cycle terhadap putaran</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg viewBox="0 0 700 375" width="700" height="375" role="img" aria-label="Grafik model simulator. Duty cycle bertambah dari 0 sampai 100 persen, kecepatan bertambah dari 0 sampai 597 RPM secara linear.">
+        <text x="4" y="24" font-size="19">Kecepatan motor (RPM)</text>
+        <g stroke="var(--abu-garis)" stroke-width="1"><path d="M68 63 H650 M68 179 H650 M68 295 H650"/></g>
+        <path d="M68 48 V295 H658" fill="none" stroke="var(--teks-lembut)" stroke-width="2"/>
+        <g class="lembut" text-anchor="end"><text x="52" y="70" class="label-kecil">600</text><text x="52" y="186" class="label-kecil">300</text><text x="52" y="302" class="label-kecil">0</text></g>
+        <path d="M68 295 L640 64.2 L640 295 Z" fill="var(--oranye-muda)"/>
+        <path d="M68 295 L640 64.2" fill="none" stroke="var(--oranye)" stroke-width="4"/>
+        <g fill="var(--oranye)" stroke="var(--putih)" stroke-width="3"><circle cx="68" cy="295" r="7"/><circle cx="211" cy="237.3" r="7"/><circle cx="354" cy="179.6" r="7"/><circle cx="497" cy="121.9" r="7"/><circle cx="640" cy="64.2" r="7"/></g>
+        <g text-anchor="middle" font-size="17"><text x="68" y="326">0</text><text x="211" y="326">25</text><text x="354" y="326">50</text><text x="497" y="326">75</text><text x="640" y="326">100</text></g>
+        <text x="650" y="363" text-anchor="end" class="label-kecil">Duty cycle (%)</text>
+        <text x="622" y="45" text-anchor="end" font-weight="700" class="oranye" data-tahap="2">597 RPM</text>
+      </svg>
+      <p class="catatan" style="margin-top:14px"><strong>Tegangan rata-rata = duty cycle × 5 V</strong><br><span class="lembut">Contoh 50% × 5 V = 2,50 V.</span></p>
+    </div>
+    <div style="padding-top:8px" data-tahap="2">
+      <h3>Contoh pembacaan</h3>
+      <table class="tabel"><thead><tr><th>Duty<br>cycle</th><th>Tegangan<br>rata-rata</th><th style="text-align:right">Kecepatan<br>motor</th></tr></thead><tbody>
+        <tr><td>25%</td><td>1,25 V</td><td>149 RPM</td></tr>
+        <tr><td>50%</td><td>2,50 V</td><td>298 RPM</td></tr>
+        <tr><td>75%</td><td>3,75 V</td><td>448 RPM</td></tr>
+      </tbody></table>
+      <p class="catatan lembut" style="margin-top:26px">Simulator memakai model tanpa beban yang disederhanakan. Pada perangkat keras, beban dan karakteristik motor turut memengaruhi putaran.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" aria-labelledby="judul8" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 8</p><h2 id="judul8">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Kebutuhan driver</h3><p>Amati perbandingan arus pin dan kebutuhan arus motor.<br>Jelaskan mengapa motor memerlukan driver.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>H-bridge</h3><p>Coba kondisi maju, mundur, dan hubung singkat.<br>Amati pasangan saklar dan jalur arus pada setiap kondisi.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>PWM</h3><p>Ubah duty cycle. Bandingkan lebar pulsa, tegangan<br>rata-rata, dan kecepatan motor yang ditampilkan.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Kondisi maju, mundur, dan hubung singkat masing-masing telah ditemukan.<br>Pengaturan PWM digunakan untuk mengeksplorasi perubahan kecepatan.</p></div>
+  </div>
+</section>
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 8 · Driver motor</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 8</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab08-driver-motor.js, engine/motor.js, render/motorView.js.
+  // Urutan saklar mengikuti simulator. Kawat sengaja berhenti pada kedua kontak.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+  function gambarRangkaian(svg) {
+    const mode = svg.dataset.mode;
+    const aktif = mode === 'maju' ? [1,4] : mode === 'mundur' ? [2,3] : mode === 'short' ? [1,2] : [];
+    const warna = mode === 'short' ? 'var(--merah)' : mode === 'mundur' ? 'var(--hijau)' : 'var(--oranye)';
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    add('path', {d:'M300 53 V80 H130 V117 M300 80 H470 V117 M130 173 V247 M470 173 V247 M130 303 V345 H470 V303 M300 345 V367 M130 210 H241 M359 210 H470',class:'kawat'});
+    add('path', {d:'M276 370 H324 M284 380 H316 M293 390 H307',class:'kawat'});
+    add('text',{x:300,y:34,'text-anchor':'middle','font-weight':700},'5 V');
+    add('text',{x:340,y:387,class:'label-kecil lembut'},'GND');
+    const jalurArus = mode === 'maju' ? 'M300 53 V80 H130 V210 H241 M359 210 H470 V345 H300 V367'
+      : mode === 'mundur' ? 'M300 53 V80 H470 V210 H359 M241 210 H130 V345 H300 V367'
+      : mode === 'short' ? 'M300 53 V80 H130 V345 H300 V367' : '';
+    if (jalurArus) {
+      add('path',{d:jalurArus,class:'arus',style:'stroke:'+warna});
+      add('path',{d:jalurArus,class:'aliran'});
+    }
+    for (const [num,x,y] of [[1,130,145],[2,130,275],[3,470,145],[4,470,275]]) {
+      const tertutup = aktif.includes(num);
+      // Tuas berangkat dari kontak bawah. Saat terbuka, ujungnya menjauhi kontak atas.
+      add('line',{x1:x,y1:y+28,x2:tertutup?x:x+34,y2:y-28,stroke:tertutup?warna:'var(--teks-lembut)','stroke-width':tertutup?6:4,'stroke-linecap':'round'});
+      for(const dy of [-28,28]) add('circle',{cx:x,cy:y+dy,r:5,fill:'var(--putih)',stroke:tertutup?warna:'var(--teks-lembut)','stroke-width':3});
+      add('text',{x:x===130?x-27:x+47,y:y+7,'text-anchor':x===130?'end':'start','font-weight':700,style:'fill:'+(tertutup?warna:'var(--teks-lembut)')},'S'+num);
+    }
+    add('circle',{cx:300,cy:210,r:59,fill:'var(--putih)',stroke:'var(--teks)','stroke-width':4});
+    add('text',{x:300,y:223,'text-anchor':'middle',style:'font-size:36px','font-weight':700},'M');
+    add('text',{x:300,y:291,'text-anchor':'middle',class:'label-kecil lembut'},'Motor DC');
+    for(const [x,t] of [[130,'A'],[470,'B']]) {
+      add('circle',{cx:x,cy:210,r:5,fill:'var(--teks)'});
+      add('text',{x:x===130?x-25:x+25,y:216,'text-anchor':x===130?'end':'start','font-weight':700},t);
+    }
+    if(mode==='maju'||mode==='mundur') {
+      const keKanan=mode==='maju';
+      add('path',{d:keKanan?'M259 323 H341 M330 315 L341 323 L330 331':'M341 323 H259 M270 315 L259 323 L270 331',fill:'none',stroke:warna,'stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'});
+    }
+  }
+  document.querySelectorAll('.rangkaian').forEach(gambarRangkaian);
+
+  const grafik = document.getElementById('grafikPWM');
+  const kata = {25:'seperempat',50:'setengah',75:'tiga perempat'};
+  function tampilPWM(duty) {
+    grafik.replaceChildren();
+    const add = (tag,attr,isi) => grafik.appendChild(elemen(tag,attr,isi));
+    const x0=68, period=192, tinggi=84, rendah=250, waktuHigh=period*duty/100;
+    add('text',{x:0,y:20,class:'label-kecil'},'Tegangan');
+    add('path',{d:'M68 63 V250 H670',fill:'none',stroke:'var(--teks-lembut)','stroke-width':2});
+    add('text',{x:50,y:91,'text-anchor':'end'},'5 V');
+    add('text',{x:50,y:257,'text-anchor':'end'},'0 V');
+    for(let i=0;i<3;i++){
+      const x=x0+i*period;
+      add('rect',{x,y:tinggi,width:waktuHigh,height:rendah-tinggi,fill:'var(--oranye-muda)'});
+      add('path',{d:'M'+x+' '+rendah+' V'+tinggi+' H'+(x+waktuHigh)+' V'+rendah+' H'+(x+period),fill:'none',stroke:'var(--oranye)','stroke-width':4,'stroke-linejoin':'round'});
+    }
+    add('path',{d:'M68 277 V289 H260 V277',fill:'none',stroke:'var(--teks)','stroke-width':2});
+    add('text',{x:164,y:318,'text-anchor':'middle',class:'label-kecil'},'Satu periode');
+    add('text',{x:664,y:318,'text-anchor':'end',class:'label-kecil lembut'},'Waktu');
+    add('path',{d:'M68 70 V60 H'+(68+waktuHigh)+' V70',fill:'none',stroke:'var(--oranye)','stroke-width':2});
+    add('text',{x:68+waktuHigh/2,y:48,'text-anchor':'middle',class:'label-kecil oranye'},'HIGH');
+    document.getElementById('nilaiDuty').textContent=duty+'%';
+    document.getElementById('uraiDuty').textContent='Tegangan berada pada 5 V selama '+kata[duty]+' periode, lalu 0 V selama sisanya.';
+    document.querySelectorAll('[data-duty]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.duty)===duty)));
+    grafik.setAttribute('aria-label','Sinyal PWM dengan sumber 5 V dan duty cycle '+duty+' persen. Bagian HIGH berlangsung selama '+kata[duty]+' periode.');
+  }
+  document.querySelectorAll('[data-duty]').forEach(button=>button.addEventListener('click',()=>tampilPWM(Number(button.dataset.duty))));
+  tampilPWM(50);
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

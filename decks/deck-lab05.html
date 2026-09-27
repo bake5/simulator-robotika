@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 5. Photodiode</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK. Pakai apa adanya. Hapus pola yang tidak dipakai ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P2 diagram lebar penuh */
+.legend{display:flex;gap:28px;align-items:center;font-size:17px}.legend span{display:flex;gap:10px;align-items:center}.garis-legenda{width:34px;height:4px;background:var(--oranye)}.garis-legenda.sinyal{height:0;border-top:3px dashed var(--teks-lembut);background:none}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+.sisipan{border-top:1px solid var(--abu-garis);margin-top:28px;padding-top:22px}
+.peringatan{border-left:4px solid var(--merah);padding:0 0 0 24px;margin-top:30px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P5 grafik interaktif dan rumus */
+.rumus{font-size:29px;font-weight:700;line-height:1.5;margin-top:20px}
+.baris-rumus{display:flex;align-items:center;gap:16px;margin-top:8px}.fraksi{display:inline-flex;flex-direction:column;text-align:center;min-width:166px;font-size:22px}.fraksi span:first-child{border-bottom:2px solid var(--teks);padding:0 5px 5px}.fraksi span:last-child{padding-top:5px}
+.pilihan{display:flex;gap:14px;margin-top:27px}
+.pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+/* P6 grafik data dan tabel */
+.tabel{width:100%;border-collapse:collapse;font-size:21px;margin-top:25px}
+.tabel th{font-size:15px;line-height:1.5;color:var(--teks-lembut);font-weight:600;text-align:left;padding:0 0 16px}
+.tabel td{border-top:1px solid var(--abu-garis);padding:19px 0}
+.tabel td:first-child{font-weight:700}.tabel td:last-child{text-align:right}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI ===== */
+.rumus.kecil{font-size:24px;line-height:1.45;margin-top:24px}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 5, Photodiode">
+
+<!-- SLIDE 1. Pola P1 pembuka -->
+<section class="slide aktif" aria-labelledby="judul1" data-video="skip">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 5 · Modul 2</p>
+      <h1 id="judul1">Sensor<br><span class="oranye">cahaya</span></h1>
+      <p class="ringkas">Mengubah intensitas cahaya menjadi nilai ADC.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Photodiode adalah dioda yang peka terhadap cahaya.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Nilai ADC pada tiga kondisi cahaya</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Nilai ADC pada simulator Lab 5 dengan skala 0 sampai 1023. Kondisi gelap dengan cahaya 0 persen menghasilkan nilai 171. Kondisi sedang dengan cahaya 75 persen menghasilkan nilai 440. Kondisi terang penuh dengan cahaya 100 persen menghasilkan nilai 930.">
+        <text x="0" y="30">Gelap, cahaya 0%</text><text x="635" y="30" text-anchor="end" font-weight="700">171</text>
+        <rect x="0" y="45" width="600" height="22" rx="3" fill="var(--abu-garis)"/>
+        <rect x="0" y="45" width="100.3" height="22" rx="3" fill="var(--teks-lembut)"/>
+        <text x="0" y="113">Sedang, cahaya 75%</text><text x="635" y="113" text-anchor="end" font-weight="700" class="oranye">440</text>
+        <rect x="0" y="128" width="600" height="22" rx="3" fill="var(--abu-garis)"/>
+        <rect x="0" y="128" width="258.1" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="196">Terang penuh, cahaya 100%</text><text x="635" y="196" text-anchor="end" font-weight="700" class="oranye">930</text>
+        <rect x="0" y="211" width="600" height="22" rx="3" fill="var(--abu-garis)"/>
+        <rect x="0" y="211" width="545.5" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="269" class="label-kecil lembut">Nilai ADC pada simulator Lab 5</text>
+        <text x="600" y="269" text-anchor="end" class="label-kecil lembut">Skala 0 sampai 1023</text>
+      </svg>
+      <p class="simpulan-visual">Nilai ADC naik ketika cahaya yang diterima photodiode bertambah. Program membaca nilai ADC ini sebagai bacaan sensor.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. Pola P2 diagram lebar penuh -->
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Alur pembacaan sensor cahaya</p><h2 id="judul2">Dari cahaya menjadi nilai ADC</h2></header>
+  <div class="isi">
+    <svg viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Empat blok berurutan dari kiri ke kanan. Sumber cahaya mengirim cahaya ke photodiode. Photodiode menentukan resistansi R_PD pada pembagi tegangan. Pembagi tegangan menghasilkan V_keluar untuk ADC. ADC menghasilkan nilai 0 sampai 1023. Contoh kondisi terang penuh, cahaya 100 persen, R_PD 1 kiloohm, V_keluar 4,55 volt, nilai ADC 930.">
+      <defs>
+        <marker id="panahSinyal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L8 5 L1 9" fill="none" stroke="var(--teks-lembut)" stroke-width="1.5"/></marker>
+      </defs>
+      <rect x="2" y="30" width="212" height="220" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="108" y="132" text-anchor="middle" font-size="24" font-weight="700">Sumber cahaya</text>
+      <text x="108" y="166" text-anchor="middle" class="label-kecil lembut">Intensitas dan jarak</text>
+      <path d="M214 140 H302" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <text x="264" y="123" text-anchor="middle" class="label-kecil">Cahaya</text>
+      <rect x="314" y="30" width="212" height="220" rx="12" fill="var(--oranye-muda)" stroke="var(--oranye)" stroke-width="3"/>
+      <text x="420" y="132" text-anchor="middle" font-weight="700" style="font-size:28px">Photodiode</text>
+      <text x="420" y="166" text-anchor="middle" class="label-kecil">Menentukan nilai R_PD</text>
+      <path d="M526 140 H614" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <text x="576" y="123" text-anchor="middle" class="label-kecil">R_PD</text>
+      <rect x="626" y="30" width="212" height="220" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="732" y="116" text-anchor="middle" font-size="24" font-weight="700">Pembagi</text>
+      <text x="732" y="146" text-anchor="middle" font-size="24" font-weight="700">tegangan</text>
+      <text x="732" y="180" text-anchor="middle" class="label-kecil lembut">Menghasilkan V_keluar</text>
+      <path d="M838 140 H926" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <text x="888" y="123" text-anchor="middle" class="label-kecil">V_keluar</text>
+      <rect x="938" y="30" width="212" height="220" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="1044" y="132" text-anchor="middle" font-size="24" font-weight="700">ADC</text>
+      <text x="1044" y="166" text-anchor="middle" class="label-kecil lembut">Nilai 0 sampai 1023</text>
+      <text x="108" y="294" text-anchor="middle" font-weight="700" class="oranye" style="font-size:22px">Cahaya 100%</text>
+      <text x="420" y="294" text-anchor="middle" font-weight="700" class="oranye" style="font-size:22px">R_PD 1 kΩ</text>
+      <text x="732" y="294" text-anchor="middle" font-weight="700" class="oranye" style="font-size:22px">V_keluar 4,55 V</text>
+      <text x="1044" y="294" text-anchor="middle" font-weight="700" class="oranye" style="font-size:22px">ADC 930</text>
+      <text x="2" y="340" class="label-kecil lembut">Contoh nilai pada kondisi terang penuh</text>
+    </svg>
+    <p class="catatan lembut bawah">Program membaca nilai ADC, bukan nilai tegangan secara langsung.</p>
+  </div>
+</section>
+
+<!-- SLIDE 3. Pola P3 visual kiri, teks kanan -->
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Masukan pada simulator</p><h2 id="judul3">Intensitas dan jarak sumber cahaya</h2></header>
+  <div class="isi terbagi">
+    <svg id="gambarJarak" data-jarak="40" viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Photodiode tetap di kanan dan sumber cahaya berada pada jarak 40 dengan intensitas 100 persen. Grafik di bawahnya memakai sumbu jarak yang sama. Cahaya efektif 100 persen pada jarak 20, 25 persen pada jarak 40, 11 persen pada jarak 60, 4 persen pada jarak 100, dan 2 persen pada jarak 150."></svg>
+    <div class="teks-samping">
+      <h3>Cahaya efektif berbanding terbalik dengan kuadrat jarak.</h3>
+      <p>Slider mengatur intensitas sumber cahaya. Jarak ke photodiode berada pada rentang 20 sampai 150.</p>
+      <div class="rumus kecil" aria-label="Cahaya efektif sama dengan intensitas dikali kuadrat dari 20 dibagi jarak">Cahaya efektif =<br><span class="oranye">intensitas</span> × (20 ÷ <span class="oranye">jarak</span>)²</div>
+      <p class="catatan lembut">Panel simulator menampilkan cahaya efektif sebagai Cahaya di sensor. Jarak memakai satuan relatif, bukan sentimeter.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. Pola P3 visual kiri, teks kanan -->
+<section class="slide" aria-labelledby="judul4" hidden>
+  <header class="judul"><p class="kicker">Rangkaian pembaca cahaya</p><h2 id="judul4">Photodiode pada pembagi tegangan</h2></header>
+  <div class="isi terbagi">
+    <svg class="pembagi" data-mode="struktur" data-cahaya="100" viewBox="0 0 600 430" width="700" height="450" role="img" aria-label="Pembagi tegangan tegak. VCC 5 volt di atas, lalu R_PD yang mewakili photodiode, titik sambung V_keluar, R_tetap 10 kiloohm, dan GND 0 volt di bawah. Cahaya mengenai R_PD. Titik sambung V_keluar terhubung ke ADC yang menghasilkan nilai 0 sampai 1023."></svg>
+    <div class="teks-samping">
+      <h3>R_PD dan R_tetap tersusun seri.</h3>
+      <p>V_keluar diambil dari titik sambung kedua resistor, lalu diukur oleh ADC.</p>
+      <p>R_PD mengecil saat cahaya bertambah, dari 50 kΩ sampai 1 kΩ.</p>
+      <p class="catatan lembut">Pada perangkat keras, photodiode menghasilkan arus yang sebanding dengan cahaya. Simulator memodelkannya sebagai resistansi R_PD agar rumus pembagi tegangan dapat digunakan.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5. Pola P4 dua kondisi berdampingan -->
+<section class="slide" aria-labelledby="judul5" hidden data-video="steps=2">
+  <header class="judul"><p class="kicker">Dua kondisi cahaya</p><h2 id="judul5">Rangkaian saat gelap dan terang</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Gelap</h3>
+        <svg class="pembagi" data-mode="keadaan" data-cahaya="0" viewBox="0 0 600 430" role="img" aria-label="Gelap. Cahaya 0 persen sehingga R_PD 50 kiloohm. Arus 0,083 miliampere mengalir dari VCC 5 volt melalui R_PD dan R_tetap 10 kiloohm ke GND. V_keluar 0,83 volt dan nilai ADC 171."></svg>
+        <p><strong>R_PD lima kali R_tetap.</strong><br>V_keluar jauh di bawah 5 V, yaitu 0,83 V.</p>
+      </div>
+      <div data-tahap="2">
+        <h3>Terang penuh</h3>
+        <svg class="pembagi" data-mode="keadaan" data-cahaya="100" viewBox="0 0 600 430" role="img" aria-label="Terang penuh. Cahaya 100 persen sehingga R_PD 1 kiloohm. Arus 0,455 miliampere mengalir dari VCC 5 volt melalui R_PD dan R_tetap 10 kiloohm ke GND. V_keluar 4,55 volt dan nilai ADC 930."></svg>
+        <p><strong>R_PD sepersepuluh R_tetap.</strong><br>V_keluar mendekati 5 V, yaitu 4,55 V.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6. Pola P5 grafik interaktif dan rumus -->
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Pengubahan tegangan menjadi nilai digital</p><h2 id="judul6">Skala tegangan dan nilai ADC</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikSkala" viewBox="0 0 700 330" width="700" height="330" role="img" aria-label="Skala tegangan 0 sampai 5 volt di atas dan skala nilai ADC 0 sampai 1023 di bawah. V_keluar 2,15 volt dipetakan ke nilai ADC 440, yang termasuk kondisi sedang."></svg>
+      <div class="pilihan" role="group" aria-label="Pilih nilai V_keluar">
+        <button type="button" data-nilai="0" aria-pressed="false">0,83 V</button>
+        <button type="button" data-nilai="75" aria-pressed="true">2,15 V</button>
+        <button type="button" data-nilai="100" aria-pressed="false">4,55 V</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>V_keluar <span id="nilaiKini" class="oranye">2,15 V</span></h3>
+      <p id="uraiKini">Cahaya efektif 75%. Nilai ADC 440 termasuk kondisi sedang, yaitu 300 sampai 799.</p>
+      <div class="rumus" aria-label="Nilai ADC sama dengan V_keluar dibagi 5 volt, dikalikan 1023">Nilai ADC =<div class="baris-rumus"><span class="fraksi"><span class="oranye">V_keluar</span><span>5 V</span></span><span>× 1023</span></div></div>
+      <p class="catatan lembut">Hasil perhitungan dibulatkan ke bilangan bulat terdekat.</p>
+    </div>
+    <p class="catatan bawah">ADC 10 bit memetakan rentang 0 sampai 5 V menjadi 1024 tingkat, dari 0 sampai 1023.</p>
+  </div>
+</section>
+
+<!-- SLIDE 7. Pola P6 grafik data dan tabel -->
+<section class="slide" aria-labelledby="judul7" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Hasil pada model sensor simulator</p><h2 id="judul7">Pengaruh cahaya efektif terhadap ADC</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikAdc" viewBox="0 0 700 375" width="700" height="375" role="img" aria-label="Grafik model simulator. Cahaya efektif bertambah dari 0 sampai 100 persen, nilai ADC naik dari 171 sampai 930 secara tidak linear. Nilai ADC 300 sebagai batas kondisi sedang tercapai pada cahaya efektif sekitar 53 persen. Nilai ADC 800 sebagai batas kondisi terang penuh tercapai pada cahaya efektif sekitar 96 persen."></svg>
+      <p class="catatan" style="margin-top:14px"><strong>V_keluar = 5 V × R_tetap ÷ (R_PD + R_tetap)</strong><br><span class="lembut">Contoh 5 V × 10 kΩ ÷ (13,25 kΩ + 10 kΩ) = 2,15 V.</span></p>
+    </div>
+    <div style="padding-top:8px">
+      <h3>Contoh pembacaan</h3>
+      <table class="tabel"><thead><tr><th>Cahaya<br>efektif</th><th>Tegangan<br>V_keluar</th><th style="text-align:right">Nilai<br>ADC</th></tr></thead><tbody>
+        <tr><td>0%</td><td>0,83 V</td><td>171</td></tr>
+        <tr><td>75%</td><td>2,15 V</td><td>440</td></tr>
+        <tr><td>100%</td><td>4,55 V</td><td>930</td></tr>
+      </tbody></table>
+      <p class="catatan lembut" style="margin-top:26px">Nilai ADC model ini berada pada rentang 171 sampai 930 karena R_PD dibatasi 1 kΩ sampai 50 kΩ. Resistansi LDR fisik saat gelap dapat jauh lebih tinggi.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8. Pola P7 kegiatan simulator -->
+<section class="slide" aria-labelledby="judul8" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 5</p><h2 id="judul8">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Sumber cahaya</h3><p>Geser sumber cahaya dan ubah slider intensitas.<br>Amati nilai Cahaya di sensor, Tegangan, dan ADC.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Persamaan</h3><p>Amati kedua persamaan ketika cahaya berubah.<br>Bandingkan nilai R_PD, arus, V_keluar, dan ADC.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Tiga kondisi</h3><p>Atur kondisi gelap, sedang, dan terang penuh.<br>Catat nilai ADC pada setiap kondisi.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Bacaan ADC pada kondisi gelap, sedang, dan terang penuh masing-masing telah diamati.<br>Setiap kondisi dipertahankan sekitar 0,4 detik sampai tanda centang muncul.</p></div>
+  </div>
+</section>
+
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 5 · Photodiode</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 8</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab05-photodiode.js, engine/rangkaian.js, render/rangkaianView.js.
+  // Photodiode mengikuti model simulator, yaitu resistansi R_PD yang turun linear terhadap cahaya efektif. Susunan VCC, R_PD, V_keluar, R_tetap, GND mengikuti kanvas simulator.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+
+  // ===== MODEL. Konstanta sama dengan engine/rangkaian.js =====
+  const V_SUMBER = 5, R_PD_MIN = 1000, R_PD_MAKS = 50000, R_TETAP = 10000, ADC_MAKS = 1023, JARAK_MIN = 20, JARAK_MAKS = 150;
+  function hitungModel(cahaya) {
+    const rPd = R_PD_MAKS - (R_PD_MAKS - R_PD_MIN) * (cahaya / 100);
+    const arus = V_SUMBER / (rPd + R_TETAP);
+    const tegangan = arus * R_TETAP;
+    return {rPd, miliAmp: arus * 1000, tegangan, adc: Math.round((tegangan / V_SUMBER) * ADC_MAKS)};
+  }
+  const cahayaEfektif = (intensitas, jarak) => Math.max(0, Math.min(100, intensitas * (JARAK_MIN / jarak) ** 2));
+  const koma = (nilai, digit) => nilai.toFixed(digit).replace('.', ',');
+  const kiloOhm = ohm => String(Number((ohm / 1000).toFixed(2))).replace('.', ',') + ' kΩ';
+  const bulat1 = nilai => Number(nilai.toFixed(1));
+  const kondisiAdc = adc => adc >= 800 ? 'terang penuh' : adc >= 300 ? 'sedang' : 'gelap';
+
+  // Ikon sumber cahaya. Lingkaran dengan delapan sinar pendek, sama dengan kanvas simulator.
+  function gambarLampu(add, cx, cy, r, menyala) {
+    if (!menyala) { add('circle', {cx, cy, r, fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 3}); return; }
+    let sinar = '';
+    for (let i = 0; i < 8; i++) {
+      const sudut = (i / 8) * Math.PI * 2 + Math.PI / 8;
+      sinar += 'M' + bulat1(cx + (r + 6) * Math.cos(sudut)) + ' ' + bulat1(cy + (r + 6) * Math.sin(sudut)) + ' L' + bulat1(cx + (r + 16) * Math.cos(sudut)) + ' ' + bulat1(cy + (r + 16) * Math.sin(sudut)) + ' ';
+    }
+    add('path', {d: sinar.trim(), fill: 'none', stroke: 'var(--led-nyala)', 'stroke-width': 3, 'stroke-linecap': 'round'});
+    add('circle', {cx, cy, r, fill: 'var(--led-nyala)'});
+  }
+
+  // ===== SLIDE 3. Trek sumber cahaya dan grafik cahaya efektif terhadap jarak pada sumbu x yang sama =====
+  function gambarJarak(svg) {
+    const jarakKini = Number(svg.dataset.jarak);
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const xJarak = jarak => bulat1(530 - (jarak - JARAK_MIN) * 450 / (JARAK_MAKS - JARAK_MIN));
+    const yCahaya = cahaya => bulat1(385 - cahaya * 1.9);
+    const xKini = xJarak(jarakKini), cahayaKini = cahayaEfektif(100, jarakKini), yTrek = 75;
+    // Trek, berkas cahaya, sumber cahaya, photodiode
+    add('path', {d: 'M80 ' + yTrek + ' H606', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-dasharray': '5 6'});
+    add('path', {d: 'M' + (xKini + 34) + ' ' + yTrek + ' H602 M592 67 L602 75 L592 83', fill: 'none', stroke: 'var(--led-nyala)', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+    gambarLampu(add, xKini, yTrek, 16, true);
+    add('circle', {cx: 630, cy: yTrek, r: 24, fill: 'var(--putih)', stroke: 'var(--teks)', 'stroke-width': 4});
+    add('path', {d: 'M619 63 V87 L640 75 Z M640 63 V87', fill: 'none', stroke: 'var(--teks)', 'stroke-width': 3, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+    add('text', {x: xKini, y: 136, 'text-anchor': 'middle'}, 'Sumber cahaya');
+    add('text', {x: xKini, y: 162, 'text-anchor': 'middle', class: 'label-kecil lembut'}, 'Jarak ' + jarakKini);
+    add('text', {x: 630, y: 136, 'text-anchor': 'middle'}, 'Photodiode');
+    // Grafik
+    add('text', {x: 4, y: 172, 'font-size': 19}, 'Cahaya efektif (%)');
+    add('path', {d: 'M80 195 H545 M80 290 H545 M80 385 H545', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    add('path', {d: 'M80 183 V385 H553', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    for (const [nilai, y] of [[100, 195], [50, 290], [0, 385]]) add('text', {x: 64, y: y + 6, 'text-anchor': 'end', class: 'label-kecil lembut'}, String(nilai));
+    let kurva = '';
+    for (let jarak = JARAK_MAKS; jarak >= JARAK_MIN; jarak -= 2) kurva += (kurva ? ' L' : 'M') + xJarak(jarak) + ' ' + yCahaya(cahayaEfektif(100, jarak));
+    add('path', {d: kurva + ' L530 385 L80 385 Z', fill: 'var(--oranye-muda)'});
+    add('path', {d: kurva, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+    add('path', {d: 'M' + xKini + ' 176 V' + yCahaya(cahayaKini), fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 2, 'stroke-dasharray': '6 5'});
+    for (const jarak of [150, 100, 60, 40, 20]) {
+      add('circle', {cx: xJarak(jarak), cy: yCahaya(cahayaEfektif(100, jarak)), r: 7, fill: 'var(--oranye)', stroke: 'var(--putih)', 'stroke-width': 3});
+      add('text', {x: xJarak(jarak), y: 414, 'text-anchor': 'middle', class: 'label-kecil'}, String(jarak));
+    }
+    add('text', {x: xKini - 18, y: yCahaya(cahayaKini) - 14, 'text-anchor': 'end', 'font-weight': 700, class: 'oranye'}, koma(cahayaKini, 0) + '%');
+    add('text', {x: 558, y: 202, 'font-weight': 700, class: 'oranye'}, '100%');
+    add('text', {x: 545, y: 443, 'text-anchor': 'end', class: 'label-kecil'}, 'Jarak (satuan relatif)');
+  }
+  gambarJarak(document.getElementById('gambarJarak'));
+
+  // ===== SLIDE 4 DAN 5. Pembagi tegangan. Mode struktur menamai bagian, mode keadaan menampilkan nilai dan jalur arus =====
+  function gambarPembagi(svg) {
+    const struktur = svg.dataset.mode === 'struktur';
+    const cahaya = Number(svg.dataset.cahaya), m = hitungModel(cahaya);
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    // Resistor zigzag tegak setinggi 90 pada rel x 200. Enam puncak dengan simpangan 18.
+    const zigzag = y0 => ' L218 ' + (y0 + 7.5) + ' L182 ' + (y0 + 22.5) + ' L218 ' + (y0 + 37.5) + ' L182 ' + (y0 + 52.5) + ' L218 ' + (y0 + 67.5) + ' L182 ' + (y0 + 82.5) + ' L200 ' + (y0 + 90);
+    add('text', {x: 200, y: 30, 'text-anchor': 'middle', 'font-weight': 700}, 'VCC 5 V');
+    add('path', {d: 'M176 381 H224 M184 391 H216 M193 401 H207', class: 'kawat'});
+    add('text', {x: 242, y: 398, class: 'lembut'}, 'GND 0 V');
+    if (struktur) {
+      add('path', {d: 'M200 48 V80 M200 170 V260 M200 350 V378', class: 'kawat'});
+      add('path', {d: 'M200 80' + zigzag(80), fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+      add('path', {d: 'M200 260' + zigzag(260), fill: 'none', stroke: 'var(--teks)', 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+    } else {
+      // Jalur arus ditulis dari VCC ke GND dan mengikuti zigzag kedua resistor agar resistor tidak tampak terhubung singkat.
+      const jalurArus = 'M200 48 V80' + zigzag(80) + ' V260' + zigzag(260) + ' V378';
+      add('path', {d: jalurArus, class: 'arus'});
+      add('path', {d: jalurArus, class: 'aliran'});
+      add('path', {d: 'M162 275 V335 M154 324 L162 335 L170 324', fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+      add('text', {x: 146, y: 312, 'text-anchor': 'end'}, 'I = ' + koma(m.miliAmp, 3) + ' mA');
+    }
+    // Cahaya yang mengenai R_PD
+    gambarLampu(add, 62, 125, 14, struktur || cahaya > 0);
+    if (struktur || cahaya > 0) add('path', {d: 'M100 115 H166 M156 108 L166 115 L156 122 M100 135 H166 M156 128 L166 135 L156 142', fill: 'none', stroke: 'var(--led-nyala)', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+    add('text', {x: 100, y: 192, 'text-anchor': 'middle'}, struktur ? 'Cahaya' : 'Cahaya ' + cahaya + '%');
+    // Label resistor
+    add('text', {x: 236, y: 118, 'font-weight': 700, class: 'oranye'}, 'R_PD');
+    add('text', {x: 236, y: 146, class: struktur ? 'lembut' : ''}, struktur ? 'Photodiode' : kiloOhm(m.rPd));
+    add('text', {x: 236, y: 298, 'font-weight': 700}, 'R_tetap');
+    add('text', {x: 236, y: 326}, kiloOhm(R_TETAP));
+    // Titik sambung menuju ADC. Garis putus putus karena ADC hanya mengukur tegangan.
+    add('path', {d: 'M200 215 H386', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 3, 'stroke-dasharray': '8 6'});
+    add('path', {d: 'M378 207 L388 215 L378 223', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+    add('text', {x: 300, y: 193, 'text-anchor': 'middle', 'font-weight': 700}, 'V_keluar');
+    if (!struktur) add('text', {x: 300, y: 252, 'text-anchor': 'middle', 'font-weight': 700, class: 'oranye'}, koma(m.tegangan, 2) + ' V');
+    add('rect', {x: 400, y: 150, width: 190, height: 130, rx: 12, fill: 'var(--abu-muda)', stroke: 'var(--abu-garis)', 'stroke-width': 2});
+    if (struktur) {
+      add('text', {x: 495, y: 208, 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:24px'}, 'ADC');
+      add('text', {x: 495, y: 242, 'text-anchor': 'middle', class: 'label-kecil lembut'}, '0 sampai 1023');
+    } else {
+      add('text', {x: 495, y: 196, 'text-anchor': 'middle', 'font-weight': 700}, 'ADC');
+      add('text', {x: 495, y: 248, 'text-anchor': 'middle', 'font-weight': 700, class: 'oranye', style: 'font-size:36px'}, String(m.adc));
+    }
+    add('circle', {cx: 200, cy: 215, r: 5, fill: 'var(--teks)'});
+  }
+  document.querySelectorAll('.pembagi').forEach(gambarPembagi);
+
+  // ===== SLIDE 6. Skala tegangan dan skala nilai ADC =====
+  const grafikSkala = document.getElementById('grafikSkala');
+  function tampilSkala(cahaya) {
+    grafikSkala.replaceChildren();
+    const add = (tag, attr, isi) => grafikSkala.appendChild(elemen(tag, attr, isi));
+    const m = hitungModel(cahaya), kondisi = kondisiAdc(m.adc);
+    const xTegangan = bulat1(60 + m.tegangan / V_SUMBER * 580), xAdc = bulat1(60 + m.adc / ADC_MAKS * 580);
+    add('text', {x: 60, y: 24, class: 'label-kecil'}, 'Tegangan masuk ADC');
+    let tanda = '';
+    for (let i = 0; i <= 4; i++) {
+      const x = 60 + i * 145, volt = V_SUMBER * i / 4;
+      tanda += 'M' + x + ' 70 V86 M' + x + ' 184 V193 ';
+      add('text', {x, y: 56, 'text-anchor': 'middle', class: 'label-kecil lembut'}, koma(volt, 2) + ' V');
+      add('text', {x, y: 212, 'text-anchor': 'middle', class: 'label-kecil lembut'}, String(Math.round(volt / V_SUMBER * ADC_MAKS)));
+    }
+    add('path', {d: 'M60 78 H640 ' + tanda.trim(), fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-linecap': 'round'});
+    add('path', {d: 'M' + xTegangan + ' 88 V158', fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 2, 'stroke-dasharray': '6 5'});
+    add('circle', {cx: xTegangan, cy: 78, r: 8, fill: 'var(--oranye)', stroke: 'var(--putih)', 'stroke-width': 3});
+    add('text', {x: 60, y: 146, class: 'label-kecil'}, 'Nilai ADC');
+    add('rect', {x: 60, y: 160, width: 580, height: 22, rx: 3, fill: 'var(--abu-garis)'});
+    add('rect', {x: 60, y: 160, width: bulat1(xAdc - 60), height: 22, rx: 3, fill: 'var(--oranye)'});
+    const kiri = xTegangan > 350;
+    add('text', {x: kiri ? xTegangan - 16 : xTegangan + 16, y: 132, 'text-anchor': kiri ? 'end' : 'start', 'font-weight': 700, class: 'oranye', style: 'font-size:24px'}, 'ADC ' + m.adc);
+    // Kurung kondisi. Batas 300 dan 800 berasal dari getter zona pada engine.
+    const x300 = bulat1(60 + 300 / ADC_MAKS * 580), x800 = bulat1(60 + 800 / ADC_MAKS * 580);
+    for (const [nama, x1, x2, rentang] of [['gelap', 60, x300, '0 sampai 299'], ['sedang', x300, x800, '300 sampai 799'], ['terang penuh', x800, 640, '800 sampai 1023']]) {
+      const aktif = nama === kondisi, tengah = bulat1((x1 + x2) / 2);
+      add('path', {d: 'M' + (x1 + 3) + ' 236 V248 H' + (x2 - 3) + ' V236', fill: 'none', stroke: aktif ? 'var(--oranye)' : 'var(--teks-lembut)', 'stroke-width': aktif ? 3 : 2, 'stroke-linejoin': 'round'});
+      add('text', {x: tengah, y: 278, 'text-anchor': 'middle', 'font-weight': aktif ? 700 : 400, class: aktif ? 'oranye' : 'lembut'}, nama[0].toUpperCase() + nama.slice(1));
+      add('text', {x: tengah, y: 304, 'text-anchor': 'middle', class: 'label-kecil lembut'}, rentang);
+    }
+    const batas = kondisi === 'gelap' ? 'di bawah 300' : kondisi === 'sedang' ? '300 sampai 799' : '800 ke atas';
+    document.getElementById('nilaiKini').textContent = koma(m.tegangan, 2) + ' V';
+    document.getElementById('uraiKini').textContent = 'Cahaya efektif ' + cahaya + '%. Nilai ADC ' + m.adc + ' termasuk kondisi ' + kondisi + ', yaitu ' + batas + '.';
+    document.querySelectorAll('[data-nilai]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.nilai) === cahaya)));
+    grafikSkala.setAttribute('aria-label', 'Skala tegangan 0 sampai 5 volt di atas dan skala nilai ADC 0 sampai 1023 di bawah. V_keluar ' + koma(m.tegangan, 2) + ' volt dipetakan ke nilai ADC ' + m.adc + ', yang termasuk kondisi ' + kondisi + '.');
+  }
+  document.querySelectorAll('[data-nilai]').forEach(b => b.addEventListener('click', () => tampilSkala(Number(b.dataset.nilai))));
+  tampilSkala(75);
+
+  // ===== SLIDE 7. Grafik nilai ADC terhadap cahaya efektif =====
+  function gambarGrafikAdc(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const xCahaya = cahaya => bulat1(68 + cahaya / 100 * 572), yAdc = adc => bulat1(295 - adc / ADC_MAKS * 232);
+    add('text', {x: 4, y: 24, 'font-size': 19}, 'Nilai ADC');
+    add('path', {d: 'M68 63 H650 M68 295 H650', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    add('path', {d: 'M68 ' + yAdc(800) + ' H650 M68 ' + yAdc(300) + ' H650', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 1.5, 'stroke-dasharray': '6 5'});
+    add('path', {d: 'M68 48 V295 H658', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    for (const nilai of [1023, 800, 300, 0]) add('text', {x: 52, y: yAdc(nilai) + 7, 'text-anchor': 'end', class: 'label-kecil lembut'}, String(nilai));
+    let kurva = '';
+    for (let cahaya = 0; cahaya <= 100; cahaya += 2) kurva += (kurva ? ' L' : 'M') + xCahaya(cahaya) + ' ' + yAdc(hitungModel(cahaya).adc);
+    add('path', {d: kurva + ' L640 295 L68 295 Z', fill: 'var(--oranye-muda)'});
+    add('path', {d: kurva, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+    for (const cahaya of [0, 25, 50, 75, 100]) {
+      add('circle', {cx: xCahaya(cahaya), cy: yAdc(hitungModel(cahaya).adc), r: 7, fill: 'var(--oranye)', stroke: 'var(--putih)', 'stroke-width': 3});
+      add('text', {x: xCahaya(cahaya), y: 326, 'text-anchor': 'middle', class: 'label-kecil'}, String(cahaya));
+    }
+    add('text', {x: 84, y: 96, class: 'label-kecil lembut'}, 'Terang penuh');
+    add('text', {x: 84, y: 178, class: 'label-kecil lembut'}, 'Sedang');
+    add('text', {x: 200, y: 284, class: 'label-kecil lembut'}, 'Gelap');
+    add('text', {x: 82, y: 284, 'font-weight': 700}, String(hitungModel(0).adc));
+    add('text', {x: 616, y: 92, 'text-anchor': 'end', 'font-weight': 700, class: 'oranye'}, String(hitungModel(100).adc));
+    add('text', {x: 650, y: 363, 'text-anchor': 'end', class: 'label-kecil'}, 'Cahaya efektif (%)');
+  }
+  gambarGrafikAdc(document.getElementById('grafikAdc'));
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

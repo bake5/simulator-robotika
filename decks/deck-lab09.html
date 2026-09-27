@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 9. Gerak Robot Dua Roda</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK. Pakai apa adanya. Hapus pola yang tidak dipakai ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P5 grafik interaktif dan rumus */
+.rumus{font-size:29px;font-weight:700;line-height:1.5;margin-top:20px}
+.baris-rumus{display:flex;align-items:center;gap:16px;margin-top:8px}.fraksi{display:inline-flex;flex-direction:column;text-align:center;min-width:166px;font-size:22px}.fraksi span:first-child{border-bottom:2px solid var(--teks);padding:0 5px 5px}.fraksi span:last-child{padding-top:5px}
+.pilihan{display:flex;gap:14px;margin-top:27px}
+.pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+/* P6 grafik data dan tabel */
+.tabel{width:100%;border-collapse:collapse;font-size:21px;margin-top:25px}
+.tabel th{font-size:15px;line-height:1.5;color:var(--teks-lembut);font-weight:600;text-align:left;padding:0 0 16px}
+.tabel td{border-top:1px solid var(--abu-garis);padding:19px 0}
+.tabel td:first-child{font-weight:700}.tabel td:last-child{text-align:right}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI ===== */
+svg .hantu{opacity:0;pointer-events:none;animation:gerakRobot 6s linear infinite}
+@keyframes gerakRobot{
+0%{opacity:0;transform:translate(var(--px),var(--py)) rotate(0deg) translate(var(--dx),var(--dy)) translateX(0px)}
+7%{opacity:.5;transform:translate(var(--px),var(--py)) rotate(0deg) translate(var(--dx),var(--dy)) translateX(0px)}
+67%{opacity:.5;transform:translate(var(--px),var(--py)) rotate(var(--sudut)) translate(var(--dx),var(--dy)) translateX(var(--maju))}
+82%{opacity:.5;transform:translate(var(--px),var(--py)) rotate(var(--sudut)) translate(var(--dx),var(--dy)) translateX(var(--maju))}
+92%,100%{opacity:0;transform:translate(var(--px),var(--py)) rotate(var(--sudut)) translate(var(--dx),var(--dy)) translateX(var(--maju))}
+}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 9, Gerak Robot Dua Roda">
+
+<!-- SLIDE 1. Pola P1 pembuka -->
+<section class="slide aktif" aria-labelledby="judul1">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 9 · Modul 3</p>
+      <h1 id="judul1">Gerak<br><span class="oranye">robot</span></h1>
+      <p class="ringkas">Mengatur gerak robot melalui kecepatan dua roda.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Differential drive adalah penggerak dengan roda kiri dan kanan digerakkan terpisah.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Kecepatan roda kiri dan kanan</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Contoh pada simulator. Kecepatan roda kiri 50 persen, kecepatan roda kanan 100 persen. Hasil kecepatan linier 90,0 satuan per detik dan kecepatan sudut 1,50 radian per detik.">
+        <text x="0" y="30">Kecepatan roda kanan</text><text x="635" y="30" text-anchor="end" font-weight="700" class="oranye">100%</text>
+        <rect x="0" y="45" width="600" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="113">Kecepatan roda kiri</text><text x="635" y="113" text-anchor="end" font-weight="700">50%</text>
+        <rect x="0" y="128" width="300" height="22" rx="3" fill="var(--teks-lembut)"/>
+        <text x="0" y="196" class="label-kecil lembut">Hasil kinematika pada kedua nilai ini</text>
+        <text x="0" y="228" font-weight="700" style="font-size:24px" class="oranye">v = 90,0 u/s</text>
+        <text x="220" y="228" font-weight="700" style="font-size:24px" class="oranye">ω = 1,50 rad/s</text>
+        <text x="0" y="269" class="label-kecil lembut">Contoh nilai kecepatan pada simulator Lab 9</text>
+      </svg>
+      <p class="simpulan-visual">Kecepatan kedua roda menentukan kecepatan linier dan kecepatan sudut robot. Kombinasi keduanya menghasilkan empat pola gerak dasar.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. Pola P2 diagram lebar penuh -->
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Alur kendali gerak robot</p><h2 id="judul2">Kecepatan roda dan posisi robot</h2></header>
+  <div class="isi">
+    <svg viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Blok kecepatan roda kiri dan blok kecepatan roda kanan, masing-masing pada rentang -100 sampai 100 persen, mengirim sinyal ke blok kinematika differential drive. Blok kinematika menghasilkan blok posisi dan arah robot berupa x, y, dan sudut.">
+      <defs>
+        <marker id="panahSinyal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L8 5 L1 9" fill="none" stroke="var(--teks-lembut)" stroke-width="1.5"/></marker>
+      </defs>
+      <rect x="20" y="40" width="230" height="140" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="135" y="100" text-anchor="middle" font-size="22" font-weight="700">Kecepatan roda kiri</text>
+      <text x="135" y="130" text-anchor="middle" class="label-kecil lembut">-100 sampai 100%</text>
+      <rect x="20" y="210" width="230" height="140" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="135" y="270" text-anchor="middle" font-size="22" font-weight="700">Kecepatan roda kanan</text>
+      <text x="135" y="300" text-anchor="middle" class="label-kecil lembut">-100 sampai 100%</text>
+      <path d="M250 110 H448" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <path d="M250 280 H448" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <rect x="460" y="90" width="290" height="220" rx="12" fill="var(--oranye-muda)" stroke="var(--oranye)" stroke-width="3"/>
+      <text x="605" y="175" text-anchor="middle" font-weight="700" style="font-size:30px">Kinematika</text>
+      <text x="605" y="210" text-anchor="middle" font-weight="700" style="font-size:22px">differential drive</text>
+      <text x="605" y="245" text-anchor="middle" class="label-kecil lembut">Menghitung posisi robot</text>
+      <path d="M750 200 H848" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <rect x="860" y="120" width="250" height="160" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="985" y="192" text-anchor="middle" font-size="22" font-weight="700">Posisi dan arah robot</text>
+      <text x="985" y="222" text-anchor="middle" class="label-kecil lembut">x, y, sudut</text>
+    </svg>
+    <p class="catatan lembut bawah">Model tidak menghitung slip roda atau gesekan permukaan.</p>
+  </div>
+</section>
+
+<!-- SLIDE 3. Pola P3 visual kiri, teks kanan -->
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Tampilan robot pada simulator</p><h2 id="judul3">Bagian robot pada simulator</h2></header>
+  <div class="isi terbagi">
+    <svg class="robot" data-animasi="tidak" data-kiri="40" data-kanan="70" viewBox="0 0 600 430" width="700" height="450" role="img" aria-label="Robot bergerak melengkung dengan kecepatan roda kiri 40 persen dan kecepatan roda kanan 70 persen. Panah pada tiap roda menandai kecepatan. Busur oranye menandai lintasan hasil gerak. Kecepatan linier 66,0 satuan per detik dan kecepatan sudut 0,90 radian per detik."></svg>
+    <div class="teks-samping">
+      <h3>Dua roda terpisah menggerakkan satu badan robot.</h3>
+      <p>Jarak antar roda kiri dan kanan disebut L. Nilai L menentukan kecepatan sudut pada selisih kecepatan tertentu.</p>
+      <p>Panah pada tiap roda menandai besar dan arah kecepatan roda. Lintasan oranye menandai arah gerak hasil kombinasi kedua kecepatan.</p>
+      <p class="catatan lembut">Ukuran robot pada gambar diperbesar dari skala simulator agar label terbaca.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. Pola P4 dua kondisi berdampingan, pasangan pertama -->
+<section class="slide" aria-labelledby="judul4" hidden>
+  <header class="judul"><p class="kicker">Dua kondisi gerak robot</p><h2 id="judul4">Gerak lurus dan rotasi di tempat</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3 class="oranye">Lurus</h3>
+        <svg class="robot" data-kiri="70" data-kanan="70" viewBox="0 0 600 430" role="img" aria-label="Lurus. Kecepatan roda kiri 70 persen dan kecepatan roda kanan 70 persen, keduanya maju. Lintasan lurus menandai gerak tanpa berbelok. Kecepatan linier 84,0 satuan per detik dan kecepatan sudut 0,00 radian per detik."></svg>
+        <p><strong>Kedua roda searah dan sama besar.</strong><br>Robot bergerak lurus tanpa berbelok.</p>
+      </div>
+      <div>
+        <h3>Rotasi di tempat</h3>
+        <svg class="robot" data-kiri="70" data-kanan="-70" viewBox="0 0 600 430" role="img" aria-label="Rotasi di tempat. Kecepatan roda kiri 70 persen maju dan kecepatan roda kanan 70 persen mundur. Busur lintasan menandai arah putar. Kecepatan linier 0,0 satuan per detik dan kecepatan sudut 4,20 radian per detik."></svg>
+        <p><strong>Kedua roda berlawanan arah dengan besar sama.</strong><br>Robot berputar di tempat pada poros di tengah roda.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5. Pola P4 dua kondisi berdampingan, pasangan kedua -->
+<section class="slide" aria-labelledby="judul5" hidden>
+  <header class="judul"><p class="kicker">Pola gerak melengkung</p><h2 id="judul5">Gerak pivot dan gerak melengkung</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Pivot</h3>
+        <svg class="robot" data-kiri="0" data-kanan="70" viewBox="0 0 600 430" role="img" aria-label="Pivot. Roda kiri diam dan roda kanan bergerak maju 70 persen. Busur lintasan menandai poros putar pada roda kiri. Kecepatan linier 42,0 satuan per detik dan kecepatan sudut 2,10 radian per detik."></svg>
+        <p><strong>Roda kiri diam, roda kanan bergerak.</strong><br>Robot berputar dengan poros pada roda yang diam.</p>
+      </div>
+      <div>
+        <h3>Melengkung</h3>
+        <svg class="robot" data-kiri="40" data-kanan="70" viewBox="0 0 600 430" role="img" aria-label="Manuver melengkung. Kecepatan roda kiri 40 persen dan kecepatan roda kanan 70 persen, keduanya maju. Lintasan melengkung menandai arah belok. Kecepatan linier 66,0 satuan per detik dan kecepatan sudut 0,90 radian per detik."></svg>
+        <p><strong>Kedua roda searah dengan besar berbeda.</strong><br>Robot bergerak melengkung ke sisi roda yang lebih lambat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6. Pola P5 grafik interaktif dan rumus -->
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Pengaturan selisih kecepatan roda</p><h2 id="judul6">Lintasan robot dan selisih roda</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikSelisih" viewBox="0 0 700 380" width="700" height="380" role="img" aria-label="Selisih kecepatan roda 100 persen. Roda kanan tetap 100 persen. Kecepatan sudut 3,00 radian per detik, kecepatan linier 60,0 satuan per detik."></svg>
+      <div class="pilihan" style="margin-top:16px" role="group" aria-label="Pilih selisih kecepatan roda">
+        <button type="button" data-nilai="40" aria-pressed="false">40%</button>
+        <button type="button" data-nilai="100" aria-pressed="true">100%</button>
+        <button type="button" data-nilai="160" aria-pressed="false">160%</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>Selisih roda <span id="nilaiKini" class="oranye">100%</span></h3>
+      <p id="uraiKini">Roda kiri diam sedangkan roda kanan bergerak penuh. Robot berputar dengan radius sedang.</p>
+      <div class="rumus" aria-label="Kecepatan sudut sama dengan selisih kecepatan roda dikali 0,03 radian per detik">ω = selisih × 0,03 rad/s</div>
+      <p class="catatan lembut">Kecepatan sudut tidak bergantung pada jumlah kecepatan kedua roda, hanya pada selisihnya.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7. Pola P6 grafik data dan tabel -->
+<section class="slide" aria-labelledby="judul7" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Hasil pada model gerak simulator</p><h2 id="judul7">Pengaruh selisih roda terhadap ω</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg viewBox="0 0 700 375" width="700" height="375" role="img" aria-label="Grafik model simulator. Selisih kecepatan roda kanan dan kiri bertambah dari 0 sampai 200 persen, kecepatan sudut bertambah dari 0 sampai 6 radian per detik secara linear.">
+        <text x="4" y="24" font-size="19">Kecepatan sudut (rad/s)</text>
+        <g stroke="var(--abu-garis)" stroke-width="1"><path d="M68 63 H650 M68 179 H650 M68 295 H650"/></g>
+        <path d="M68 48 V295 H658" fill="none" stroke="var(--teks-lembut)" stroke-width="2"/>
+        <g class="lembut" text-anchor="end"><text x="52" y="70" class="label-kecil">6,0</text><text x="52" y="186" class="label-kecil">3,0</text><text x="52" y="302" class="label-kecil">0,0</text></g>
+        <path d="M68 295 L640 63 L640 295 Z" fill="var(--oranye-muda)"/>
+        <path d="M68 295 L640 63" fill="none" stroke="var(--oranye)" stroke-width="4"/>
+        <g fill="var(--oranye)" stroke="var(--putih)" stroke-width="3"><circle cx="68" cy="295" r="7"/><circle cx="182.4" cy="248.6" r="7"/><circle cx="354" cy="179" r="7"/><circle cx="525.6" cy="109.4" r="7"/><circle cx="640" cy="63" r="7"/></g>
+        <g text-anchor="middle" font-size="17"><text x="68" y="326">0</text><text x="182.4" y="326">40</text><text x="354" y="326">100</text><text x="525.6" y="326">160</text><text x="640" y="326">200</text></g>
+        <text x="650" y="363" text-anchor="end" class="label-kecil">Selisih kecepatan roda (%)</text>
+        <text x="612" y="45" text-anchor="end" font-weight="700" class="oranye">6,00 rad/s</text>
+      </svg>
+      <p class="catatan" style="margin-top:14px"><strong>ω = selisih kecepatan roda × 0,03 rad/s</strong><br><span class="lembut">Contoh 100% × 0,03 = 3,00 rad/s.</span></p>
+    </div>
+    <div style="padding-top:8px">
+      <h3>Contoh pembacaan</h3>
+      <table class="tabel"><thead><tr><th>Selisih<br>roda</th><th>Kecepatan<br>linier v</th><th style="text-align:right">Kecepatan<br>sudut ω</th></tr></thead><tbody>
+        <tr><td>40%</td><td>96,0 u/s</td><td>1,20 rad/s</td></tr>
+        <tr><td>100%</td><td>60,0 u/s</td><td>3,00 rad/s</td></tr>
+        <tr><td>160%</td><td>24,0 u/s</td><td>4,80 rad/s</td></tr>
+      </tbody></table>
+      <p class="catatan lembut" style="margin-top:26px">Simulator memakai model kinematika tanpa slip roda. Kecepatan sudut hanya dipengaruhi selisih kecepatan roda, sedangkan kecepatan linier menurun karena roda kiri melambat.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8. Pola P7 kegiatan simulator -->
+<section class="slide" aria-labelledby="judul8" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 9</p><h2 id="judul8">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Empat pola gerak</h3><p>Atur slider kecepatan roda kiri dan kanan.<br>Temukan pola lurus, rotasi, pivot, dan melengkung.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Parkir manual</h3><p>Arahkan robot ke kotak target menggunakan kedua slider.<br>Amati kombinasi pola yang paling mendekatkan robot.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Fungsi gerak</h3><p>Lengkapi fungsi gerak pada Level 2, lalu jalankan.<br>Amati apakah robot berhasil sampai ke target.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Keempat pola gerak, lurus, rotasi di tempat, pivot, dan melengkung, masing-masing telah ditemukan.<br>Fungsi gerak telah berhasil membawa robot ke kotak target.</p></div>
+  </div>
+</section>
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 9 · Gerak robot dua roda</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 8</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab09-gerak-robot.js, engine/robot.js, render/robotView.js.
+  // v = (vKanan+vKiri)/2, omega = (vKanan-vKiri)/L, dengan vX = (pctX/100) * ROBOT_KECEPATAN_MAKS.
+  // Rumus dan nilai numerik diambil dari engine/robot.js, bukan dari string rumus yang tampil pada panel simulator.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+
+  // ===== R7. Robot tampak atas dengan lintasan hasil gerak. Disalin dari templates/cuplikan-robot.js =====
+  // Dipakai slide 3, 4, 5 (statis lewat data-kiri/data-kanan) dan slide 6 (interaktif lewat opsi).
+const ROBOT_LEBAR_RODA = 40;      // engine/robot.js ROBOT_LEBAR_RODA
+const ROBOT_KECEPATAN_MAKS = 120; // engine/robot.js ROBOT_KECEPATAN_MAKS
+
+function koma(nilai, digit) { return nilai.toFixed(digit).replace('.', ',').replace('-', '−'); }
+
+function gambarRobot(svg, opsi = {}) {
+  svg.replaceChildren();
+  const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));   // appendChild mengembalikan simpul yang ditambahkan
+  const kiri = Number(opsi.kiri ?? svg.dataset.kiri), kanan = Number(opsi.kanan ?? svg.dataset.kanan);
+  const L = svg.viewBox.baseVal.width, T = svg.viewBox.baseVal.height;
+  const K = 4, setengahRoda = ROBOT_LEBAR_RODA * K / 2;        // 80 piksel dari pusat robot ke tengah roda
+  const vKiri = kiri / 100 * ROBOT_KECEPATAN_MAKS, vKanan = kanan / 100 * ROBOT_KECEPATAN_MAKS;
+  const v = (vKanan + vKiri) / 2, omega = (vKanan - vKiri) / ROBOT_LEBAR_RODA;
+  const berbelok = Math.abs(omega) > 0.001;
+  const R = berbelok ? Math.abs(v / omega) * K : Infinity;
+  const pivot = Math.abs(R - setengahRoda) < 0.5;
+  const busurPutar = berbelok && R < 100 && !pivot;            // rotasi di tempat, atau pusat putar di dalam badan
+  const cx = busurPutar ? L / 2 - 40 : 200, cy = T / 2 + 22, panjang = L - cx - 110;
+
+  // 1. Bacaan. Satu nilai per elemen teks. v di kiri atas, omega di kanan atas.
+  add('text', {x: 0, y: 24, 'font-weight': 700}, 'v = ' + koma(v, 1) + ' u/s');
+  add('text', {x: L, y: 24, 'text-anchor': 'end', 'font-weight': 700}, 'ω = ' + koma(omega, 2) + ' rad/s');
+
+  // 2. Lintasan pusat robot, digambar di bawah robot.
+  const jejak = {fill: 'none', stroke: 'var(--oranye-muda)', 'stroke-width': 18, 'stroke-linecap': 'round'};
+  const garis = {fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'};
+  const s = omega > 0 ? 1 : -1;                   // omega positif memutar robot ke kiri, di layar berlawanan arah jarum jam
+  const arahMaju = Math.sign(v) || 1;
+  const sisi = s * arahMaju;                      // pusat putar di atas robot (1) atau di bawah robot (-1) pada gambar
+  let ujung = null;                               // [x, y, arahX, arahY] untuk kepala panah
+  let phi = 2 * Math.PI / 3;                      // sudut putar bayangan, 120 derajat untuk busur putar
+  if (busurPutar) {
+    const r = Math.min(T / 2 - 40, 190), dx = r * 0.5, dy = r * 0.866;   // busur 120 derajat di sisi kanan robot
+    add('path', {d: 'M' + (cx + dx).toFixed(1) + ' ' + (cy + s * dy).toFixed(1) + ' A' + r + ' ' + r + ' 0 0 ' + (s > 0 ? 0 : 1) + ' ' + (cx + dx).toFixed(1) + ' ' + (cy - s * dy).toFixed(1), ...garis});
+    ujung = [cx + dx, cy - s * dy, -0.866, -s * 0.5];
+  } else if (!berbelok) {
+    if (Math.abs(v) > 0.01) {
+      const d = 'M' + cx + ' ' + cy + ' H' + (cx + arahMaju * panjang);
+      add('path', {d, ...jejak}); add('path', {d, ...garis});
+      ujung = [cx + arahMaju * panjang, cy, arahMaju, 0];
+    }
+  } else {
+    phi = Math.min(panjang / R, pivot ? Math.PI : 1.25);        // pivot digambar setengah lingkaran agar panah tidak menimpa label roda
+    const x = cx + arahMaju * R * Math.sin(phi), y = cy - sisi * R * (1 - Math.cos(phi));
+    const d = 'M' + cx + ' ' + cy + ' A' + R.toFixed(1) + ' ' + R.toFixed(1) + ' 0 ' + (phi > Math.PI ? 1 : 0) + ' ' + (s > 0 ? 0 : 1) + ' ' + x.toFixed(1) + ' ' + y.toFixed(1);
+    add('path', {d, ...jejak}); add('path', {d, ...garis});
+    ujung = [x, y, arahMaju * Math.cos(phi), -sisi * Math.sin(phi)];
+  }
+  if (ujung) {
+    const [x, y, ax, ay] = ujung, nx = -ay, ny = ax;
+    add('path', {d: 'M' + (x - 14 * ax + 9 * nx).toFixed(1) + ' ' + (y - 14 * ay + 9 * ny).toFixed(1) + ' L' + x.toFixed(1) + ' ' + y.toFixed(1) + ' L' + (x - 14 * ax - 9 * nx).toFixed(1) + ' ' + (y - 14 * ay - 9 * ny).toFixed(1), ...garis});
+  }
+
+  // 3. Robot. Badan, dua roda, penanda arah hadap.
+  add('rect', {x: cx - 72, y: cy - 62, width: 144, height: 124, rx: 26, fill: 'var(--oranye-muda)', stroke: 'var(--oranye)', 'stroke-width': 3});
+  add('path', {d: 'M' + (cx + 30) + ' ' + (cy - 17) + ' L' + (cx + 54) + ' ' + cy + ' L' + (cx + 30) + ' ' + (cy + 17) + ' Z', fill: 'var(--oranye)'});
+  for (const [nama, pct, yTengah] of [['Roda kiri', kiri, cy - setengahRoda], ['Roda kanan', kanan, cy + setengahRoda]]) {
+    add('rect', {x: cx - 45, y: yTengah - 13, width: 90, height: 26, rx: 9, fill: 'var(--robot-roda)'});
+    const warna = pct < 0 ? 'var(--hijau)' : 'var(--oranye)';
+    if (pct !== 0) {
+      const arah = Math.sign(pct), x1 = cx + arah * 55, x2 = x1 + arah * Math.abs(pct) / 100 * 160;
+      add('path', {d: 'M' + x1 + ' ' + yTengah + ' H' + x2 + ' M' + (x2 - arah * 12) + ' ' + (yTengah - 9) + ' L' + x2 + ' ' + yTengah + ' L' + (x2 - arah * 12) + ' ' + (yTengah + 9), fill: 'none', stroke: warna, 'stroke-width': 5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+    }
+    // Label di kiri roda. Jika roda mundur, panahnya mengarah ke kiri, sehingga label dipindah ke sisi luar roda.
+    const luar = yTengah < cy ? -1 : 1, mundur = pct < 0;
+    const xLabel = mundur ? cx : cx - 86, jangkar = mundur ? 'middle' : 'end';
+    const yNama = mundur ? yTengah + (luar < 0 ? -48 : 38) : yTengah - 5, yNilai = yNama + 25;
+    add('text', {x: xLabel, y: yNama, 'text-anchor': jangkar, class: 'label-kecil lembut'}, nama);
+    add('text', {x: xLabel, y: yNilai, 'text-anchor': jangkar, 'font-weight': 700, style: 'fill:' + (pct === 0 ? 'var(--teks-lembut)' : warna)}, koma(pct, 0) + '%');
+  }
+
+  // 4. Bayangan robot yang bergerak. Bentuknya digambar berpusat di titik 0,0 lalu ditempatkan lewat variabel CSS.
+  const yPusat = cy - sisi * R;
+  if (svg.dataset.animasi !== 'tidak' && (berbelok || Math.abs(v) > 0.01)) {
+    const hantu = add('g', {class: 'hantu', 'aria-hidden': 'true'});
+    const isi = (tag, attr) => hantu.appendChild(elemen(tag, attr));
+    isi('rect', {x: -72, y: -62, width: 144, height: 124, rx: 26, fill: 'var(--oranye-muda)', stroke: 'var(--oranye)', 'stroke-width': 3});
+    isi('rect', {x: -45, y: -setengahRoda - 13, width: 90, height: 26, rx: 9, fill: 'var(--robot-roda)'});
+    isi('rect', {x: -45, y: setengahRoda - 13, width: 90, height: 26, rx: 9, fill: 'var(--robot-roda)'});
+    isi('path', {d: 'M30 -17 L54 0 L30 17 Z', fill: 'var(--oranye)'});
+    const atur = (nama, nilai) => hantu.style.setProperty(nama, nilai);
+    atur('--px', cx + 'px'); atur('--py', (berbelok ? yPusat : cy).toFixed(1) + 'px');
+    atur('--dx', '0px'); atur('--dy', (berbelok ? sisi * R : 0).toFixed(1) + 'px');
+    atur('--sudut', (berbelok ? -s * phi * 180 / Math.PI : 0).toFixed(1) + 'deg');   // berlawanan arah jarum jam bernilai negatif pada CSS
+    atur('--maju', (berbelok ? 0 : arahMaju * panjang) + 'px');
+  }
+
+  // 5. Pusat putar yang sebenarnya. Digambar paling akhir agar terlihat di atas badan, roda, dan bayangan.
+  if (berbelok && yPusat > 44 && yPusat < T - 12) {
+    add('circle', {cx, cy: yPusat, r: 6, fill: 'var(--teks)', stroke: 'var(--putih)', 'stroke-width': 2});
+    if (R >= 150) add('text', {x: cx + 16, y: yPusat + 6, class: 'label-kecil lembut'}, 'Pusat putar');
+  }
+}
+
+  document.querySelectorAll('.robot').forEach((svg) => gambarRobot(svg));
+
+  // ===== SLIDE 6. Robot dengan roda kanan tetap dan roda kiri berubah lewat tombol =====
+  const KET_SELISIH = {
+    40: 'Roda kiri sedikit lebih lambat dari roda kanan. Robot melengkung landai.',
+    100: 'Roda kiri diam sedangkan roda kanan bergerak penuh. Robot berputar dengan radius sedang.',
+    160: 'Roda kiri bergerak mundur sedangkan roda kanan bergerak maju penuh. Robot berputar dengan radius kecil.',
+  };
+  const grafikSelisih = document.getElementById('grafikSelisih');
+  function tampilNilai(selisih) {
+    const kiri = 100 - selisih, kanan = 100;
+    gambarRobot(grafikSelisih, { kiri, kanan });
+    const vKiri = kiri / 100 * ROBOT_KECEPATAN_MAKS, vKanan = kanan / 100 * ROBOT_KECEPATAN_MAKS;
+    const v = (vKanan + vKiri) / 2, omega = (vKanan - vKiri) / ROBOT_LEBAR_RODA;
+    document.getElementById('nilaiKini').textContent = selisih + '%';
+    document.getElementById('uraiKini').textContent = KET_SELISIH[selisih];
+    document.querySelectorAll('[data-nilai]').forEach((tombol) => tombol.setAttribute('aria-pressed', String(Number(tombol.dataset.nilai) === selisih)));
+    grafikSelisih.setAttribute('aria-label', 'Selisih kecepatan roda ' + selisih + ' persen. Roda kanan tetap 100 persen. Kecepatan sudut ' + koma(omega, 2) + ' radian per detik, kecepatan linier ' + koma(v, 1) + ' satuan per detik.');
+  }
+  document.querySelectorAll('[data-nilai]').forEach((tombol) => tombol.addEventListener('click', () => tampilNilai(Number(tombol.dataset.nilai))));
+  tampilNilai(100);
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

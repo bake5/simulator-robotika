@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 4. Potensiometer</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK. Pakai apa adanya. Hapus pola yang tidak dipakai ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P2 diagram lebar penuh */
+.legend{display:flex;gap:28px;align-items:center;font-size:17px}.legend span{display:flex;gap:10px;align-items:center}.garis-legenda{width:34px;height:4px;background:var(--oranye)}.garis-legenda.sinyal{height:0;border-top:3px dashed var(--teks-lembut);background:none}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+.sisipan{border-top:1px solid var(--abu-garis);margin-top:28px;padding-top:22px}
+.peringatan{border-left:4px solid var(--merah);padding:0 0 0 24px;margin-top:30px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P5 grafik interaktif dan rumus */
+.rumus{font-size:29px;font-weight:700;line-height:1.5;margin-top:20px}
+.baris-rumus{display:flex;align-items:center;gap:16px;margin-top:8px}.fraksi{display:inline-flex;flex-direction:column;text-align:center;min-width:166px;font-size:22px}.fraksi span:first-child{border-bottom:2px solid var(--teks);padding:0 5px 5px}.fraksi span:last-child{padding-top:5px}
+.pilihan{display:flex;gap:14px;margin-top:27px}
+.pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI. Tambahkan seperlunya, hanya warna dari token ===== */
+.rumus.kecil{font-size:24px;line-height:1.45;margin-top:24px}
+.rumus.kecil .baris{display:block;margin-top:10px}
+.sisipan .catatan{margin-top:10px}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 4, Potensiometer">
+
+<!-- SLIDE 1. Pola P1 pembuka. Nilai dari engine/rangkaian.js, tegangan = posisi ÷ 100 × 5 V -->
+<section class="slide aktif" aria-labelledby="judul1" data-video="skip">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 4 · Modul 1</p>
+      <h1 id="judul1">Sinyal<br><span class="oranye">analog</span></h1>
+      <p class="ringkas">Mengatur tegangan dengan memutar kenop potensiometer.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Potensiometer adalah resistor tiga kaki dengan kontak geser yang digerakkan kenop.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Tegangan keluaran pada tiga posisi kenop</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Tegangan keluaran pada simulator Lab 4 dengan skala 0 sampai 5 volt. Posisi kenop 25 persen menghasilkan 1,25 volt. Posisi 65 persen menghasilkan 3,25 volt. Posisi 100 persen menghasilkan 5,00 volt.">
+        <text x="0" y="30">Posisi 25%</text><text x="635" y="30" text-anchor="end" font-weight="700" class="oranye">1,25 V</text>
+        <rect x="0" y="45" width="600" height="22" rx="3" fill="var(--abu-garis)"/>
+        <rect x="0" y="45" width="150" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="113">Posisi 65%</text><text x="635" y="113" text-anchor="end" font-weight="700" class="oranye">3,25 V</text>
+        <rect x="0" y="128" width="600" height="22" rx="3" fill="var(--abu-garis)"/>
+        <rect x="0" y="128" width="390" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="196">Posisi 100%</text><text x="635" y="196" text-anchor="end" font-weight="700" class="oranye">5,00 V</text>
+        <rect x="0" y="211" width="600" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="269" class="label-kecil lembut">Tegangan pada simulator Lab 4</text>
+        <text x="600" y="269" text-anchor="end" class="label-kecil lembut">Skala 0 sampai 5 V</text>
+      </svg>
+      <p class="simpulan-visual">Tegangan keluaran berubah bertahap mengikuti posisi kenop. Setiap nilai di antara 0 V dan 5 V dapat dicapai.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. Pola P4. Lab 3 (labs/lab03-resistor.js) R1 atas, R2 bawah. Lab 4 satu jalur 10 kΩ yang dibagi wiper -->
+<section class="slide" aria-labelledby="judul2" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Dari Lab 3 ke Lab 4</p><h2 id="judul2">Pembagi tegangan yang dapat diatur</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Lab 3</h3>
+        <svg class="jalur" data-mode="tetap" viewBox="0 0 490 352" role="img" aria-label="Pembagi tegangan Lab 3. Sumber 5 volt di atas, resistor tetap R1, titik Vout, resistor tetap R2, lalu GND. Nilai Vout hanya berubah jika salah satu resistor diganti."></svg>
+        <p><strong>R1 dan R2 tetap.</strong><br>Vout berubah hanya jika resistor diganti.</p>
+      </div>
+      <div>
+        <h3>Lab 4</h3>
+        <svg class="jalur" data-mode="pot" viewBox="0 0 490 352" role="img" aria-label="Potensiometer Lab 4. Sumber 5 volt di atas, satu jalur resistif 10 kiloohm, lalu GND. Wiper menyentuh jalur dan tersambung ke V_keluar. Bagian di atas wiper adalah R_atas, bagian di bawahnya berwarna oranye adalah R_bawah."></svg>
+        <p><strong>Satu jalur resistif 10 kΩ.</strong><br>Wiper menggeser batas R_atas dan R_bawah.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3. Pola P3. Dial mengikuti render/rangkaianView.js gambarPotensiometer: busur 270°, celah di bawah, MIN kiri, MAKS kanan -->
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Bagian potensiometer</p><h2 id="judul3">Tiga kaki dan satu wiper</h2></header>
+  <div class="isi terbagi">
+    <svg id="gambarDial" viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Dial potensiometer seperti kanvas simulator, posisi 60 persen. Jalur resistif berbentuk busur 270 derajat dengan celah di bawah. Ujung MIN tersambung ke GND, ujung MAKS tersambung ke 5 volt. Wiper menyentuh jalur dan tersambung ke kaki tengah, yaitu V_keluar. Jalur dari MIN ke wiper berwarna oranye dan disebut R_bawah. Jalur dari wiper ke MAKS berwarna abu dan disebut R_atas."></svg>
+    <div class="teks-samping">
+      <h3>Wiper membagi jalur resistif menjadi dua bagian.</h3>
+      <p>Kaki MIN terhubung ke GND dan kaki MAKS ke 5 V. Putaran searah jarum jam menambah R_bawah.</p>
+      <p class="catatan lembut">Dial mengikuti kanvas simulator. Trek oranye pada simulator menunjukkan bagian R_bawah.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. Pola P3. Padanan istilah Lab 3 dan Lab 4 -->
+<section class="slide" aria-labelledby="judul4" hidden>
+  <header class="judul"><p class="kicker">Potensiometer sebagai pembagi</p><h2 id="judul4">Padanan dengan pembagi Lab 3</h2></header>
+  <div class="isi terbagi">
+    <svg id="gambarPadanan" viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Potensiometer sebagai pembagi tegangan. Sumber 5 volt di atas, jalur resistif, dan GND di bawah. Wiper menyentuh jalur dan tersambung ke V_keluar. Bagian di atas wiper adalah R_atas, seperti R1 pada Lab 3. Bagian di bawah wiper adalah R_bawah, seperti R2 pada Lab 3. Jumlah keduanya adalah R_total 10 kiloohm."></svg>
+    <div class="teks-samping">
+      <h3>R_bawah berperan seperti R2 pada Lab 3.</h3>
+      <p>R_atas berperan seperti R1. Jumlah keduanya selalu 10 kΩ.</p>
+      <div class="rumus" aria-label="V_keluar sama dengan 5 volt dikalikan R_bawah, dibagi jumlah R_atas dan R_bawah">V_keluar =<div class="baris-rumus"><span>5 V ×</span><span class="fraksi"><span class="oranye">R_bawah</span><span>R_atas + R_bawah</span></span></div></div>
+      <p class="catatan lembut">Lab 3 memakai nama Vout, R1, dan R2. Simulator Lab 4 memakai V_keluar, R_atas, dan R_bawah.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5. Pola P4. Saklar Lab 1 menghasilkan 0 V atau 5 V. Kenop Lab 4 menghasilkan nilai kontinu 0 sampai 5 V -->
+<section class="slide" aria-labelledby="judul5" hidden>
+  <header class="judul"><p class="kicker">Dua jenis sinyal</p><h2 id="judul5">Sinyal digital dan sinyal analog</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Sinyal digital</h3>
+        <svg class="sinyal" data-mode="digital" viewBox="0 0 490 352" role="img" aria-label="Grafik tegangan terhadap waktu untuk saklar Lab 1. Tegangan hanya berada pada 0 volt atau 5 volt dan berpindah langsung di antara keduanya."></svg>
+        <p><strong>Saklar Lab 1, dua keadaan.</strong><br>Tegangan hanya 0 V atau 5 V.</p>
+      </div>
+      <div>
+        <h3>Sinyal analog</h3>
+        <svg class="sinyal" data-mode="analog" viewBox="0 0 490 352" role="img" aria-label="Grafik tegangan terhadap waktu untuk kenop potensiometer. Tegangan berubah bertahap di dalam rentang 0 sampai 5 volt dan melewati 1,25 volt serta 3,70 volt."></svg>
+        <p><strong>Kenop Lab 4, seluruh rentang.</strong><br>Tegangan dapat bernilai berapa pun dari 0 V sampai 5 V.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6. Pola P5. Rumus kartu Kontrol labs/lab04-potensiometer.js -->
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Kartu Rumus pada simulator</p><h2 id="judul6">Posisi kenop dan V_keluar</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikPosisi" viewBox="0 0 700 330" width="700" height="330" role="img" aria-label="Posisi 30 persen. Batang R_total 10000 ohm terbagi menjadi R_bawah 3000 ohm dan R_atas 7000 ohm. Skala tegangan 0 sampai 5 volt di bawahnya menunjukkan V_keluar 1,50 volt, yaitu bagian yang sama dari 5 volt."></svg>
+      <div class="pilihan" role="group" aria-label="Pilih posisi kenop">
+        <button type="button" data-nilai="10" aria-pressed="false">10%</button>
+        <button type="button" data-nilai="30" aria-pressed="true">30%</button>
+        <button type="button" data-nilai="70" aria-pressed="false">70%</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>Posisi <span id="nilaiKini" class="oranye">30%</span></h3>
+      <p id="uraiKini">R_bawah mengisi tiga persepuluh jalur resistif. V_keluar juga tiga persepuluh dari 5 V.</p>
+      <div class="rumus kecil" aria-label="R_bawah sama dengan posisi dibagi 100, dikalikan R_total. V_keluar sama dengan R_bawah dibagi R_total, dikalikan 5 volt"><span class="baris">R_bawah =<br><span class="oranye">(posisi ÷ 100)</span> × R_total</span><span class="baris">V_keluar =<br>(R_bawah ÷ R_total) × 5 V</span></div>
+    </div>
+    <p class="catatan bawah">Kartu Rumus pada simulator juga memuat baris Cek, yaitu R_atas + R_bawah = R_total.</p>
+  </div>
+</section>
+
+<!-- SLIDE 7. Pola P3. ADC sebagai konsep untuk Lab 5, rumus sama dengan decks/deck-lab05.html hitungModel -->
+<section class="slide" aria-labelledby="judul7" hidden>
+  <header class="judul"><p class="kicker">Konsep untuk Lab 5</p><h2 id="judul7">Tegangan analog menjadi nilai ADC</h2></header>
+  <div class="isi terbagi">
+    <svg id="gambarAdc" viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Skala tegangan 0 sampai 5 volt di atas dan skala nilai ADC 0 sampai 1023 di bawah, dihubungkan oleh blok ADC 10 bit. 0 volt menjadi 0, 1,25 volt menjadi 256, 2,50 volt menjadi 512, 3,75 volt menjadi 767, dan 5 volt menjadi 1023."></svg>
+    <div class="teks-samping">
+      <h3>ADC 10 bit membagi 0 sampai 5 V menjadi 1024 tingkat.</h3>
+      <p>Program pada mikrokontroler membaca nilai ADC, bukan tegangan.</p>
+      <div class="rumus kecil" aria-label="Nilai ADC sama dengan V_keluar dibagi 5 volt, dikalikan 1023">Nilai ADC =<br>V_keluar ÷ 5 V × 1023</div>
+      <div class="sisipan"><h3 class="oranye">Belum tampil di simulator Lab 4</h3><p class="catatan lembut">Panel Lab 4 hanya menampilkan Tegangan dan Posisi. Nilai ADC mulai tampil pada simulator Lab 5.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8. Pola P2. Rantai Lab 4 ke Lab 5, selaras dengan pendukung jalur-lab5 dan pembuka video Lab 5 -->
+<section class="slide" aria-labelledby="judul8" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Dari Lab 4 ke Lab 5</p><h2 id="judul8">Jalur dari kenop menuju nilai</h2></header>
+  <div class="isi">
+    <svg id="gambarJalurLab5" viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Rantai lima blok. Kenop diputar tangan, Posisi 0 sampai 100 persen, V_keluar 0 sampai 5 volt, ADC 10 bit, dan Nilai 0 sampai 1023. Kenop, Posisi, dan V_keluar tampil di simulator Lab 4. ADC dan Nilai tampil di simulator Lab 5. Di bawah, photodiode sebagai sumber tegangan Lab 5 masuk ke V_keluar."></svg>
+    <p class="catatan lembut bawah">Pada Lab 5, cahaya pada photodiode menggantikan putaran kenop. Jalur V_keluar, ADC, dan nilai tetap sama.</p>
+  </div>
+</section>
+
+<!-- SLIDE 9. Pola P7. Kegiatan mengikuti panduan dan kriteriaSelesai labs/lab04-potensiometer.js -->
+<section class="slide" aria-labelledby="judul9" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 4</p><h2 id="judul9">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Arah putaran</h3><p>Klik kenop pada kanvas, lalu seret searah jarum jam.<br>Amati Posisi dan Tegangan saat arah putaran dibalik.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Rentang penuh</h3><p>Putar kenop perlahan dari MIN sampai MAKS.<br>Amati nilai Tegangan dan batang 0 V sampai 5 V.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Target dan rumus</h3><p>Arahkan kenop ke target, lalu tahan sekitar 1,2 detik.<br>Baca baris R_bawah, V_keluar, dan Cek pada kartu Rumus.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Kenop telah diputar sampai minimum dan sampai maksimum.<br>Kenop telah ditahan pada nilai target yang diminta simulator.</p></div>
+  </div>
+</section>
+
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 4 · Potensiometer</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 9</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab04-potensiometer.js, engine/rangkaian.js, render/rangkaianView.js, labs/lab03-resistor.js.
+  // Orientasi dial mengikuti kanvas simulator. MIN di kiri terhubung ke GND, MAKS di kanan ke 5 V, dan bagian oranye adalah R_bawah dari wiper ke GND.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+
+  // ===== MODEL. Konstanta sama dengan engine/rangkaian.js =====
+  const V_SUMBER = 5, R_TOTAL = 10000, ADC_MAKS = 1023;
+  const hitung = posisi => {
+    const rBawah = posisi / 100 * R_TOTAL;
+    return {rBawah, rAtas: R_TOTAL - rBawah, tegangan: rBawah / R_TOTAL * V_SUMBER};
+  };
+  const bulat1 = n => Math.round(n * 10) / 10;
+  const koma = (n, d) => n.toFixed(d).replace('.', ',');
+  const keD = titik => titik.map((q, i) => (i ? 'L' : 'M') + bulat1(q[0]) + ' ' + bulat1(q[1])).join(' ');
+  const garis = (add, d, warna, tebal) => add('path', {d, fill: 'none', stroke: warna, 'stroke-width': tebal, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+  const gnd = (add, x, y) => add('path', {d: 'M' + (x - 24) + ' ' + y + ' H' + (x + 24) + ' M' + (x - 15) + ' ' + (y + 10) + ' H' + (x + 15) + ' M' + (x - 6) + ' ' + (y + 20) + ' H' + (x + 6), class: 'kawat'});
+
+  // Resistor zigzag tegak pada rel x. Titik puncak ke-i berada di y0 + tinggi × (i + 0,5) ÷ n, puncak genap di sisi kanan.
+  function titikZigzag(x, y0, y1, n, a) {
+    const titik = [];
+    titik.push([x, y0]);
+    for (let i = 0; i < n; i++) titik.push([x + (i % 2 ? -a : a), y0 + (y1 - y0) * (i + 0.5) / n]);
+    titik.push([x, y1]);
+    return titik;
+  }
+  // Memotong zigzag pada puncak ke-k. Bagian atas R_atas, bagian bawah R_bawah. Jumlah panjangnya tetap.
+  const potongPuncak = (titik, k) => [titik.slice(0, k + 2), titik.slice(k + 1)];
+  function panahWiper(add, xAwal, xUjung, y) {
+    garis(add, 'M' + xAwal + ' ' + y + ' H' + xUjung, 'var(--oranye)', 4);
+    garis(add, 'M' + (xUjung + 12) + ' ' + (y - 8) + ' L' + xUjung + ' ' + y + ' L' + (xUjung + 12) + ' ' + (y + 8), 'var(--oranye)', 4);
+  }
+
+  // ===== SLIDE 2. Pembagi tetap Lab 3 dan jalur potensiometer Lab 4 dengan skala yang sama =====
+  function gambarJalur(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const x = 170;
+    add('text', {x: 46, y: 47, 'text-anchor': 'end', 'font-weight': 700}, '5 V');
+    add('path', {d: 'M60 40 H170 V60 M170 292 V312', class: 'kawat'});
+    gnd(add, x, 314);
+    add('text', {x: 206, y: 334, class: 'label-kecil lembut'}, 'GND');
+    if (svg.dataset.mode === 'tetap') {
+      garis(add, keD(titikZigzag(x, 60, 130, 6, 16)), 'var(--teks)', 4);
+      garis(add, keD(titikZigzag(x, 222, 292, 6, 16)), 'var(--teks)', 4);
+      add('path', {d: 'M170 130 V222 M170 176 H400', class: 'kawat'});
+      add('circle', {cx: x, cy: 176, r: 5, fill: 'var(--teks)'});
+      add('circle', {cx: 400, cy: 176, r: 5, fill: 'var(--teks)'});
+      add('text', {x: 400, y: 208, 'text-anchor': 'end', 'font-weight': 700}, 'Vout');
+      add('text', {x: 136, y: 102, 'text-anchor': 'end', 'font-weight': 700}, 'R1');
+      add('text', {x: 136, y: 264, 'text-anchor': 'end', 'font-weight': 700}, 'R2');
+      add('text', {x: 214, y: 102, class: 'label-kecil lembut'}, 'Resistor tetap');
+      add('text', {x: 214, y: 264, class: 'label-kecil lembut'}, 'Resistor tetap');
+    } else {
+      const [atas, bawah] = potongPuncak(titikZigzag(x, 60, 292, 12, 16), 6);
+      const yKontak = bulat1(bawah[0][1]);
+      garis(add, keD(atas), 'var(--teks)', 4);
+      garis(add, keD(bawah), 'var(--oranye)', 4);
+      panahWiper(add, 400, 192, yKontak);
+      add('circle', {cx: 400, cy: yKontak, r: 5, fill: 'var(--teks)'});
+      add('text', {x: 250, y: yKontak - 18, 'text-anchor': 'middle', class: 'label-kecil oranye'}, 'Wiper');
+      add('text', {x: 400, y: yKontak + 32, 'text-anchor': 'end', 'font-weight': 700}, 'V_keluar');
+      add('text', {x: 136, y: 128, 'text-anchor': 'end', 'font-weight': 700}, 'R_atas');
+      add('text', {x: 136, y: 250, 'text-anchor': 'end', 'font-weight': 700, class: 'oranye'}, 'R_bawah');
+    }
+  }
+  document.querySelectorAll('.jalur').forEach(gambarJalur);
+
+  // ===== SLIDE 3. Dial seperti gambarPotensiometer. Sudut diukur searah jarum jam dari arah jam 12 =====
+  (function gambarDial() {
+    const svg = document.getElementById('gambarDial');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const cx = 300, cy = 205, rTrek = 165, rKnob = 134, posisi = 60;
+    const titik = (sudut, r) => [cx + r * Math.sin(sudut * Math.PI / 180), cy - r * Math.cos(sudut * Math.PI / 180)];
+    const busur = (d1, d2, r) => { const t = []; for (let s = d1; s < d2; s += 3) t.push(titik(s, r)); t.push(titik(d2, r)); return keD(t); };
+    const sudutWiper = -135 + posisi / 100 * 270;
+    const [xMin, yMin] = titik(-135, rTrek), [xMaks, yMaks] = titik(135, rTrek);
+    // Kaki. MIN ke GND, MAKS ke 5 V, kaki tengah dari kenop ke V_keluar.
+    add('path', {d: 'M' + bulat1(xMin) + ' ' + bulat1(yMin) + ' V392 M' + bulat1(xMaks) + ' ' + bulat1(yMaks) + ' V372 H556 M300 339 V420 H556', class: 'kawat'});
+    gnd(add, bulat1(xMin), 394);
+    add('text', {x: 146, y: 412, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'GND 0 V');
+    add('text', {x: 570, y: 379, 'font-weight': 700}, '5 V');
+    add('text', {x: 570, y: 427, 'font-weight': 700}, 'V_keluar');
+    // Trek. Abu dari wiper ke MAKS, oranye dari MIN ke wiper.
+    garis(add, busur(-135, 135, rTrek), 'var(--abu-garis)', 16);
+    garis(add, busur(-135, sudutWiper, rTrek), 'var(--oranye)', 16);
+    // Kenop dan penunjuk
+    add('circle', {cx, cy, r: rKnob, fill: 'var(--putih)', stroke: 'var(--abu-garis)', 'stroke-width': 2});
+    const [xP, yP] = titik(sudutWiper, rKnob - 16);
+    garis(add, 'M' + cx + ' ' + cy + ' L' + bulat1(xP) + ' ' + bulat1(yP), 'var(--oranye)', 5);
+    add('circle', {cx: bulat1(xP), cy: bulat1(yP), r: 6, fill: 'var(--oranye)'});
+    add('circle', {cx, cy, r: 7, fill: 'var(--teks)'});
+    add('text', {x: cx, y: 272, 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:40px'}, posisi + '%');
+    // Titik kontak wiper pada trek
+    const [xW, yW] = titik(sudutWiper, rTrek);
+    add('circle', {cx: bulat1(xW), cy: bulat1(yW), r: 10, fill: 'var(--teks)', stroke: 'var(--putih)', 'stroke-width': 3});
+    garis(add, 'M' + bulat1(xW + 14) + ' ' + bulat1(yW - 8) + ' L468 34', 'var(--teks)', 2);
+    add('text', {x: 478, y: 40, 'font-weight': 700}, 'Wiper');
+    add('text', {x: 478, y: 64, class: 'label-kecil lembut'}, 'Kontak geser');
+    // Label ujung dan bagian jalur
+    add('text', {x: bulat1(xMin - 22), y: 352, 'text-anchor': 'end', 'font-weight': 700}, 'MIN');
+    add('text', {x: bulat1(xMaks + 22), y: 352, 'font-weight': 700}, 'MAKS');
+    add('text', {x: 112, y: 140, 'text-anchor': 'end', 'font-weight': 700, class: 'oranye'}, 'R_bawah');
+    add('text', {x: 112, y: 166, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'MIN ke wiper');
+    add('text', {x: 492, y: 212, 'font-weight': 700}, 'R_atas');
+    add('text', {x: 492, y: 238, class: 'label-kecil lembut'}, 'Wiper ke MAKS');
+  })();
+
+  // ===== SLIDE 4. Potensiometer sebagai pembagi dengan padanan Lab 3 =====
+  (function gambarPadanan() {
+    const svg = document.getElementById('gambarPadanan');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const x = 260;
+    add('text', {x: 106, y: 37, 'text-anchor': 'end', 'font-weight': 700}, '5 V');
+    add('path', {d: 'M120 30 H260 V70 M260 330 V372', class: 'kawat'});
+    gnd(add, x, 374);
+    add('text', {x: 296, y: 394, class: 'label-kecil lembut'}, 'GND');
+    const [atas, bawah] = potongPuncak(titikZigzag(x, 70, 330, 14, 20), 8);
+    const yKontak = bulat1(bawah[0][1]);
+    garis(add, keD(atas), 'var(--teks)', 4);
+    garis(add, keD(bawah), 'var(--oranye)', 4);
+    panahWiper(add, 520, 286, yKontak);
+    add('circle', {cx: 520, cy: yKontak, r: 5, fill: 'var(--teks)'});
+    add('text', {x: 358, y: yKontak - 20, 'text-anchor': 'middle', class: 'label-kecil oranye'}, 'Wiper');
+    add('text', {x: 520, y: yKontak - 20, 'text-anchor': 'end', 'font-weight': 700}, 'V_keluar');
+    // Kurung R_atas dan R_bawah di kiri, R_total di kanan
+    garis(add, 'M202 72 H190 V' + (yKontak - 6) + ' H202', 'var(--teks)', 2);
+    garis(add, 'M202 ' + (yKontak + 6) + ' H190 V328 H202', 'var(--oranye)', 2);
+    add('text', {x: 174, y: 142, 'text-anchor': 'end', 'font-weight': 700}, 'R_atas');
+    add('text', {x: 174, y: 168, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'Seperti R1');
+    add('text', {x: 174, y: 276, 'text-anchor': 'end', 'font-weight': 700, class: 'oranye'}, 'R_bawah');
+    add('text', {x: 174, y: 302, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'Seperti R2');
+    garis(add, 'M588 72 H600 V328 H588', 'var(--teks-lembut)', 2);
+    add('text', {x: 614, y: 196, 'font-weight': 700}, 'R_total');
+    add('text', {x: 614, y: 222, class: 'label-kecil lembut'}, '10 kΩ');
+  })();
+
+  // ===== SLIDE 5. Tegangan terhadap waktu. Skala sama pada kedua grafik, 46 px per volt =====
+  function gambarSinyal(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const vy = v => bulat1(290 - 46 * v);
+    add('path', {d: 'M70 60 H470', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    add('path', {d: 'M70 44 V290 H478', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    add('text', {x: 56, y: 67, 'text-anchor': 'end', class: 'label-kecil lembut'}, '5 V');
+    add('text', {x: 56, y: 297, 'text-anchor': 'end', class: 'label-kecil lembut'}, '0 V');
+    add('text', {x: 90, y: 30, class: 'label-kecil'}, 'Tegangan');
+    add('text', {x: 470, y: 322, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'Waktu');
+    if (svg.dataset.mode === 'digital') {
+      garis(add, 'M70 290 H150 V60 H250 V290 H330 V60 H470', 'var(--oranye)', 4);
+      add('text', {x: 200, y: 44, 'text-anchor': 'middle', class: 'label-kecil oranye'}, 'HIGH');
+      add('text', {x: 290, y: 272, 'text-anchor': 'middle', class: 'label-kecil lembut'}, 'LOW');
+      return;
+    }
+    // v(t) = 2,5 − 2,3 cos(2π · 0,8 t), minimum 0,2 V dan maksimum 4,8 V, tidak pernah keluar dari 0 sampai 5 V.
+    const v = t => 2.5 - 2.3 * Math.cos(2 * Math.PI * 0.8 * t), vx = t => 70 + 400 * t;
+    const titik = [];
+    for (let i = 0; i <= 100; i++) titik.push([vx(i / 100), vy(v(i / 100))]);
+    garis(add, keD(titik), 'var(--oranye)', 4);
+    const tA = Math.acos((2.5 - 1.25) / 2.3) / (2 * Math.PI * 0.8), tB = Math.acos((2.5 - 3.7) / 2.3) / (2 * Math.PI * 0.8);
+    add('circle', {cx: bulat1(vx(tA)), cy: vy(1.25), r: 7, fill: 'var(--teks)', stroke: 'var(--putih)', 'stroke-width': 3});
+    add('text', {x: bulat1(vx(tA) + 18), y: vy(1.25) + 28, 'font-weight': 700}, '1,25 V');
+    add('circle', {cx: bulat1(vx(tB)), cy: vy(3.7), r: 7, fill: 'var(--teks)', stroke: 'var(--putih)', 'stroke-width': 3});
+    add('text', {x: bulat1(vx(tB) + 18), y: vy(3.7) + 32, 'font-weight': 700}, '3,70 V');
+  }
+  document.querySelectorAll('.sinyal').forEach(gambarSinyal);
+
+  // ===== SLIDE 6. Batang R_total yang dibagi wiper dan skala V_keluar pada lebar yang sama =====
+  const grafik = document.getElementById('grafikPosisi');
+  const kata = {10: 'sepersepuluh', 30: 'tiga persepuluh', 70: 'tujuh persepuluh'};
+  function tampilNilai(posisi) {
+    grafik.replaceChildren();
+    const add = (tag, attr, isi) => grafik.appendChild(elemen(tag, attr, isi));
+    const m = hitung(posisi), x0 = 60, lebar = 580, xBatas = bulat1(x0 + lebar * posisi / 100);
+    garis(add, 'M60 56 V46 H640 V56', 'var(--teks-lembut)', 2);
+    add('text', {x: 350, y: 30, 'text-anchor': 'middle', 'font-weight': 700}, 'R_total 10000 Ω');
+    add('rect', {x: x0, y: 70, width: lebar, height: 40, rx: 3, fill: 'var(--abu-garis)'});
+    add('rect', {x: x0, y: 70, width: bulat1(xBatas - x0), height: 40, rx: 3, fill: 'var(--oranye)'});
+    garis(add, 'M' + xBatas + ' 62 V118', 'var(--teks)', 4);
+    add('text', {x: 60, y: 146, 'font-weight': 700, class: 'oranye'}, 'R_bawah');
+    add('text', {x: 60, y: 172}, Math.round(m.rBawah) + ' Ω');
+    add('text', {x: 640, y: 146, 'text-anchor': 'end', 'font-weight': 700}, 'R_atas');
+    add('text', {x: 640, y: 172, 'text-anchor': 'end'}, Math.round(m.rAtas) + ' Ω');
+    // Skala tegangan 0 sampai 5 V dengan lebar sama
+    add('rect', {x: x0, y: 226, width: lebar, height: 22, rx: 3, fill: 'var(--abu-garis)'});
+    add('rect', {x: x0, y: 226, width: bulat1(xBatas - x0), height: 22, rx: 3, fill: 'var(--oranye)'});
+    add('text', {x: xBatas, y: 212, 'text-anchor': 'middle', 'font-weight': 700, class: 'oranye'}, koma(m.tegangan, 2) + ' V');
+    add('text', {x: 640, y: 212, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'V_keluar');
+    let tanda = '';
+    for (let v = 0; v <= 5; v++) {
+      const x = x0 + lebar * v / 5;
+      tanda += 'M' + x + ' 256 V264 ';
+      add('text', {x, y: 290, 'text-anchor': 'middle', class: 'label-kecil lembut'}, v + ' V');
+    }
+    add('path', {d: tanda.trim(), fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-linecap': 'round'});
+    document.getElementById('nilaiKini').textContent = posisi + '%';
+    document.getElementById('uraiKini').textContent = 'R_bawah mengisi ' + kata[posisi] + ' jalur resistif. V_keluar juga ' + kata[posisi] + ' dari 5 V.';
+    document.querySelectorAll('[data-nilai]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.nilai) === posisi)));
+    grafik.setAttribute('aria-label', 'Posisi ' + posisi + ' persen. Batang R_total 10000 ohm terbagi menjadi R_bawah ' + Math.round(m.rBawah) + ' ohm dan R_atas ' + Math.round(m.rAtas) + ' ohm. Skala tegangan 0 sampai 5 volt di bawahnya menunjukkan V_keluar ' + koma(m.tegangan, 2) + ' volt, yaitu bagian yang sama dari 5 volt.');
+  }
+  document.querySelectorAll('[data-nilai]').forEach(b => b.addEventListener('click', () => tampilNilai(Number(b.dataset.nilai))));
+  tampilNilai(30);
+
+  // ===== SLIDE 7. Skala tegangan dan skala ADC. Pembulatan sama dengan deck Lab 5 =====
+  (function gambarAdc() {
+    const svg = document.getElementById('gambarAdc');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const x0 = 60, lebar = 580;
+    add('text', {x: x0, y: 30, class: 'label-kecil'}, 'Tegangan V_keluar');
+    add('text', {x: x0, y: 432, class: 'label-kecil'}, 'Nilai ADC');
+    add('path', {d: 'M60 110 H640 M60 330 H640', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    for (let i = 0; i <= 4; i++) {
+      const x = x0 + lebar * i / 4, volt = V_SUMBER * i / 4, adc = Math.round(volt / V_SUMBER * ADC_MAKS), pokok = i === 2;
+      if (pokok) {
+        garis(add, 'M' + x + ' 116 V180 M' + x + ' 256 V318', 'var(--oranye)', 4);
+        garis(add, 'M' + (x - 8) + ' 308 L' + x + ' 320 L' + (x + 8) + ' 308', 'var(--oranye)', 4);
+      } else {
+        add('path', {d: 'M' + x + ' 116 V180 M' + x + ' 256 V322', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-dasharray': '6 6'});
+      }
+      add('circle', {cx: x, cy: 110, r: 6, fill: pokok ? 'var(--oranye)' : 'var(--teks-lembut)'});
+      add('circle', {cx: x, cy: 330, r: 6, fill: pokok ? 'var(--oranye)' : 'var(--teks-lembut)'});
+      add('text', {x, y: 88, 'text-anchor': 'middle', 'font-weight': pokok ? 700 : 400, class: pokok ? 'oranye' : ''}, (i === 0 || i === 4 ? String(volt) : koma(volt, 2)) + ' V');
+      add('text', {x, y: 364, 'text-anchor': 'middle', 'font-weight': pokok ? 700 : 400, class: pokok ? 'oranye' : '', style: pokok ? 'font-size:28px' : ''}, String(adc));
+    }
+    add('rect', {x: 40, y: 184, width: 620, height: 68, rx: 12, fill: 'var(--abu-muda)', stroke: 'var(--abu-garis)', 'stroke-width': 2});
+    add('text', {x: 350, y: 226, 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:24px'}, 'ADC 10 bit');
+  })();
+
+  // ===== SLIDE 8. Rantai kenop sampai nilai. Tiga blok pertama tampil di Lab 4, dua blok terakhir di Lab 5 =====
+  (function gambarJalurLab5() {
+    const svg = document.getElementById('gambarJalurLab5');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const panah = (d) => {
+      add('path', {d, fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 3, 'stroke-dasharray': '8 6', 'stroke-linecap': 'round'});
+    };
+    const kepala = (x, y, arah) => garis(add, arah === 'kanan' ? 'M' + (x - 10) + ' ' + (y - 8) + ' L' + x + ' ' + y + ' L' + (x - 10) + ' ' + (y + 8) : 'M' + (x - 8) + ' ' + (y + 10) + ' L' + x + ' ' + y + ' L' + (x + 8) + ' ' + (y + 10), 'var(--teks-lembut)', 3);
+    const blok = [['Kenop', 'Diputar tangan'], ['Posisi', '0 sampai 100%'], ['V_keluar', '0 sampai 5 V'], ['ADC', '10 bit'], ['Nilai', '0 sampai 1023']];
+    blok.forEach(([nama, sub], i) => {
+      const x = 4 + i * 240, pokok = i === 2, lab5 = i >= 3;
+      add('rect', {x, y: 90, width: 186, height: 130, rx: 12, fill: pokok ? 'var(--oranye-muda)' : 'var(--abu-muda)', stroke: pokok ? 'var(--oranye)' : 'var(--abu-garis)', 'stroke-width': pokok ? 3 : 2, 'stroke-dasharray': lab5 ? '8 6' : 'none'});
+      add('text', {x: x + 93, y: 150, 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:24px'}, nama);
+      add('text', {x: x + 93, y: 182, 'text-anchor': 'middle', class: 'label-kecil lembut'}, sub);
+      if (i < 4) { panah('M' + (x + 194) + ' 155 H' + (x + 234)); kepala(x + 236, 155, 'kanan'); }
+    });
+    garis(add, 'M8 64 V52 H666 V64', 'var(--teks-lembut)', 2);
+    add('text', {x: 337, y: 36, 'text-anchor': 'middle', 'font-weight': 700}, 'Tampil di simulator Lab 4');
+    garis(add, 'M728 64 V52 H1146 V64', 'var(--oranye)', 2);
+    add('text', {x: 937, y: 36, 'text-anchor': 'middle', 'font-weight': 700, class: 'oranye'}, 'Tampil di simulator Lab 5');
+    add('rect', {x: 244, y: 268, width: 186, height: 84, rx: 12, fill: 'var(--putih)', stroke: 'var(--abu-garis)', 'stroke-width': 2, 'stroke-dasharray': '8 6'});
+    add('text', {x: 337, y: 304, 'text-anchor': 'middle', 'font-weight': 700}, 'Photodiode');
+    add('text', {x: 337, y: 332, 'text-anchor': 'middle', class: 'label-kecil lembut'}, 'Sumber Lab 5');
+    panah('M438 310 H577 V236');
+    kepala(577, 230, 'atas');
+  })();
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

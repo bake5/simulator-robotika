@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 3. Pembagi Tegangan</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK. Pakai apa adanya. Hapus pola yang tidak dipakai ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P5 grafik interaktif dan rumus */
+.rumus{font-size:29px;font-weight:700;line-height:1.5;margin-top:20px}
+.baris-rumus{display:flex;align-items:center;gap:16px;margin-top:8px}.fraksi{display:inline-flex;flex-direction:column;text-align:center;min-width:166px;font-size:22px}.fraksi span:first-child{border-bottom:2px solid var(--teks);padding:0 5px 5px}.fraksi span:last-child{padding-top:5px}
+.pilihan{display:flex;gap:14px;margin-top:27px}
+.pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI. Tambahkan seperlunya, hanya warna dari token ===== */
+/* Tiga baris kartu Rumus seperti panel simulator. Baris simbol di atas, hitungan saat ini di bawah. */
+.kartu-rumus{margin-top:14px}
+.kartu-rumus .baris{border-top:1px solid var(--abu-garis);padding:9px 0 10px}
+.kartu-rumus .simbol{display:block;font-size:20px;line-height:1.5;font-weight:700}
+.kartu-rumus .hitung{display:block;font-size:20px;line-height:1.5}
+.rumus-ohm{margin-top:18px}
+/* Slide kegiatan dengan gambar panel Kontrol di kiri. Kolom 396 + 56 + 700 sama dengan lebar isi 1152. */
+.penutup{display:grid;grid-template-columns:396px 700px;gap:56px}
+.penutup .kegiatan{grid-template-columns:56px 1fr;column-gap:20px;align-items:start;min-height:0;padding:10px 0 12px}
+.penutup .kegiatan .urutan{line-height:1.1}
+.penutup .kegiatan h3{margin-bottom:4px}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 3, Pembagi Tegangan">
+
+<!-- SLIDE 1. P1 pembuka. Rentang Vout dari engine/rangkaian.js buatPembagiTegangan, slider 1 sampai 10 kΩ (output/deck-lab03/cek-engine.mjs). -->
+<section class="slide aktif" aria-labelledby="judul1" data-video="skip">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 3 · Modul 1</p>
+      <h1 id="judul1">Pembagi<br><span class="oranye">tegangan</span></h1>
+      <p class="ringkas">Menghasilkan tegangan di antara 0 dan 5 V.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Resistansi adalah besar hambatan resistor terhadap arus, dalam satuan ohm.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Rentang tegangan</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Skala tegangan 0 sampai 5 volt. Pin digital hanya mengenal dua keadaan, LOW pada 0 volt dan HIGH pada 5 volt. Pembagi tegangan pada simulator Lab 3 menghasilkan Vout dari 0,45 volt sampai 4,55 volt.">
+        <text x="0" y="30">Pin digital</text>
+        <path d="M40 58 H600" fill="none" stroke="var(--abu-garis)" stroke-width="2"/>
+        <circle cx="40" cy="58" r="10" fill="var(--teks)"/>
+        <circle cx="600" cy="58" r="10" fill="var(--teks)"/>
+        <text x="40" y="96" text-anchor="middle" class="label-kecil">LOW</text>
+        <text x="600" y="96" text-anchor="middle" class="label-kecil">HIGH</text>
+        <text x="0" y="136">Vout pembagi tegangan</text>
+        <rect x="90.4" y="150" width="459.2" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="90.4" y="198" text-anchor="middle" class="label-kecil oranye" font-weight="700">0,45 V</text>
+        <text x="549.6" y="198" text-anchor="middle" class="label-kecil oranye" font-weight="700">4,55 V</text>
+        <path d="M40 222 H600 M40 222 V230 M152 222 V230 M264 222 V230 M376 222 V230 M488 222 V230 M600 222 V230" fill="none" stroke="var(--teks-lembut)" stroke-width="2"/>
+        <g text-anchor="middle" class="label-kecil lembut"><text x="40" y="250" class="label-kecil lembut">0 V</text><text x="152" y="250" class="label-kecil lembut">1 V</text><text x="264" y="250" class="label-kecil lembut">2 V</text><text x="376" y="250" class="label-kecil lembut">3 V</text><text x="488" y="250" class="label-kecil lembut">4 V</text><text x="600" y="250" class="label-kecil lembut">5 V</text></g>
+        <text x="680" y="276" text-anchor="end" class="label-kecil lembut">Rentang Vout pada simulator Lab 3</text>
+      </svg>
+      <p class="simpulan-visual">Pin digital hanya membedakan HIGH dan LOW. Dua resistor menghasilkan Vout di antara kedua nilai tersebut.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. P4 dua keadaan. Contoh hukum Ohm 250 Ω dan 500 Ω dari LMS 04_lab3_pendukung.html dan naskah VO scene 03, sumber 5 V dari TEGANGAN_SUMBER. -->
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Resistor dan arus</p><h2 id="judul2">Pengaruh resistansi terhadap arus</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Resistor 250 Ω</h3>
+        <svg class="ohm" data-r="250" viewBox="0 0 490 352" role="img" aria-label="Rangkaian tertutup dengan sumber 5 volt dan resistor 250 ohm. Arus 20 miliampere mengalir dari kutub positif melalui resistor dan kembali ke kutub negatif. Batang arus mengisi skala penuh 20 miliampere."></svg>
+        <p><strong>Tegangan 5 V.</strong><br>Arus 20 mA melalui resistor.</p>
+      </div>
+      <div>
+        <h3>Resistor 500 Ω</h3>
+        <svg class="ohm" data-r="500" viewBox="0 0 490 352" role="img" aria-label="Rangkaian tertutup dengan sumber 5 volt dan resistor 500 ohm. Arus 10 miliampere mengalir melalui resistor. Batang arus hanya setengah dari batang 20 miliampere pada skala yang sama."></svg>
+        <p><strong>Tegangan 5 V.</strong><br>Arus 10 mA melalui resistor.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3. P3 dengan grafik. I = 5 V ÷ R, titik 250 Ω dan 500 Ω dihitung dari rumus pemetaan pada skrip. -->
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Hukum Ohm</p><h2 id="judul3">Hubungan tegangan, arus, dan resistansi</h2></header>
+  <div class="isi terbagi">
+    <svg id="grafikOhm" viewBox="0 0 700 375" width="700" height="375" role="img" aria-label="Grafik arus terhadap resistansi pada tegangan tetap 5 volt. Arus turun ketika resistansi bertambah. Resistansi 250 ohm menghasilkan 20 miliampere, resistansi 500 ohm menghasilkan 10 miliampere."></svg>
+    <div class="teks-samping">
+      <h3>Arus sama dengan tegangan dibagi resistansi.</h3>
+      <div class="rumus rumus-ohm" aria-label="I sama dengan V dibagi R"><div class="baris-rumus"><span>I =</span><span class="fraksi"><span class="oranye">V</span><span>R</span></span></div></div>
+      <p><strong>5 V ÷ 500 Ω = 10 mA</strong></p>
+      <p style="margin-top:12px">Resistansi dua kali lipat membuat arus menjadi setengahnya.</p>
+      <p class="catatan lembut">Bentuk lain hukum Ohm adalah V = I × R. Contoh 250 Ω dan 500 Ω berasal dari materi pendukung, bukan dari slider simulator.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. P3 struktur seri. Label VCC dan GND sama dengan render/rangkaianView.js gambarPembagiTegangan. -->
+<section class="slide" aria-labelledby="judul4" hidden>
+  <header class="judul"><p class="kicker">Susunan seri</p><h2 id="judul4">Dua resistor dalam satu jalur</h2></header>
+  <div class="isi terbagi">
+    <svg id="rangkaianSeri" viewBox="0 0 600 450" width="700" height="450" role="img" aria-label="Rangkaian tertutup. Baterai 5 volt di kiri. R1 di atas terhubung ke VCC, R2 di bawah terhubung ke GND. Arus I yang sama mengalir melalui R1 lalu R2 dan kembali ke baterai. Tegangan V R1 terukur pada R1 dan V R2 pada R2."></svg>
+    <div class="teks-samping">
+      <h3>Arus yang sama melewati R1 dan R2.</h3>
+      <p>Hambatan total adalah Rtotal = R1 + R2.</p>
+      <p>Tegangan 5 V terbagi menjadi V R1 dan V R2.</p>
+      <p class="catatan lembut">Kawat dianggap tanpa hambatan, sehingga V R1 + V R2 = 5 V.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5. P4 dua tahap untuk video. Nilai dari engine: R1 = R2 = 10 kΩ memberi 2,50 V dan 2,50 V, bagian R2 50%.
+     R1 4 kΩ dan R2 6 kΩ memberi V R1 2,00 V dan Vout 3,00 V, bagian R2 60%. Keduanya bukan kombinasi target rendah atau tinggi. -->
+<section class="slide" aria-labelledby="judul5" hidden data-video="steps=2">
+  <header class="judul"><p class="kicker">Tegangan sebanding resistansi</p><h2 id="judul5">Pembagian tegangan pada R1 dan R2</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>R1 sama dengan R2</h3>
+        <svg class="bagi" data-r1="10" data-r2="10" viewBox="0 0 490 352" role="img" aria-label="R1 10 kiloohm dan R2 10 kiloohm. Tegangan 5 volt terbagi rata, V R1 2,50 volt dan V R2 2,50 volt. Vout diukur dari titik tengah ke GND, sama dengan V R2."></svg>
+        <p><strong>R1 = R2 = 10 kΩ.</strong><br>Vout 2,50 V, bagian R2 50%.</p>
+      </div>
+      <div data-tahap="2">
+        <h3>R2 lebih besar</h3>
+        <svg class="bagi" data-r1="4" data-r2="6" viewBox="0 0 490 352" role="img" aria-label="R1 4 kiloohm dan R2 6 kiloohm. R2 mengambil 6 dari 10 bagian hambatan total. V R1 2,00 volt dan V R2 sama dengan Vout 3,00 volt."></svg>
+        <p><strong>R1 4 kΩ, R2 6 kΩ.</strong><br>Vout 3,00 V, bagian R2 60%.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6. P5 interaktif. Tiga baris sama dengan kartu "Rumus dan perhitungan saat ini" pada labs/lab03-resistor.js.
+     Nilai awal R1 4 kΩ dan R2 6 kΩ melanjutkan slide 5, bukan tombol tengah. -->
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Rumus pembagi tegangan</p><h2 id="judul6">Bagian R2 dan tegangan keluaran</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikBagian" viewBox="0 0 700 120" width="700" height="120" role="img" aria-label="R1 4 kiloohm dan R2 6 kiloohm. Bagian R2 dari total 60,0 persen. Vout 3,00 volt dari sumber 5 volt."></svg>
+      <div class="kartu-rumus" aria-label="Tiga baris kartu Rumus">
+        <div class="baris"><span class="simbol">Rtotal = R1 + R2</span><span class="hitung oranye" id="hitungTotal"></span></div>
+        <div class="baris"><span class="simbol">Vout = Vsumber × R2 ÷ (R1 + R2)</span><span class="hitung oranye" id="hitungVout"></span></div>
+        <div class="baris"><span class="simbol">I = Vsumber ÷ (R1 + R2)</span><span class="hitung oranye" id="hitungArus"></span></div>
+      </div>
+      <div class="pilihan" role="group" aria-label="Pilih pasangan R1 dan R2">
+        <button type="button" data-nilai="40" aria-pressed="false">R1 6 kΩ, R2 4 kΩ</button>
+        <button type="button" data-nilai="50" aria-pressed="false">R1 10 kΩ, R2 10 kΩ</button>
+        <button type="button" data-nilai="60" aria-pressed="true">R1 4 kΩ, R2 6 kΩ</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>Bagian R2 <span id="nilaiKini" class="oranye">60%</span></h3>
+      <p id="uraiKini">R2 mengambil enam dari sepuluh bagian hambatan total.</p>
+      <div class="rumus" aria-label="Bagian R2 sama dengan R2 dibagi jumlah R1 dan R2">Bagian R2 =<div class="baris-rumus"><span class="fraksi"><span class="oranye">R2</span><span>R1 + R2</span></span></div></div>
+      <p><strong>Vout = Bagian R2 × Vsumber</strong></p>
+      <p class="catatan lembut">Tiga baris di kiri sama dengan kartu Rumus pada simulator.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7. P3 struktur kanvas. Label mengikuti render/rangkaianView.js gambarPembagiTegangan. Tanpa nilai agar keadaan awal tidak dibacakan. -->
+<section class="slide" aria-labelledby="judul7" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Tampilan simulator</p><h2 id="judul7">Bagian kanvas simulator Lab 3</h2></header>
+  <div class="isi terbagi">
+    <svg id="kanvasSimulator" viewBox="0 0 600 450" width="700" height="450" role="img" aria-label="Kanvas simulator Lab 3. Baterai di kiri, VCC sumber 5 volt di atas, R1 dan R2 tersusun tegak, GND acuan 0 volt di bawah. Titik di antara R1 dan R2 terhubung ke kartu Vout tegangan keluaran. Label V R1 dan V R2 berada di sisi kiri dekat baterai. Batang Bagian R2 dari total di bagian bawah."></svg>
+    <div class="teks-samping">
+      <h3>R1 terhubung ke VCC dan R2 ke GND.</h3>
+      <p>Vout diambil dari titik di antara R1 dan R2.</p>
+      <p class="catatan lembut">Label V R1 dan V R2 terletak di sisi kiri kanvas, dekat baterai. Panel simulator menulis desimal dengan tanda titik.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8. P7 kegiatan. Urutan mengikuti panduan labs/lab03-resistor.js. Nilai batas checklist tidak ditulis. -->
+<section class="slide" aria-labelledby="judul8" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 3</p><h2 id="judul8">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="penutup">
+      <svg id="panelKontrol" viewBox="0 0 396 360" width="396" height="360" role="img" aria-label="Panel Kontrol simulator. Slider R1, resistor atas, di bagian atas dan slider R2, resistor bawah, di bawahnya. Keduanya bernilai 1 sampai 10 kiloohm dengan langkah 0,5 kiloohm. Nilai awal R1 10 kiloohm dan R2 5 kiloohm. Di bawah slider terdapat kartu Arus, Vout, dan Bagian R2."></svg>
+      <div>
+        <div class="kegiatan"><span class="urutan">01</span><div><h3>Nilai sama</h3><p>Atur slider R1 dan R2 ke nilai yang sama.<br>Amati Vout dan Bagian R2 pada kartu nilai.</p></div></div>
+        <div class="kegiatan"><span class="urutan">02</span><div><h3>Nilai berbeda</h3><p>Buat R1 jauh lebih besar daripada R2, lalu sebaliknya.<br>Amati arah perubahan Vout dan Arus.</p></div></div>
+        <div class="kegiatan"><span class="urutan">03</span><div><h3>Kartu Rumus</h3><p>Bandingkan ketiga kondisi pada kartu Rumus.<br>Jelaskan hubungan R1, R2, dan Vout.</p></div></div>
+      </div>
+    </div>
+    <div class="hasil" style="margin-top:20px"><strong>Checklist selesai</strong><p>Target rendah, seimbang, dan tinggi pada checklist masing-masing telah tercapai.<br>Setiap target tercatat setelah bertahan sekitar 0,4 detik.</p></div>
+  </div>
+</section>
+
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 3 · Pembagi tegangan</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 8</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab03-resistor.js, engine/rangkaian.js (buatPembagiTegangan, TEGANGAN_SUMBER 5 V), render/rangkaianView.js (gambarPembagiTegangan).
+  // R1 di atas terhubung ke VCC dan R2 di bawah ke GND seperti kanvas. Semua rangkaian digambar tertutup melalui baterai.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+
+  // ===== GAMBAR KHUSUS LAB =====
+  const V_SUMBER = 5;
+  const bulat = n => Math.round(n * 10) / 10;
+  const koma = (n, d) => n.toFixed(d).replace('.', ',');
+
+  // Resistor zigzag tegak enam ruas pada kawat x, berpusat di yc, panjang pj, simpangan amp.
+  // Mengembalikan potongan path yang dimulai dengan V ke awal zigzag, sehingga jalur arus mengikuti zigzag.
+  function zigzag(x, yc, pj, amp) {
+    const y0 = yc - pj / 2;
+    let d = ' V' + bulat(y0);
+    for (let i = 0; i < 6; i++) d += ' L' + bulat(i % 2 === 0 ? x + amp : x - amp) + ' ' + bulat(y0 + (2 * i + 1) * pj / 12);
+    return d + ' L' + x + ' ' + bulat(y0 + pj);
+  }
+
+  // Baterai seperti kanvas simulator. Pelat panjang (+) di atas, pelat pendek tebal (−) di bawah.
+  function baterai(add, x, yc) {
+    add('path', {d: 'M' + (x - 18) + ' ' + (yc - 12) + ' H' + (x + 18), fill: 'none', stroke: 'var(--teks)', 'stroke-width': 3, 'stroke-linecap': 'round'});
+    add('path', {d: 'M' + (x - 9) + ' ' + (yc + 12) + ' H' + (x + 9), fill: 'none', stroke: 'var(--teks)', 'stroke-width': 7, 'stroke-linecap': 'round'});
+  }
+
+  // Slide 2. Satu resistor pada rangkaian tertutup, batang arus berskala 20 mA = 490 px.
+  function gambarOhm(svg) {
+    const r = Number(svg.dataset.r), mA = V_SUMBER / r * 1000;
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const xL = 70, xR = 290, yT = 40, yB = 250, yc = 145;
+    const jalur = 'M' + xL + ' ' + (yc - 12) + ' V' + yT + ' H' + xR + zigzag(xR, yc, 90, 18) + ' V' + yB + ' H' + xL + ' V' + (yc + 12);
+    add('path', {d: jalur, class: 'arus'});
+    add('path', {d: jalur, class: 'aliran'});
+    baterai(add, xL, yc);
+    add('text', {x: 40, y: 152, 'text-anchor': 'end', 'font-weight': 700}, '5 V');
+    add('path', {d: 'M150 16 H206 M196 8 L206 16 L196 24', fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+    add('text', {x: 224, y: 23, 'font-weight': 700, class: 'oranye'}, 'I');
+    add('text', {x: 326, y: 138, class: 'label-kecil lembut'}, 'Resistor');
+    add('text', {x: 326, y: 164, 'font-weight': 700}, r + ' Ω');
+    add('text', {x: 0, y: 298}, 'Arus');
+    add('text', {x: 490, y: 298, 'text-anchor': 'end', 'font-weight': 700, class: 'oranye'}, koma(mA, 0) + ' mA');
+    add('rect', {x: 0, y: 312, width: bulat(490 * mA / 20), height: 22, rx: 3, fill: 'var(--oranye)'});
+  }
+  document.querySelectorAll('.ohm').forEach(gambarOhm);
+
+  // Slide 3. Grafik I = 5 V ÷ R. x = 68 + R ÷ 1000 × 572, y = 295 − I ÷ 40 × 232.
+  (function gambarGrafikOhm() {
+    const svg = document.getElementById('grafikOhm');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const xR = R => bulat(68 + R / 1000 * 572), yI = I => bulat(295 - I / 40 * 232);
+    add('text', {x: 4, y: 24, style: 'font-size:19px'}, 'Arus (mA)');
+    add('path', {d: 'M68 63 H650 M68 179 H650', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    add('path', {d: 'M68 48 V295 H658', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    [[40, 70], [20, 186], [0, 302]].forEach(([n, y]) => add('text', {x: 52, y, 'text-anchor': 'end', class: 'label-kecil lembut'}, String(n)));
+    let d = '';
+    for (let R = 125; R <= 1000; R += 25) d += (d ? ' L' : 'M') + xR(R) + ' ' + yI(V_SUMBER / R * 1000);
+    add('path', {d, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linejoin': 'round'});
+    for (const R of [250, 500]) {
+      const x = xR(R), y = yI(V_SUMBER / R * 1000);
+      add('path', {d: 'M' + x + ' ' + y + ' V295 M' + x + ' ' + y + ' H68', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-dasharray': '6 5'});
+    }
+    for (const R of [250, 500]) add('circle', {cx: xR(R), cy: yI(V_SUMBER / R * 1000), r: 7, fill: 'var(--oranye)', stroke: 'var(--putih)', 'stroke-width': 3});
+    add('text', {x: 226, y: 162, 'font-weight': 700}, '20 mA');
+    add('text', {x: 368, y: 222, 'font-weight': 700, class: 'oranye'}, '10 mA');
+    add('text', {x: 650, y: 110, 'text-anchor': 'end', class: 'lembut'}, 'Tegangan tetap 5 V');
+    [0, 250, 500, 750, 1000].forEach(R => add('text', {x: xR(R), y: 326, 'text-anchor': 'middle', class: 'label-kecil'}, String(R)));
+    add('text', {x: 650, y: 363, 'text-anchor': 'end', class: 'label-kecil'}, 'Resistansi (Ω)');
+  })();
+
+  // Slide 4. Susunan seri dengan arus yang sama pada R1 dan R2.
+  (function gambarSeri() {
+    const svg = document.getElementById('rangkaianSeri');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const xL = 50, xR = 330, yT = 60, yB = 400, yc = 230;
+    const jalur = 'M' + xL + ' ' + (yc - 12) + ' V' + yT + ' H' + xR + zigzag(xR, 145, 100, 22) + zigzag(xR, 315, 100, 22) + ' V' + yB + ' H' + xL + ' V' + (yc + 12);
+    add('path', {d: jalur, class: 'arus'});
+    add('path', {d: jalur, class: 'aliran'});
+    baterai(add, xL, yc);
+    add('circle', {cx: xR, cy: yc, r: 5, fill: 'var(--teks)'});
+    add('text', {x: xR, y: 40, 'text-anchor': 'middle', 'font-weight': 700}, 'VCC, sumber 5 V');
+    add('text', {x: xR, y: 432, 'text-anchor': 'middle', 'font-weight': 700}, 'GND, acuan 0 V');
+    for (const [nama, yPusat, v] of [['R1', 145, 'V R1'], ['R2', 315, 'V R2']]) {
+      add('path', {d: 'M270 ' + (yPusat - 26) + ' V' + (yPusat + 26) + ' M261 ' + (yPusat + 15) + ' L270 ' + (yPusat + 26) + ' L279 ' + (yPusat + 15), fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+      add('text', {x: 250, y: yPusat + 7, 'text-anchor': 'end', 'font-weight': 700, class: 'oranye'}, 'I');
+      add('text', {x: 378, y: yPusat + 7, 'font-weight': 700}, nama);
+      add('path', {d: 'M456 ' + (yPusat - 50) + ' H470 V' + (yPusat + 50) + ' H456', fill: 'none', stroke: 'var(--teks)', 'stroke-width': 2});
+      add('text', {x: 488, y: yPusat + 7}, v);
+    }
+  })();
+
+  // Slide 5. Rel x 176 dari y 74 sampai 290 dibagi sebanding resistansi. Batang 5 V setinggi rel yang sama,
+  // sehingga titik Vout sejajar batas V R1 dan V R2. Lambang resistor berukuran sama.
+  function gambarBagi(svg) {
+    const r1 = Number(svg.dataset.r1), r2 = Number(svg.dataset.r2), total = r1 + r2;
+    const vout = V_SUMBER * r2 / total, vr1 = V_SUMBER - vout;
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const xB = 40, xR = 176, yT = 36, yB = 304, yc = 170, zA = 64, zB = 276;
+    const s = bulat(zA + (zB - zA) * r1 / total), c1 = (zA + s) / 2, c2 = (s + zB) / 2;
+    add('path', {d: 'M' + xB + ' ' + (yc - 12) + ' V' + yT + ' H' + xR + zigzag(xR, c1, 70, 16) + zigzag(xR, c2, 70, 16) + ' V' + yB + ' H' + xB + ' V' + (yc + 12), class: 'kawat'});
+    baterai(add, xB, yc);
+    add('text', {x: xR, y: 20, 'text-anchor': 'middle', 'font-weight': 700}, 'VCC, sumber 5 V');
+    add('text', {x: xR, y: 332, 'text-anchor': 'middle', 'font-weight': 700}, 'GND, acuan 0 V');
+    add('text', {x: 150, y: bulat(c1 - 4), 'text-anchor': 'end', 'font-weight': 700}, 'R1');
+    add('text', {x: 150, y: bulat(c1 + 22), 'text-anchor': 'end', class: 'lembut'}, r1 + ' kΩ');
+    add('text', {x: 150, y: bulat(c2 - 4), 'text-anchor': 'end', 'font-weight': 700}, 'R2');
+    add('text', {x: 150, y: bulat(c2 + 22), 'text-anchor': 'end', class: 'lembut'}, r2 + ' kΩ');
+    // Garis ukur Vout dari titik tengah ke batas pada batang.
+    add('path', {d: 'M' + xR + ' ' + s + ' H290', fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 3, 'stroke-dasharray': '8 6'});
+    add('circle', {cx: xR, cy: s, r: 6, fill: 'var(--oranye)'});
+    add('text', {x: 233, y: bulat(s - 14), 'text-anchor': 'middle', 'font-weight': 700, class: 'oranye'}, 'Vout');
+    // Batang tegangan 5 V.
+    add('rect', {x: 290, y: zA, width: 36, height: bulat(s - zA), fill: 'var(--abu-garis)'});
+    add('rect', {x: 290, y: s, width: 36, height: bulat(zB - s), fill: 'var(--oranye)'});
+    add('rect', {x: 290, y: zA, width: 36, height: zB - zA, rx: 4, fill: 'none', stroke: 'var(--teks)', 'stroke-width': 2});
+    add('text', {x: 342, y: bulat(c1 - 4), 'font-weight': 700}, 'V R1');
+    add('text', {x: 342, y: bulat(c1 + 22), class: 'lembut'}, koma(vr1, 2) + ' V');
+    add('text', {x: 342, y: bulat(c2 - 4), 'font-weight': 700, class: 'oranye'}, 'V R2 = Vout');
+    add('text', {x: 342, y: bulat(c2 + 22), 'font-weight': 700}, koma(vout, 2) + ' V');
+  }
+  document.querySelectorAll('.bagi').forEach(gambarBagi);
+
+  // Slide 7. Kanvas simulator yang disederhanakan, tanpa nilai.
+  (function gambarKanvas() {
+    const svg = document.getElementById('kanvasSimulator');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const xB = 90, xR = 300, yT = 80, yB = 320, yc = 200;
+    add('path', {d: 'M' + xB + ' ' + (yc - 12) + ' V' + yT + ' H' + xR + zigzag(xR, 140, 90, 18) + zigzag(xR, 260, 90, 18) + ' V' + yB + ' H' + xB + ' V' + (yc + 12), class: 'kawat'});
+    baterai(add, xB, yc);
+    add('path', {d: 'M' + xR + ' ' + yc + ' H400', fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linecap': 'round'});
+    add('circle', {cx: xR, cy: yc, r: 6, fill: 'var(--oranye)'});
+    add('rect', {x: 400, y: 150, width: 180, height: 100, rx: 12, fill: 'var(--oranye-muda)'});
+    add('text', {x: 490, y: 190, 'text-anchor': 'middle', 'font-weight': 700}, 'Vout');
+    add('text', {x: 490, y: 222, 'text-anchor': 'middle', class: 'label-kecil lembut'}, 'Tegangan keluaran');
+    add('text', {x: xR, y: 58, 'text-anchor': 'middle', 'font-weight': 700}, 'VCC, sumber 5 V');
+    add('text', {x: xR, y: 352, 'text-anchor': 'middle', 'font-weight': 700}, 'GND, acuan 0 V');
+    add('text', {x: xB, y: 58, 'text-anchor': 'middle', class: 'lembut'}, 'V R1');
+    add('text', {x: xB, y: 352, 'text-anchor': 'middle', class: 'lembut'}, 'V R2');
+    add('text', {x: 336, y: 147, 'font-weight': 700}, 'R1');
+    add('text', {x: 336, y: 267, 'font-weight': 700}, 'R2');
+    add('path', {d: 'M156 406 H444', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 12, 'stroke-linecap': 'round'});
+    add('text', {x: 150, y: 388, class: 'label-kecil lembut'}, '0%');
+    add('text', {x: 450, y: 388, 'text-anchor': 'end', class: 'label-kecil lembut'}, '100%');
+    add('text', {x: xR, y: 440, 'text-anchor': 'middle', class: 'label-kecil'}, 'Bagian R2 dari total');
+  })();
+
+  // Slide 8. Panel Kontrol seperti simulator. R1 di atas, R2 di bawah, posisi kenop pada nilai awal 10 kΩ dan 5 kΩ.
+  (function gambarPanel() {
+    const svg = document.getElementById('panelKontrol');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const xKenop = nilai => bulat(14 + (nilai - 1) / 9 * 368);
+    add('text', {x: 0, y: 26, 'font-weight': 700, style: 'font-size:23px'}, 'Kontrol');
+    for (const [label, nilai, y] of [['R1, resistor atas', 10, 74], ['R2, resistor bawah', 5, 160]]) {
+      add('text', {x: 0, y}, label);
+      add('text', {x: 396, y, 'text-anchor': 'end', 'font-weight': 700, class: 'oranye'}, nilai + ' kΩ');
+      add('path', {d: 'M14 ' + (y + 30) + ' H382', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 8, 'stroke-linecap': 'round'});
+      add('circle', {cx: xKenop(nilai), cy: y + 30, r: 14, fill: 'var(--oranye)'});
+    }
+    add('text', {x: 0, y: 232, class: 'label-kecil lembut'}, 'Rentang 1 sampai 10 kΩ');
+    add('text', {x: 396, y: 232, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'Langkah 0,5 kΩ');
+    [['Arus', 'mA'], ['Vout', 'V'], ['Bagian R2', '%']].forEach(([nama, satuan], i) => {
+      const x = i * 138;
+      add('rect', {x, y: 256, width: 120, height: 84, rx: 10, fill: 'var(--abu-muda)', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+      add('text', {x: x + 60, y: 290, 'text-anchor': 'middle', class: 'label-kecil lembut'}, nama);
+      add('text', {x: x + 60, y: 322, 'text-anchor': 'middle', class: 'label-kecil lembut'}, satuan);
+    });
+  })();
+
+  // Slide 6. Interaksi pasangan R1 dan R2. data-nilai berisi bagian R2 dalam persen.
+  const PASANGAN = {40: [6, 4], 50: [10, 10], 60: [4, 6]};
+  const URAIAN = {40: 'R2 mengambil empat dari sepuluh bagian hambatan total.', 50: 'R2 mengambil separuh hambatan total.', 60: 'R2 mengambil enam dari sepuluh bagian hambatan total.'};
+  const grafik = document.getElementById('grafikBagian');
+  function tampilNilai(nilai) {
+    const [r1, r2] = PASANGAN[nilai], total = r1 + r2, bagian = r2 / total;
+    const vout = V_SUMBER * bagian, mA = V_SUMBER / total;
+    grafik.replaceChildren();
+    const add = (tag, attr, isi) => grafik.appendChild(elemen(tag, attr, isi));
+    const xUjung = bulat(700 * bagian);
+    add('text', {x: 0, y: 24}, 'Bagian R2 dari total');
+    add('text', {x: 700, y: 24, 'text-anchor': 'end', 'font-weight': 700, class: 'oranye'}, koma(bagian * 100, 1) + '%');
+    add('rect', {x: 0, y: 40, width: 700, height: 26, rx: 3, fill: 'var(--abu-garis)'});
+    add('rect', {x: 0, y: 40, width: xUjung, height: 26, rx: 3, fill: 'var(--oranye)'});
+    add('path', {d: 'M' + xUjung + ' 34 V74', fill: 'none', stroke: 'var(--teks)', 'stroke-width': 2});
+    add('text', {x: 0, y: 96, class: 'label-kecil lembut'}, '0 V');
+    add('text', {x: 700, y: 96, 'text-anchor': 'end', class: 'label-kecil lembut'}, '5 V');
+    add('text', {x: xUjung, y: 102, 'text-anchor': 'middle', 'font-weight': 700, class: 'oranye'}, 'Vout ' + koma(vout, 2) + ' V');
+    document.getElementById('hitungTotal').textContent = '= ' + koma(r1, 1) + ' kΩ + ' + koma(r2, 1) + ' kΩ = ' + koma(total, 1) + ' kΩ';
+    document.getElementById('hitungVout').textContent = '= 5,00 V × ' + koma(r2, 1) + ' kΩ ÷ ' + koma(total, 1) + ' kΩ = ' + koma(vout, 2) + ' V';
+    document.getElementById('hitungArus').textContent = '= 5,00 V ÷ ' + koma(total, 1) + ' kΩ = ' + koma(mA, 2) + ' mA';
+    document.getElementById('nilaiKini').textContent = nilai + '%';
+    document.getElementById('uraiKini').textContent = URAIAN[nilai];
+    document.querySelectorAll('[data-nilai]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.nilai) === nilai)));
+    grafik.setAttribute('aria-label', 'R1 ' + r1 + ' kiloohm dan R2 ' + r2 + ' kiloohm. Bagian R2 dari total ' + koma(bagian * 100, 1) + ' persen. Vout ' + koma(vout, 2) + ' volt dari sumber 5 volt.');
+  }
+  document.querySelectorAll('[data-nilai]').forEach(b => b.addEventListener('click', () => tampilNilai(Number(b.dataset.nilai))));
+  tampilNilai(60);
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

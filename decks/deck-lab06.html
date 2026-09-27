@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 6. Satu Photodiode di Atas Permukaan</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK. Pakai apa adanya ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P2 diagram lebar penuh */
+.legend{display:flex;gap:28px;align-items:center;font-size:17px}.legend span{display:flex;gap:10px;align-items:center}.garis-legenda{width:34px;height:4px;background:var(--oranye)}.garis-legenda.sinyal{height:0;border-top:3px dashed var(--teks-lembut);background:none}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+.sisipan{border-top:1px solid var(--abu-garis);margin-top:28px;padding-top:22px}
+.peringatan{border-left:4px solid var(--merah);padding:0 0 0 24px;margin-top:30px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P5 grafik interaktif dan rumus */
+.rumus{font-size:29px;font-weight:700;line-height:1.5;margin-top:20px}
+.baris-rumus{display:flex;align-items:center;gap:16px;margin-top:8px}.fraksi{display:inline-flex;flex-direction:column;text-align:center;min-width:166px;font-size:22px}.fraksi span:first-child{border-bottom:2px solid var(--teks);padding:0 5px 5px}.fraksi span:last-child{padding-top:5px}
+.pilihan{display:flex;gap:14px;margin-top:27px}
+.pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+/* P6 grafik data dan tabel */
+.tabel{width:100%;border-collapse:collapse;font-size:21px;margin-top:25px}
+.tabel th{font-size:15px;line-height:1.5;color:var(--teks-lembut);font-weight:600;text-align:left;padding:0 0 16px}
+.tabel td{border-top:1px solid var(--abu-garis);padding:19px 0}
+.tabel td:first-child{font-weight:700}.tabel td:last-child{text-align:right}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI ===== */
+.tabel td{white-space:nowrap}
+/* Bayangan garis sensor pada slide 5. Digambar di x 0 lalu digeser sepanjang kotak grafik x 110 sampai 640. */
+.hantu{opacity:.55;animation:geserSensor 7s linear infinite}
+@keyframes geserSensor{0%{transform:translate(110px,0)}80%{transform:translate(640px,0)}88%{transform:translate(640px,0);opacity:.55}100%{transform:translate(640px,0);opacity:0}}
+@media(prefers-reduced-motion:reduce){.hantu{display:none}}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 6, Satu Photodiode di Atas Permukaan">
+
+<!-- SLIDE 1. Pola P1 pembuka -->
+<section class="slide aktif" aria-labelledby="judul1" data-video="skip">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 6 · Modul 2</p>
+      <h1 id="judul1">Sensor<br><span class="oranye">pantulan</span></h1>
+      <p class="ringkas">Membaca pantulan cahaya dari permukaan putih dan hitam.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Reflektansi adalah persentase cahaya yang dipantulkan oleh permukaan.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Nilai ADC pada dua warna permukaan</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Nilai ADC pada simulator Lab 6 dengan skala 0 sampai 1023. Permukaan putih dengan reflektansi 99 persen menghasilkan nilai 890. Garis hitam dengan reflektansi 8 persen menghasilkan nilai 182. Selisih kedua nilai 708.">
+        <text x="0" y="30">Permukaan putih, reflektansi 99%</text><text x="635" y="30" text-anchor="end" font-weight="700" class="oranye">890</text>
+        <rect x="0" y="45" width="600" height="22" rx="3" fill="var(--abu-garis)"/>
+        <rect x="0" y="45" width="522" height="22" rx="3" fill="var(--oranye)"/>
+        <text x="0" y="113">Garis hitam, reflektansi 8%</text><text x="635" y="113" text-anchor="end" font-weight="700">182</text>
+        <rect x="0" y="128" width="600" height="22" rx="3" fill="var(--abu-garis)"/>
+        <rect x="0" y="128" width="106.7" height="22" rx="3" fill="var(--teks-lembut)"/>
+        <path d="M106.7 172 V184 H522 V172" fill="none" stroke="var(--teks)" stroke-width="2" stroke-linejoin="round"/>
+        <text x="314.4" y="214" text-anchor="middle" font-weight="700">Selisih 708</text>
+        <text x="0" y="269" class="label-kecil lembut">Nilai ADC pada simulator Lab 6</text>
+        <text x="600" y="269" text-anchor="end" class="label-kecil lembut">Skala 0 sampai 1023</text>
+      </svg>
+      <p class="simpulan-visual">Permukaan putih memantulkan hampir seluruh cahaya pemancar, garis hitam menyerap sebagian besar. Selisih ADC sebesar 708 menjadi dasar pengenalan garis.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. Pola P3 visual kiri, teks kanan -->
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Susunan sensor pantulan</p><h2 id="judul2">Pemancar dan photodiode penerima</h2></header>
+  <div class="isi terbagi">
+    <svg class="sensor" data-mode="struktur" data-posisi="-60" viewBox="0 0 600 430" width="700" height="450" role="img" aria-label="Sensor tetap menghadap ke bawah berisi pemancar di kiri dan photodiode di kanan. Cahaya pancar turun ke permukaan, lalu cahaya pantul naik ke photodiode. Permukaan putih berada di bawah sensor dan garis hitam berada di sisi kanan. Lingkaran putus putus oranye menandai area baca photodiode."></svg>
+    <div class="teks-samping">
+      <h3>Pemancar dan photodiode menghadap permukaan.</h3>
+      <p>Pemancar menyala penuh. Photodiode menerima cahaya pantul dari permukaan.</p>
+      <p>Lingkaran putus putus menandai area baca photodiode, bukan satu titik.</p>
+      <p class="catatan lembut">Photodiode dan pembagi tegangannya sama dengan Lab 5. Pada sensor garis fisik, pemancar biasanya LED inframerah.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3. Pola P4 dua kondisi berdampingan -->
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Dua kondisi permukaan</p><h2 id="judul3">Pantulan pada putih dan hitam</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Permukaan putih</h3>
+        <svg class="sensor" data-mode="keadaan" data-posisi="-60" viewBox="0 0 600 430" role="img" aria-label="Sensor di atas permukaan putih, garis hitam berada di sisi kanan. Cahaya pantul tebal kembali ke photodiode. Reflektansi 99 persen dan nilai ADC 890."></svg>
+        <p><strong>Reflektansi 99%, ADC 890.</strong><br>Sebagian besar cahaya pancar kembali ke photodiode.</p>
+      </div>
+      <div>
+        <h3>Garis hitam</h3>
+        <svg class="sensor" data-mode="keadaan" data-posisi="0" viewBox="0 0 600 430" role="img" aria-label="Sensor di atas garis hitam. Cahaya pantul tipis dan putus putus. Reflektansi 8 persen dan nilai ADC 182."></svg>
+        <p><strong>Reflektansi 8%, ADC 182.</strong><br>Sebagian besar cahaya pancar diserap permukaan.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. Pola P2 diagram lebar penuh -->
+<section class="slide" aria-labelledby="judul4" hidden>
+  <header class="judul"><p class="kicker">Alur perhitungan pada simulator</p><h2 id="judul4">Perhitungan ADC dari reflektansi</h2></header>
+  <div class="isi">
+    <svg viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Empat blok berurutan. Permukaan menentukan reflektansi, photodiode menentukan R_PD, pembagi tegangan menghasilkan V_keluar, ADC menghasilkan nilai 0 sampai 1023. Blok permukaan adalah masukan baru, tiga blok lain sama dengan Lab 5. Putih menghasilkan reflektansi 99 persen, R_PD 1,49 kiloohm, V_keluar 4,35 volt, ADC 890. Hitam menghasilkan reflektansi 8 persen, R_PD 46,08 kiloohm, V_keluar 0,89 volt, ADC 182.">
+      <defs>
+        <marker id="panahSinyal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L8 5 L1 9" fill="none" stroke="var(--teks-lembut)" stroke-width="1.5"/></marker>
+      </defs>
+      <path d="M100 46 V34 H300 V46" fill="none" stroke="var(--oranye)" stroke-width="2" stroke-linejoin="round"/>
+      <text x="200" y="22" text-anchor="middle" class="label-kecil oranye">Masukan baru</text>
+      <path d="M384 46 V34 H1152 V46" fill="none" stroke="var(--teks-lembut)" stroke-width="2" stroke-linejoin="round"/>
+      <text x="768" y="22" text-anchor="middle" class="label-kecil lembut">Rangkaian Lab 5</text>
+      <rect x="100" y="62" width="200" height="130" rx="12" fill="var(--oranye-muda)" stroke="var(--oranye)" stroke-width="3"/>
+      <text x="200" y="118" text-anchor="middle" font-size="24" font-weight="700">Permukaan</text>
+      <text x="200" y="152" text-anchor="middle" class="label-kecil">Reflektansi 8% sampai 99%</text>
+      <path d="M300 127 H372" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <text x="342" y="110" text-anchor="middle" class="label-kecil">Pantulan</text>
+      <rect x="384" y="62" width="200" height="130" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="484" y="118" text-anchor="middle" font-size="24" font-weight="700">Photodiode</text>
+      <text x="484" y="152" text-anchor="middle" class="label-kecil lembut">Menentukan R_PD</text>
+      <path d="M584 127 H656" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <text x="626" y="110" text-anchor="middle" class="label-kecil">R_PD</text>
+      <rect x="668" y="62" width="200" height="130" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="768" y="108" text-anchor="middle" font-size="24" font-weight="700">Pembagi</text>
+      <text x="768" y="138" text-anchor="middle" font-size="24" font-weight="700">tegangan</text>
+      <text x="768" y="172" text-anchor="middle" class="label-kecil lembut">Menghasilkan V_keluar</text>
+      <path d="M868 127 H940" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-dasharray="8 6" marker-end="url(#panahSinyal)"/>
+      <text x="910" y="110" text-anchor="middle" class="label-kecil">V_keluar</text>
+      <rect x="952" y="62" width="200" height="130" rx="12" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2"/>
+      <text x="1052" y="118" text-anchor="middle" font-size="24" font-weight="700">ADC</text>
+      <text x="1052" y="152" text-anchor="middle" class="label-kecil lembut">Nilai 0 sampai 1023</text>
+      <text x="200" y="236" text-anchor="middle" class="label-kecil lembut">Reflektansi</text>
+      <text x="484" y="236" text-anchor="middle" class="label-kecil lembut">R_PD</text>
+      <text x="768" y="236" text-anchor="middle" class="label-kecil lembut">V_keluar</text>
+      <text x="1052" y="236" text-anchor="middle" class="label-kecil lembut">Nilai ADC</text>
+      <path d="M0 248 H1152 M0 298 H1152 M0 348 H1152" fill="none" stroke="var(--abu-garis)" stroke-width="1"/>
+      <text x="0" y="282" font-weight="700">Putih</text>
+      <text x="200" y="282" text-anchor="middle" font-weight="700" class="oranye">99%</text>
+      <text x="484" y="282" text-anchor="middle" font-weight="700">1,49 kΩ</text>
+      <text x="768" y="282" text-anchor="middle" font-weight="700">4,35 V</text>
+      <text x="1052" y="282" text-anchor="middle" font-weight="700">890</text>
+      <text x="0" y="332" font-weight="700">Hitam</text>
+      <text x="200" y="332" text-anchor="middle" font-weight="700" class="oranye">8%</text>
+      <text x="484" y="332" text-anchor="middle" font-weight="700">46,08 kΩ</text>
+      <text x="768" y="332" text-anchor="middle" font-weight="700">0,89 V</text>
+      <text x="1052" y="332" text-anchor="middle" font-weight="700">182</text>
+    </svg>
+    <p class="catatan lembut bawah">Photodiode, pembagi tegangan, dan ADC sama dengan Lab 5. Pemancar menyala penuh sehingga cahaya efektif sama dengan reflektansi.</p>
+  </div>
+</section>
+
+<!-- SLIDE 5. Pola P6 grafik data dan tabel -->
+<section class="slide" aria-labelledby="judul5" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Hasil pada model sensor simulator</p><h2 id="judul5">Perubahan ADC pada tepi garis</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikTepi" viewBox="0 0 700 375" width="700" height="375" role="img" aria-label="Strip permukaan dengan garis hitam di tengah dan grafik nilai ADC terhadap posisi permukaan di bawah sensor pada sumbu yang sama. Di atas putih nilai ADC 890. Pada zona transisi selebar 6 satuan di luar tiap tepi garis nilai turun bertahap, misalnya 303 pada posisi minus 15. Di atas garis hitam nilai ADC 182. Bayangan garis oranye memperagakan sensor yang menyusuri permukaan."></svg>
+      <p class="catatan" style="margin-top:14px"><strong>Reflektansi = 99% − (99 − 8)% × fraksiHitam</strong><br><span class="lembut">Contoh fraksiHitam 0,50 menghasilkan reflektansi 53,5% dan ADC 303.</span></p>
+    </div>
+    <div style="padding-top:8px">
+      <h3>Contoh pembacaan</h3>
+      <table class="tabel"><thead><tr><th>fraksiHitam</th><th>Reflektansi</th><th style="text-align:right">Nilai<br>ADC</th></tr></thead><tbody>
+        <tr><td>0,00</td><td>99,0%</td><td>890</td></tr>
+        <tr><td>0,50</td><td>53,5%</td><td>303</td></tr>
+        <tr><td>1,00</td><td>8,0%</td><td>182</td></tr>
+      </tbody></table>
+      <p class="catatan lembut" style="margin-top:26px">Zona transisi 6 satuan di luar tiap tepi garis berasal dari model simulator. Pada sensor fisik, lebar zona bergantung pada ukuran area baca dan jarak sensor ke permukaan.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6. Pola P5 grafik interaktif dan rumus -->
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Keputusan dari nilai analog</p><h2 id="judul6">Threshold di antara dua bacaan</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikAmbang" viewBox="0 0 700 330" width="700" height="330" role="img" aria-label="Skala nilai ADC 0 sampai 1023 dengan garis threshold merah putus putus pada 536. Nilai ADC 303 berada di bawah threshold dan dibaca sebagai garis hitam."></svg>
+      <div class="pilihan" role="group" aria-label="Pilih nilai ADC">
+        <button type="button" data-nilai="100" aria-pressed="false">182</button>
+        <button type="button" data-nilai="50" aria-pressed="true">303</button>
+        <button type="button" data-nilai="0" aria-pressed="false">890</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>ADC <span id="nilaiKini" class="oranye">303</span></h3>
+      <p id="uraiKini">Sensor separuh masuk garis, fraksiHitam 0,50. Nilai ADC di bawah threshold dibaca sebagai garis hitam.</p>
+      <div class="rumus" aria-label="Threshold sama dengan ADC putih ditambah ADC hitam, dibagi dua, yaitu 536">Threshold =<div class="baris-rumus"><span class="fraksi"><span><span class="oranye">890</span> + 182</span><span>2</span></span><span>= 536</span></div></div>
+      <p class="catatan lembut">Simulator Lab 6 tidak menghitung threshold. Nilai 536 adalah nilai tengah dua bacaan pada model simulator.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7. Pola P4 dua kondisi berdampingan -->
+<section class="slide" aria-labelledby="judul7" hidden>
+  <header class="judul"><p class="kicker">Batas pembacaan satu sensor</p><h2 id="judul7">Bacaan sama pada dua posisi garis</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Garis di kiri sensor</h3>
+        <svg class="sensor" data-mode="keadaan" data-posisi="60" data-kurung="ya" viewBox="0 0 600 430" role="img" aria-label="Sensor di atas permukaan putih. Garis hitam berada 60 satuan di kiri sensor. Reflektansi 99 persen dan nilai ADC 890."></svg>
+        <p><strong>Garis 60 satuan di kiri, ADC 890.</strong><br>Sensor hanya membaca permukaan putih di bawahnya.</p>
+      </div>
+      <div>
+        <h3>Garis di kanan sensor</h3>
+        <svg class="sensor" data-mode="keadaan" data-posisi="-60" data-kurung="ya" viewBox="0 0 600 430" role="img" aria-label="Sensor di atas permukaan putih. Garis hitam berada 60 satuan di kanan sensor. Reflektansi 99 persen dan nilai ADC 890."></svg>
+        <p><strong>Garis 60 satuan di kanan, ADC 890.</strong><br>Nilai ADC tidak menunjukkan arah garis.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8. Pola P7 kegiatan simulator -->
+<section class="slide" aria-labelledby="judul8" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 6</p><h2 id="judul8">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Permukaan</h3><p>Seret permukaan pada kanvas ke kiri dan ke kanan.<br>Amati nilai Reflektansi, Tegangan, dan ADC pada panel.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Tepi garis</h3><p>Geser tepi garis melewati lingkaran area baca perlahan.<br>Amati fraksiHitam pada kartu rumus dan grafik ADC.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Dua kondisi</h3><p>Tahan sensor di atas hitam, lalu di atas putih.<br>Catat nilai ADC pada kedua kondisi.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Sensor telah berada di atas warna hitam dan di atas warna putih.<br>Setiap kondisi dipertahankan sekitar 0,4 detik sampai tanda centang muncul.</p></div>
+  </div>
+</section>
+
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 6 · Satu photodiode di atas permukaan</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 8</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab06-sensor-permukaan.js, engine/rangkaian.js, render/rangkaianView.js.
+  // posisi adalah koordinat permukaan tepat di bawah sensor, garis hitam menempati −12 sampai 12. Pemancar di kiri dan photodiode di kanan mengikuti kanvas simulator.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+
+  // ===== MODEL. Konstanta sama dengan engine/rangkaian.js =====
+  const V_SUMBER = 5, R_PD_MIN = 1000, R_PD_MAKS = 50000, R_TETAP = 10000, ADC_MAKS = 1023;
+  const REFLEKTANSI_PUTIH = 99, REFLEKTANSI_HITAM = 8, LEBAR_GARIS = 24, LEBAR_TRANSISI = 6;
+  const TEPI = LEBAR_GARIS / 2;
+  const jepit = nilai => Math.max(0, Math.min(1, nilai));
+  const fraksiHitamDariPosisi = posisi => Math.min(jepit((posisi - (-TEPI - LEBAR_TRANSISI)) / LEBAR_TRANSISI), jepit((TEPI + LEBAR_TRANSISI - posisi) / LEBAR_TRANSISI));
+  function hitungDariFraksi(fraksi) {
+    const reflektansi = REFLEKTANSI_PUTIH - (REFLEKTANSI_PUTIH - REFLEKTANSI_HITAM) * fraksi;
+    const rPd = R_PD_MAKS - (R_PD_MAKS - R_PD_MIN) * (reflektansi / 100);
+    const tegangan = V_SUMBER / (rPd + R_TETAP) * R_TETAP;
+    return {fraksi, reflektansi, rPd, tegangan, adc: Math.round((tegangan / V_SUMBER) * ADC_MAKS)};
+  }
+  const hitungModel = posisi => hitungDariFraksi(fraksiHitamDariPosisi(posisi));
+  const ADC_PUTIH = hitungDariFraksi(0).adc, ADC_HITAM = hitungDariFraksi(1).adc;
+  const THRESHOLD = Math.round((ADC_PUTIH + ADC_HITAM) / 2);
+  const koma = (nilai, digit) => nilai.toFixed(digit).replace('.', ',');
+  const bulat1 = nilai => Number(nilai.toFixed(1));
+  // Kepala panah pada ruas garis (x1,y1) ke (x2,y2), ditempatkan pada pecahan t dari panjang ruas.
+  function panah(x1, y1, x2, y2, t, ukuran) {
+    const dx = x2 - x1, dy = y2 - y1, panjang = Math.hypot(dx, dy);
+    const ux = dx / panjang, uy = dy / panjang, px = x1 + dx * t, py = y1 + dy * t;
+    const a = [px - ux * ukuran - uy * ukuran * 0.6, py - uy * ukuran + ux * ukuran * 0.6];
+    const b = [px - ux * ukuran + uy * ukuran * 0.6, py - uy * ukuran - ux * ukuran * 0.6];
+    return 'M' + bulat1(a[0]) + ' ' + bulat1(a[1]) + ' L' + bulat1(px) + ' ' + bulat1(py) + ' L' + bulat1(b[0]) + ' ' + bulat1(b[1]);
+  }
+
+  // ===== SLIDE 2, 3, 7. Sensor tetap di atas permukaan bergaris. Mode struktur menamai bagian, mode keadaan menampilkan nilai =====
+  function gambarSensor(svg) {
+    const struktur = svg.dataset.mode === 'struktur';
+    const posisi = Number(svg.dataset.posisi), m = hitungModel(posisi);
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const K = 3.5, cx = 300, yPermukaan = 310, tinggiPermukaan = 60;
+    const xKiriGaris = Math.max(20, cx + (-TEPI - posisi) * K), xKananGaris = Math.min(580, cx + (TEPI - posisi) * K);
+    // Permukaan dan garis hitam. Garis digambar di x = cx − posisi × K, sama dengan kanvas simulator.
+    add('rect', {x: 20, y: yPermukaan, width: 560, height: tinggiPermukaan, fill: 'var(--putih-kartu)', stroke: 'var(--abu-garis)', 'stroke-width': 2});
+    if (xKananGaris > xKiriGaris) add('rect', {x: bulat1(xKiriGaris), y: yPermukaan, width: bulat1(xKananGaris - xKiriGaris), height: tinggiPermukaan, fill: 'var(--lintasan)'});
+    // Sinar pancar dan sinar pantul. Tebal pantulan mengikuti reflektansi.
+    const pancar = 'M250 133 L300 308', pantul = 'M300 308 L350 133';
+    const gayaSinar = {fill: 'none', stroke: 'var(--led-nyala)', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'};
+    add('path', {...gayaSinar, d: pancar, 'stroke-width': 4});
+    add('path', {...gayaSinar, d: panah(250, 133, 300, 308, 0.62, 12), 'stroke-width': 3});
+    const tebalPantul = struktur ? 5 : m.reflektansi > 50 ? 6 : 2;
+    const atribPantul = {...gayaSinar, d: pantul, 'stroke-width': tebalPantul};
+    if (!struktur && m.reflektansi <= 50) atribPantul['stroke-dasharray'] = '6 8';
+    add('path', atribPantul);
+    add('path', {...gayaSinar, d: panah(300, 308, 350, 133, 0.62, 12), 'stroke-width': 3});
+    // Lingkaran area baca, sama dengan lingkaran putus putus oranye pada kanvas.
+    add('circle', {cx, cy: yPermukaan + tinggiPermukaan / 2, r: 27, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 2, 'stroke-dasharray': '4 5'});
+    // Rumah sensor menghadap ke bawah, pemancar di kiri dan photodiode di kanan.
+    add('rect', {x: 190, y: 40, width: 220, height: 100, rx: 10, fill: 'var(--teks)'});
+    add('circle', {cx: 250, cy: 118, r: 13, fill: 'var(--led-nyala)'});
+    add('circle', {cx: 350, cy: 118, r: 13, fill: 'var(--putih)', stroke: 'var(--abu-garis)', 'stroke-width': 3});
+    add('text', {x: 300, y: 26, 'text-anchor': 'middle', 'font-weight': 700}, 'Sensor tetap');
+    if (struktur) {
+      add('text', {x: 172, y: 125, 'text-anchor': 'end'}, 'Pemancar');
+      add('text', {x: 428, y: 125}, 'Photodiode');
+      add('text', {x: 232, y: 235, 'text-anchor': 'end'}, 'Cahaya pancar');
+      add('text', {x: 368, y: 235}, 'Cahaya pantul');
+      add('text', {x: 30, y: 296}, 'Permukaan putih');
+      add('text', {x: bulat1((xKiriGaris + xKananGaris) / 2), y: 296, 'text-anchor': 'middle'}, 'Garis hitam');
+      add('text', {x: 300, y: 402, 'text-anchor': 'middle', class: 'oranye'}, 'Area baca');
+    } else {
+      add('text', {x: 232, y: 235, 'text-anchor': 'end'}, 'Reflektansi ' + koma(m.reflektansi, 0) + '%');
+      add('text', {x: 368, y: 238, 'font-weight': 700, class: 'oranye', style: 'font-size:28px'}, 'ADC ' + m.adc);
+    }
+    if (svg.dataset.kurung === 'ya') {
+      const xGaris = bulat1(cx - posisi * K), kiri = Math.min(cx, xGaris), kanan = Math.max(cx, xGaris);
+      add('path', {d: 'M' + kiri + ' 384 V396 H' + kanan + ' V384', fill: 'none', stroke: 'var(--teks)', 'stroke-width': 2, 'stroke-linejoin': 'round'});
+      add('text', {x: bulat1((kiri + kanan) / 2), y: 424, 'text-anchor': 'middle'}, Math.abs(posisi) + ' satuan');
+    }
+  }
+  document.querySelectorAll('.sensor').forEach(gambarSensor);
+
+  // ===== SLIDE 5. Strip permukaan dan grafik ADC terhadap posisi pada sumbu x yang sama =====
+  function gambarTepi(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const xP = posisi => bulat1(110 + (posisi + 36) / 72 * 530), yA = adc => bulat1(316 - adc / ADC_MAKS * 200);
+    add('text', {x: 650, y: 24, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'Permukaan di bawah sensor');
+    add('rect', {x: 110, y: 36, width: 530, height: 36, fill: 'var(--putih-kartu)', stroke: 'var(--abu-garis)', 'stroke-width': 2});
+    add('rect', {x: xP(-TEPI), y: 36, width: bulat1(xP(TEPI) - xP(-TEPI)), height: 36, fill: 'var(--lintasan)'});
+    // Pita zona transisi pada grafik, 6 satuan di luar tiap tepi garis.
+    for (const [a, b] of [[-TEPI - LEBAR_TRANSISI, -TEPI], [TEPI, TEPI + LEBAR_TRANSISI]]) {
+      add('rect', {x: xP(a), y: 116, width: bulat1(xP(b) - xP(a)), height: 200, fill: 'var(--abu-muda)'});
+      add('text', {x: bulat1((xP(a) + xP(b)) / 2), y: 100, 'text-anchor': 'middle', class: 'label-kecil lembut'}, 'Transisi');
+    }
+    add('text', {x: 4, y: 24, 'font-size': 19}, 'Nilai ADC');
+    add('path', {d: 'M110 116 H650 M110 ' + yA(ADC_PUTIH) + ' H650 M110 ' + yA(ADC_HITAM) + ' H650', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    add('path', {d: 'M110 104 V316 H658', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    for (const nilai of [ADC_MAKS, ADC_PUTIH, ADC_HITAM, 0]) add('text', {x: 94, y: yA(nilai) + 7, 'text-anchor': 'end', class: 'label-kecil lembut'}, String(nilai));
+    let kurva = '';
+    for (let posisi = -36; posisi <= 36; posisi += 0.5) kurva += (kurva ? ' L' : 'M') + xP(posisi) + ' ' + yA(hitungModel(posisi).adc);
+    add('path', {d: kurva + ' L640 316 L110 316 Z', fill: 'var(--oranye-muda)'});
+    add('path', {d: kurva, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+    // Penanda statis pada posisi −15, yaitu fraksiHitam 0,50.
+    add('path', {d: 'M' + xP(-15) + ' 36 V316', fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 2, 'stroke-dasharray': '6 5'});
+    for (const posisi of [-18, -15, -12, 12, 15, 18]) add('circle', {cx: xP(posisi), cy: yA(hitungModel(posisi).adc), r: 7, fill: 'var(--oranye)', stroke: 'var(--putih)', 'stroke-width': 3});
+    add('text', {x: xP(-15) + 16, y: 240, 'font-weight': 700, class: 'oranye'}, String(hitungModel(-15).adc));
+    for (const posisi of [-36, -18, -12, 0, 12, 18, 36]) add('text', {x: xP(posisi), y: 342, 'text-anchor': 'middle', class: 'label-kecil'}, String(posisi).replace('-', '−'));
+    add('text', {x: 650, y: 368, 'text-anchor': 'end', class: 'label-kecil'}, 'Posisi permukaan di bawah sensor');
+    // Bayangan garis sensor yang menyusuri permukaan. Digambar di x 0 lalu digeser lewat CSS.
+    const hantu = add('g', {class: 'hantu', 'aria-hidden': 'true'});
+    hantu.appendChild(elemen('line', {x1: 0, y1: 36, x2: 0, y2: 316, stroke: 'var(--oranye)', 'stroke-width': 3, 'stroke-linecap': 'round'}));
+  }
+  gambarTepi(document.getElementById('grafikTepi'));
+
+  // ===== SLIDE 6. Skala nilai ADC dengan garis threshold di antara dua bacaan =====
+  const grafikAmbang = document.getElementById('grafikAmbang');
+  const uraian = {
+    100: 'Sensor di atas garis hitam, fraksiHitam 1,00. Nilai ADC di bawah threshold dibaca sebagai garis hitam.',
+    50: 'Sensor separuh masuk garis, fraksiHitam 0,50. Nilai ADC di bawah threshold dibaca sebagai garis hitam.',
+    0: 'Sensor di atas permukaan putih, fraksiHitam 0,00. Nilai ADC di atas threshold dibaca sebagai putih.',
+  };
+  function tampilAmbang(fraksiPersen) {
+    grafikAmbang.replaceChildren();
+    const add = (tag, attr, isi) => grafikAmbang.appendChild(elemen(tag, attr, isi));
+    const m = hitungDariFraksi(fraksiPersen / 100), xA = adc => bulat1(60 + adc / ADC_MAKS * 580);
+    const xT = xA(THRESHOLD), xKini = xA(m.adc), hitam = m.adc < THRESHOLD;
+    add('text', {x: 60, y: 156, class: 'label-kecil lembut'}, 'Skala nilai ADC');
+    add('rect', {x: 60, y: 60, width: bulat1(xT - 60), height: 22, rx: 3, fill: 'var(--teks-lembut)'});
+    add('rect', {x: xT, y: 60, width: bulat1(640 - xT), height: 22, rx: 3, fill: 'var(--abu-garis)'});
+    let tanda = '';
+    for (const nilai of [0, ADC_HITAM, ADC_PUTIH, ADC_MAKS]) {
+      tanda += 'M' + xA(nilai) + ' 84 V94 ';
+      add('text', {x: xA(nilai), y: 116, 'text-anchor': 'middle', class: 'label-kecil lembut'}, String(nilai));
+    }
+    add('path', {d: tanda.trim(), fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-linecap': 'round'});
+    // Garis threshold merah putus putus, label di ujung atas.
+    add('path', {d: 'M' + xT + ' 40 V214', fill: 'none', stroke: 'var(--merah)', 'stroke-width': 3, 'stroke-dasharray': '8 6'});
+    add('text', {x: xT + 12, y: 50, class: 'label-kecil merah', 'font-weight': 700}, 'Threshold ' + THRESHOLD);
+    // Bacaan yang dipilih.
+    add('circle', {cx: xKini, cy: 71, r: 9, fill: 'var(--oranye)', stroke: 'var(--putih)', 'stroke-width': 3});
+    add('text', {x: xKini, y: 48, 'text-anchor': 'middle', 'font-weight': 700, class: 'oranye', style: 'font-size:24px'}, 'ADC ' + m.adc);
+    // Kurung dua keadaan hasil keputusan.
+    for (const [aktif, x1, x2, nama, rentang] of [[hitam, 60, xT - 6, 'Garis hitam', '0 sampai ' + (THRESHOLD - 1)], [!hitam, xT + 6, 640, 'Permukaan putih', THRESHOLD + ' sampai ' + ADC_MAKS]]) {
+      const tengah = bulat1((x1 + x2) / 2);
+      add('path', {d: 'M' + x1 + ' 200 V212 H' + x2 + ' V200', fill: 'none', stroke: aktif ? 'var(--oranye)' : 'var(--teks-lembut)', 'stroke-width': aktif ? 3 : 2, 'stroke-linejoin': 'round'});
+      add('text', {x: tengah, y: 246, 'text-anchor': 'middle', 'font-weight': aktif ? 700 : 400, class: aktif ? 'oranye' : 'lembut'}, nama);
+      add('text', {x: tengah, y: 272, 'text-anchor': 'middle', class: 'label-kecil lembut'}, rentang);
+    }
+    document.getElementById('nilaiKini').textContent = String(m.adc);
+    document.getElementById('uraiKini').textContent = uraian[fraksiPersen];
+    document.querySelectorAll('[data-nilai]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.nilai) === fraksiPersen)));
+    grafikAmbang.setAttribute('aria-label', 'Skala nilai ADC 0 sampai 1023 dengan garis threshold merah putus putus pada ' + THRESHOLD + '. Nilai ADC ' + m.adc + ' berada di ' + (hitam ? 'bawah' : 'atas') + ' threshold dan dibaca sebagai ' + (hitam ? 'garis hitam' : 'permukaan putih') + '.');
+  }
+  document.querySelectorAll('[data-nilai]').forEach(b => b.addEventListener('click', () => tampilAmbang(Number(b.dataset.nilai))));
+  tampilAmbang(50);
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 14. Delapan Region Kamera</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P5 grafik interaktif */
+.pilihan{display:flex;gap:14px;margin-top:27px}
+.pilihan button{background:transparent;border:1px solid var(--abu-garis);padding:9px 15px;font-weight:700;color:var(--teks);border-radius:6px;min-width:75px}
+.pilihan button[aria-pressed="true"]{background:var(--oranye-muda);border-color:var(--oranye)}
+/* P6 grafik data dan tabel */
+.tabel{width:100%;border-collapse:collapse;font-size:21px;margin-top:25px}
+.tabel th{font-size:15px;line-height:1.5;color:var(--teks-lembut);font-weight:600;text-align:left;padding:0 0 16px}
+.tabel td{border-top:1px solid var(--abu-garis);padding:19px 0}
+.tabel td:first-child{font-weight:700}.tabel td:last-child{text-align:right}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI ===== */
+.tabel td{white-space:nowrap}.tabel td:first-child{padding-right:16px}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 14, Delapan Region Kamera">
+
+<!-- SLIDE 1. Pola P1 pembuka -->
+<section class="slide aktif" aria-labelledby="judul1">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 14 · Modul 4</p>
+      <h1 id="judul1">Delapan<br><span class="oranye">region</span></h1>
+      <p class="ringkas">Mengubah citra biner menjadi delapan nilai ADC.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Region adalah bagian frame yang dihitung menjadi satu nilai sensor.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Nilai ADC delapan region</h3>
+      <svg viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Diagram batang nilai ADC delapan region pada simulator saat garis berada di tengah frame. Region R0, R1, R2, R5, R6, dan R7 bernilai 1023. Region R3 dan R4 bernilai 0. Semua batang memakai skala yang sama.">
+        <text x="0" y="24" class="label-kecil lembut">Nilai ADC</text>
+        <path d="M40 210 H660" stroke="var(--teks-lembut)" stroke-width="2"/>
+        <rect x="39" y="60" width="46" height="150" rx="3" fill="var(--teks-lembut)"/><text x="62" y="48" text-anchor="middle" font-weight="700">1023</text><text x="62" y="240" text-anchor="middle" class="label-kecil lembut">R0</text>
+        <rect x="121" y="60" width="46" height="150" rx="3" fill="var(--teks-lembut)"/><text x="144" y="48" text-anchor="middle" font-weight="700">1023</text><text x="144" y="240" text-anchor="middle" class="label-kecil lembut">R1</text>
+        <rect x="203" y="60" width="46" height="150" rx="3" fill="var(--teks-lembut)"/><text x="226" y="48" text-anchor="middle" font-weight="700">1023</text><text x="226" y="240" text-anchor="middle" class="label-kecil lembut">R2</text>
+        <text x="308" y="199" text-anchor="middle" font-weight="700" class="oranye">0</text><text x="308" y="240" text-anchor="middle" class="label-kecil oranye">R3</text>
+        <text x="390" y="199" text-anchor="middle" font-weight="700" class="oranye">0</text><text x="390" y="240" text-anchor="middle" class="label-kecil oranye">R4</text>
+        <rect x="449" y="60" width="46" height="150" rx="3" fill="var(--teks-lembut)"/><text x="472" y="48" text-anchor="middle" font-weight="700">1023</text><text x="472" y="240" text-anchor="middle" class="label-kecil lembut">R5</text>
+        <rect x="531" y="60" width="46" height="150" rx="3" fill="var(--teks-lembut)"/><text x="554" y="48" text-anchor="middle" font-weight="700">1023</text><text x="554" y="240" text-anchor="middle" class="label-kecil lembut">R6</text>
+        <rect x="613" y="60" width="46" height="150" rx="3" fill="var(--teks-lembut)"/><text x="636" y="48" text-anchor="middle" font-weight="700">1023</text><text x="636" y="240" text-anchor="middle" class="label-kecil lembut">R7</text>
+        <text x="0" y="269" class="label-kecil lembut">Nilai region pada simulator Lab 14</text>
+      </svg>
+      <p class="simpulan-visual">Region yang dilewati garis bernilai 0 dan region lantai bernilai 1023. Delapan nilai ini dapat diolah seperti bacaan larik photodiode Lab 7.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. Pola P3 struktur region -->
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Pembagian frame</p><h2 id="judul2">Delapan region selebar empat kolom</h2></header>
+  <div class="isi terbagi">
+    <svg viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Frame kamera simulator berukuran 32 kolom dan 20 baris dibagi menjadi delapan region R0 sampai R7 oleh tujuh garis pembatas oranye. Setiap region selebar 4 kolom. Garis gelap berada di tengah frame pada region R3 dan R4.">
+      <g text-anchor="middle" class="label-kecil lembut"><text x="154" y="34">R0</text><text x="222" y="34">R1</text><text x="290" y="34">R2</text><text x="358" y="34">R3</text><text x="426" y="34">R4</text><text x="494" y="34">R5</text><text x="562" y="34">R6</text><text x="630" y="34">R7</text></g>
+      <text x="108" y="228" text-anchor="end" class="label-kecil lembut">20 baris</text>
+      <g class="kisi" data-frame="asli" data-x="120" data-y="52" data-sel="17" data-kolom="0" data-baris="0" data-nk="32" data-nb="20"></g>
+      <path d="M188 52 V392 M256 52 V392 M324 52 V392 M392 52 V392 M460 52 V392 M528 52 V392 M596 52 V392" fill="none" stroke="var(--oranye)" stroke-width="2"/>
+      <path d="M120 404 V414 H188 V404" fill="none" stroke="var(--oranye)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="154" y="440" text-anchor="middle">4 kolom</text>
+    </svg>
+    <div class="teks-samping">
+      <h3>Setiap region selebar 4 kolom dan setinggi 20 baris.</h3>
+      <p>Frame 32 kolom dibagi menjadi delapan region dengan lebar sama. Setiap region memuat 80 piksel, yaitu 4 kolom × 20 baris.</p>
+      <p class="catatan lembut">Pada simulator, batas region digambar sebagai garis putus-putus oranye. Nilai region dihitung dari seluruh baris frame.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3. Pola P3 proporsi piksel gelap -->
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Isi satu region</p><h2 id="judul3">Proporsi piksel gelap dalam region</h2></header>
+  <div class="isi terbagi">
+    <svg viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Citra biner frame simulator dengan posisi garis 11 dan threshold 128, dibagi delapan region. Region R3 disorot dan diperbesar di sisi kanan. Perbesaran memuat 4 kolom dan 20 baris. Kolom 12, 13, dan 14 bernilai 1, kolom 15 bernilai 0, sehingga 60 dari 80 piksel bernilai 1.">
+      <text x="20" y="76" class="label-kecil lembut">Citra biner</text>
+      <g text-anchor="middle" class="label-kecil lembut"><text x="46" y="100">R0</text><text x="98" y="100">R1</text><text x="150" y="100">R2</text><text x="202" y="100" class="oranye" font-weight="700">R3</text><text x="254" y="100">R4</text><text x="306" y="100">R5</text><text x="358" y="100">R6</text><text x="410" y="100">R7</text></g>
+      <g class="kisi" data-frame="biner11" data-warna="biner" data-x="20" data-y="120" data-sel="13" data-kolom="0" data-baris="0" data-nk="32" data-nb="20"></g>
+      <path d="M72 120 V380 M124 120 V380 M228 120 V380 M280 120 V380 M332 120 V380 M384 120 V380" fill="none" stroke="var(--oranye)" stroke-width="2"/>
+      <rect x="176" y="120" width="52" height="260" fill="none" stroke="var(--oranye)" stroke-width="3"/>
+      <path d="M228 120 L580 100 M228 380 L580 440" fill="none" stroke="var(--oranye)" stroke-width="2" stroke-linecap="round"/>
+      <text x="614" y="84" text-anchor="middle" font-weight="700" class="oranye">Region 3</text>
+      <g class="kisi" data-frame="biner11" data-warna="biner" data-x="580" data-y="100" data-sel="17" data-kolom="12" data-baris="0" data-nk="4" data-nb="20"></g>
+      <rect x="580" y="100" width="68" height="340" fill="none" stroke="var(--oranye)" stroke-width="3"/>
+    </svg>
+    <div class="teks-samping">
+      <h3>Region 3 memuat 60 piksel gelap dari 80 piksel.</h3>
+      <p>Proporsi gelap = 60 ÷ 80 = 0,75. Tiga kolom bernilai 1 dan satu kolom bernilai 0.</p>
+      <p class="catatan lembut">Contoh pada posisi garis 11 dan threshold 128. Kotak gelap bernilai 1 dan kotak terang bernilai 0.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. Pola P6 grafik konversi dan tabel -->
+<section class="slide" aria-labelledby="judul4" hidden>
+  <header class="judul"><p class="kicker">Konversi ke skala ADC</p><h2 id="judul4">Nilai ADC dari proporsi gelap</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg viewBox="0 0 700 375" width="700" height="375" role="img" aria-label="Grafik nilai ADC region terhadap proporsi piksel gelap pada model simulator. Proporsi 0 menghasilkan 1023, proporsi 0,25 menghasilkan 767, proporsi 0,50 menghasilkan 512, proporsi 0,75 menghasilkan 256, dan proporsi 1 menghasilkan 0. Hubungan berupa garis lurus menurun.">
+        <text x="4" y="24" font-size="19">Nilai ADC region</text>
+        <g stroke="var(--abu-garis)" stroke-width="1"><path d="M68 63 H650 M68 179 H650 M68 295 H650"/></g>
+        <path d="M68 48 V295 H658" fill="none" stroke="var(--teks-lembut)" stroke-width="2"/>
+        <g class="lembut" text-anchor="end"><text x="52" y="70" class="label-kecil">1023</text><text x="52" y="186" class="label-kecil">512</text><text x="52" y="302" class="label-kecil">0</text></g>
+        <path d="M68 295 L68 63 L640 295 Z" fill="var(--oranye-muda)"/>
+        <path d="M68 63 L640 295" fill="none" stroke="var(--oranye)" stroke-width="4"/>
+        <g fill="var(--oranye)" stroke="var(--putih)" stroke-width="3"><circle cx="68" cy="63" r="7"/><circle cx="211" cy="121" r="7"/><circle cx="354" cy="179" r="7"/><circle cx="497" cy="237" r="7"/><circle cx="640" cy="295" r="7"/></g>
+        <g text-anchor="middle" font-size="17"><text x="68" y="326">0</text><text x="211" y="326">0,25</text><text x="354" y="326">0,50</text><text x="497" y="326">0,75</text><text x="640" y="326">1,00</text></g>
+        <text x="650" y="363" text-anchor="end" class="label-kecil">Proporsi piksel gelap</text>
+        <text x="514" y="222" font-weight="700" class="oranye">256</text>
+      </svg>
+      <p class="catatan" style="margin-top:14px"><strong>ADC = (1 − proporsi gelap) × 1023</strong><br><span class="lembut">Contoh (1 − 0,75) × 1023 = 256.</span></p>
+    </div>
+    <div style="padding-top:8px">
+      <h3>Contoh pada posisi garis 11</h3>
+      <table class="tabel"><thead><tr><th>Region</th><th>Proporsi<br>gelap</th><th style="text-align:right">Nilai<br>ADC</th></tr></thead><tbody>
+        <tr><td>R1</td><td>0,25</td><td>767</td></tr>
+        <tr><td>R2</td><td>1,00</td><td>0</td></tr>
+        <tr><td>R3</td><td>0,75</td><td>256</td></tr>
+      </tbody></table>
+      <p class="catatan lembut" style="margin-top:26px">Skala 0 sampai 1023 meniru ADC 10 bit pada Lab 7. Pada kamera, nilai ini hasil perhitungan, bukan pembacaan ADC.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5. Pola P5 gambar interaktif, posisi garis -->
+<section class="slide" aria-labelledby="judul5" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Garis berpindah pada frame</p><h2 id="judul5">Nilai region saat garis bergeser</h2></header>
+  <div class="isi terbagi">
+    <div>
+      <svg id="grafikRegion" viewBox="0 0 700 400" width="700" height="400" role="img" aria-label="Frame kamera dengan garis di tengah dan delapan batang nilai region di bawahnya. Region R3 dan R4 bernilai 0, region lain bernilai 1023."></svg>
+      <div class="pilihan" style="margin-top:16px" role="group" aria-label="Pilih posisi garis">
+        <button type="button" data-nilai="2" aria-pressed="false">Kiri</button>
+        <button type="button" data-nilai="16" aria-pressed="true">Tengah</button>
+        <button type="button" data-nilai="30" aria-pressed="false">Kanan</button>
+      </div>
+    </div>
+    <div class="teks-samping">
+      <h3>Garis di posisi <span id="nilaiKini" class="oranye">tengah</span></h3>
+      <p id="uraiKini">Garis menutupi region 3 dan region 4 seluruhnya. Kedua region bernilai 0 dan enam region lainnya bernilai 1023.</p>
+      <p>Region yang hanya setengah tertutup garis bernilai 512, yaitu pertengahan skala.</p>
+      <p class="catatan lembut">Ketiga posisi ini adalah kasus uji tombol Uji hitungRegion pada threshold 128.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6. Pola P2 pengaruh threshold -->
+<section class="slide" aria-labelledby="judul6" hidden data-video="skip">
+  <header class="judul"><p class="kicker">Pengaruh threshold</p><h2 id="judul6">Perubahan nilai region akibat threshold</h2></header>
+  <div class="isi">
+    <svg viewBox="0 0 1152 336" width="1152" height="336" role="img" aria-label="Dua citra biner dari frame yang sama dengan garis di tengah. Pada threshold 60, garis biner selebar 6 kolom dan nilai region R3 dan R4 adalah 256. Pada threshold 200, garis biner selebar 10 kolom dan nilai region R2 dan R5 adalah 767, sedangkan R3 dan R4 bernilai 0.">
+      <text x="252" y="22" text-anchor="middle" font-weight="700">Threshold 60</text>
+      <g class="kisi" data-frame="biner60" data-warna="biner" data-x="44" data-y="36" data-sel="13" data-kolom="0" data-baris="0" data-nk="32" data-nb="20"></g>
+      <path d="M96 36 V296 M148 36 V296 M200 36 V296 M252 36 V296 M304 36 V296 M356 36 V296 M408 36 V296" fill="none" stroke="var(--oranye)" stroke-width="2"/>
+      <g text-anchor="middle" class="label-kecil"><text x="70" y="324">1023</text><text x="122" y="324">1023</text><text x="174" y="324">1023</text><text x="226" y="324" class="oranye" font-weight="700">256</text><text x="278" y="324" class="oranye" font-weight="700">256</text><text x="330" y="324">1023</text><text x="382" y="324">1023</text><text x="434" y="324">1023</text></g>
+      <text x="900" y="22" text-anchor="middle" font-weight="700">Threshold 200</text>
+      <g class="kisi" data-frame="biner200" data-warna="biner" data-x="692" data-y="36" data-sel="13" data-kolom="0" data-baris="0" data-nk="32" data-nb="20"></g>
+      <path d="M744 36 V296 M796 36 V296 M848 36 V296 M900 36 V296 M952 36 V296 M1004 36 V296 M1056 36 V296" fill="none" stroke="var(--oranye)" stroke-width="2"/>
+      <g text-anchor="middle" class="label-kecil"><text x="718" y="324">1023</text><text x="770" y="324">1023</text><text x="822" y="324" class="oranye" font-weight="700">767</text><text x="874" y="324" class="oranye" font-weight="700">0</text><text x="926" y="324" class="oranye" font-weight="700">0</text><text x="978" y="324" class="oranye" font-weight="700">767</text><text x="1030" y="324">1023</text><text x="1082" y="324">1023</text></g>
+    </svg>
+    <p style="margin-top:18px">Pada threshold 60, piksel tepi 66 tergolong lantai dan region 3 dan 4 bernilai 256. Pada threshold 200, piksel tepi 148 tergolong garis dan region 2 dan 5 bernilai 767.</p>
+    <p class="catatan lembut bawah">Kotak gelap bernilai 1 dan kotak terang bernilai 0. Posisi garis tetap di tengah. Pada threshold awal 128, region 3 dan 4 bernilai 0.</p>
+  </div>
+</section>
+
+<!-- SLIDE 7. Pola P4 kesetaraan dengan Lab 7 -->
+<section class="slide" aria-labelledby="judul7" hidden>
+  <header class="judul"><p class="kicker">Kesetaraan dengan larik photodiode</p><h2 id="judul7">Delapan nilai setara larik Lab 7</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Larik photodiode Lab 7</h3>
+        <svg viewBox="0 0 490 352" role="img" aria-label="Delapan sensor S0 sampai S7 berjajar di atas permukaan putih dengan garis hitam di tengah larik. S3 dan S4 berada di atas garis dan membaca 182. Sensor lain membaca 890.">
+          <g text-anchor="middle" class="label-kecil lembut"><text x="70" y="20">S0</text><text x="120" y="20">S1</text><text x="170" y="20">S2</text><text x="220" y="20" class="oranye" font-weight="700">S3</text><text x="270" y="20" class="oranye" font-weight="700">S4</text><text x="320" y="20">S5</text><text x="370" y="20">S6</text><text x="420" y="20">S7</text></g>
+          <rect x="25" y="60" width="440" height="200" rx="12" fill="var(--putih)" stroke="var(--abu-garis)" stroke-width="2"/>
+          <rect x="215" y="61" width="60" height="198" fill="var(--lintasan)"/>
+          <g fill="var(--abu-garis)" stroke="var(--teks-lembut)" stroke-width="2"><rect x="48" y="138" width="44" height="44" rx="6"/><rect x="98" y="138" width="44" height="44" rx="6"/><rect x="148" y="138" width="44" height="44" rx="6"/><rect x="298" y="138" width="44" height="44" rx="6"/><rect x="348" y="138" width="44" height="44" rx="6"/><rect x="398" y="138" width="44" height="44" rx="6"/></g>
+          <g fill="var(--teks)" stroke="var(--oranye)" stroke-width="3"><rect x="198" y="138" width="44" height="44" rx="6"/><rect x="248" y="138" width="44" height="44" rx="6"/></g>
+          <g text-anchor="middle" class="label-kecil lembut"><text x="70" y="316">890</text><text x="120" y="316">890</text><text x="170" y="316">890</text><text x="220" y="316" class="oranye" font-weight="700">182</text><text x="270" y="316" class="oranye" font-weight="700">182</text><text x="320" y="316">890</text><text x="370" y="316">890</text><text x="420" y="316">890</text></g>
+        </svg>
+        <p><strong>Garis di bawah S3 dan S4.</strong><br>Kedua sensor membaca 182, sensor lain 890.</p>
+      </div>
+      <div>
+        <h3>Delapan region Lab 14</h3>
+        <svg viewBox="0 0 490 352" role="img" aria-label="Citra biner frame kamera dengan garis di tengah dibagi delapan region R0 sampai R7. Region R3 dan R4 dilewati garis dan bernilai 0. Region lain bernilai 1023.">
+          <g text-anchor="middle" class="label-kecil lembut"><text x="70" y="20">R0</text><text x="120" y="20">R1</text><text x="170" y="20">R2</text><text x="220" y="20" class="oranye" font-weight="700">R3</text><text x="270" y="20" class="oranye" font-weight="700">R4</text><text x="320" y="20">R5</text><text x="370" y="20">R6</text><text x="420" y="20">R7</text></g>
+          <g class="kisi" data-frame="biner16" data-warna="biner" data-x="45" data-y="36" data-sel="12.5" data-kolom="0" data-baris="0" data-nk="32" data-nb="20"></g>
+          <path d="M95 36 V286 M145 36 V286 M195 36 V286 M245 36 V286 M295 36 V286 M345 36 V286 M395 36 V286" fill="none" stroke="var(--oranye)" stroke-width="2"/>
+          <g text-anchor="middle" class="label-kecil lembut"><text x="70" y="316">1023</text><text x="120" y="316">1023</text><text x="170" y="316">1023</text><text x="220" y="316" class="oranye" font-weight="700">0</text><text x="270" y="316" class="oranye" font-weight="700">0</text><text x="320" y="316">1023</text><text x="370" y="316">1023</text><text x="420" y="316">1023</text></g>
+        </svg>
+        <p><strong>Garis pada region 3 dan 4.</strong><br>Kedua region bernilai 0, region lain 1023.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8. Pola P7 kegiatan simulator -->
+<section class="slide" aria-labelledby="judul8" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 14</p><h2 id="judul8">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Posisi garis</h3><p>Seret garis pada frame ke ujung kiri dan ujung kanan.<br>Amati region yang dilewati garis dan batang nilai ADC.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Threshold</h3><p>Ubah slider Threshold. Bandingkan nilai region pada<br>threshold rendah, threshold 128, dan threshold tinggi.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Kode Level 2</h3><p>Aktifkan kode hitungRegion(frameBiner) di dalam komentar.<br>Jalankan Uji hitungRegion sampai ketiga kasus lulus.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Garis telah digeser hingga batas kiri dan batas kanan.<br>Fungsi hitungRegion(frameBiner) telah lulus semua uji.</p></div>
+  </div>
+</section>
+
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 14 · Delapan region kamera</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 8</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab14-frame-region.js, engine/kamera.js, render/kameraView.js, engine/rangkaian.js.
+  // Nilai region dihitung dengan salinan hitungRegionDariBiner pada engine/kamera.js atas frame biner threshold 128.
+  // Label R0 sampai R7 mengikuti diagram batang pada kanvas simulator. Nilai Lab 7 (890 dan 182) berasal dari
+  // buatArraySensor pada engine/rangkaian.js yang dijalankan di Node (output/deck-lab14/hitung-data.mjs).
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+
+  // ===== R9. Kisi piksel dari templates/cuplikan-kisi-piksel.js. Pemasang ditambah data-warna="biner" =====
+  const FRAME_LEBAR = 32, FRAME_TINGGI = 20;           // engine/kamera.js FRAME_LEBAR, FRAME_TINGGI
+  const LEBAR_GARIS_PIKSEL = 6, TRANSISI_PIKSEL = 2.5; // engine/kamera.js
+  const KONDISI_PENCAHAYAAN = {normal: {gelap: 25, terang: 230}, redup: {gelap: 65, terang: 150}, silau: {gelap: 120, terang: 250}}; // engine/kamera.js
+
+  // posisiGaris berupa nilai kolom atau fungsi (baris) => kolom, sama seperti engine.
+  function buatFrameDeck(posisiGaris = FRAME_LEBAR / 2, kondisi = 'normal') {
+    const {gelap, terang} = KONDISI_PENCAHAYAAN[kondisi], setengah = LEBAR_GARIS_PIKSEL / 2;
+    return Array.from({length: FRAME_TINGGI}, (_, baris) => Array.from({length: FRAME_LEBAR}, (_, kolom) => {
+      const pusat = typeof posisiGaris === 'function' ? posisiGaris(baris) : posisiGaris;
+      const jarak = Math.abs(kolom + 0.5 - pusat);
+      const fraksiHitam = jarak <= setengah ? 1 : jarak >= setengah + TRANSISI_PIKSEL ? 0 : 1 - (jarak - setengah) / TRANSISI_PIKSEL;
+      return Math.round(terang - (terang - gelap) * fraksiHitam);
+    }));
+  }
+  function frameBiner(frame, ambang) { return frame.map((baris) => baris.map((v) => (v < ambang ? 1 : 0))); }
+
+  // Enam tingkat keabuan dari token. Ambang berada di tengah antara nilai 0, 25, 66, 148, 230, dan 255.
+  function warnaPiksel(nilai) {
+    if (nilai < 13) return 'var(--lintasan)';
+    if (nilai < 46) return 'var(--teks)';
+    if (nilai < 107) return 'var(--robot-roda)';
+    if (nilai < 189) return 'var(--teks-lembut)';
+    if (nilai < 243) return 'var(--abu-garis)';
+    return 'var(--putih)';
+  }
+  // Citra biner. Piksel bernilai 1 (garis) gelap, piksel bernilai 0 (lantai) terang.
+  const warnaBiner = (v) => (v ? 'var(--teks)' : 'var(--abu-garis)');
+
+  function gambarKisi(g, o) {
+    g.replaceChildren();
+    const add = (tag, attr, isi) => g.appendChild(elemen(tag, attr, isi));
+    const bulat1 = (n) => Math.round(n * 10) / 10;
+    const {frame, x, y, sel, kolomAwal, barisAwal, lebar, tinggi} = o;
+    const warna = o.warna || warnaPiksel, warnaTeks = o.warnaTeks || ((nilai) => (nilai < 189 ? 'var(--putih)' : 'var(--teks)'));
+    const tebalKisi = sel >= 30 ? 2 : 1, ukuranHuruf = sel >= 70 ? 22 : 20, label = [];
+    for (let b = 0; b < frame.length; b++) for (let k = 0; k < frame[0].length; k++) {
+      const xa = x + (k - kolomAwal) * sel, ya = y + (b - barisAwal) * sel;
+      const x1 = Math.max(xa, x), y1 = Math.max(ya, y), x2 = Math.min(xa + sel, x + lebar), y2 = Math.min(ya + sel, y + tinggi);
+      if (x2 - x1 < 1 || y2 - y1 < 1) continue;
+      const nilai = frame[b][k];
+      add('rect', {x: bulat1(x1), y: bulat1(y1), width: bulat1(x2 - x1), height: bulat1(y2 - y1), fill: warna(nilai), stroke: 'var(--putih)', 'stroke-width': tebalKisi});
+      const utuh = x2 - x1 > sel - 0.5 && y2 - y1 > sel - 0.5;
+      if (o.tulisNilai && utuh && sel >= 60) label.push([xa + sel / 2, ya + sel / 2 + ukuranHuruf * 0.35, nilai]);
+    }
+    for (const [tx, ty, nilai] of label) add('text', {x: bulat1(tx), y: bulat1(ty), 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:' + ukuranHuruf + 'px;fill:' + warnaTeks(nilai)}, String(nilai));
+    if (o.yNomorKolom) for (let k = Math.ceil(kolomAwal); (k + 1 - kolomAwal) * sel <= lebar + 0.5; k++)
+      add('text', {x: bulat1(x + (k - kolomAwal + 0.5) * sel), y: o.yNomorKolom, 'text-anchor': 'middle', class: 'label-kecil lembut'}, String(k));
+    if (o.barisPindai !== undefined) {
+      const hantu = add('rect', {class: 'hantu', 'aria-hidden': 'true', x: -sel / 2, y: -sel / 2, width: sel, height: sel, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 5});
+      hantu.style.setProperty('--px', (x + sel / 2) + 'px');
+      hantu.style.setProperty('--py', (y + (o.barisPindai + 0.5) * sel) + 'px');
+      hantu.style.setProperty('--maju', ((Math.round(lebar / sel) - 1) * sel) + 'px');
+    }
+  }
+
+  // Pemasang. Frame grayscale posisi 16 (awal simulator) dan tiga citra biner yang dibahas deck.
+  const AMBANG_AWAL = 128;   // labs/lab14-frame-region.js kontrol ambang nilaiAwal
+  const FRAME = {
+    asli: buatFrameDeck(16),
+    biner11: frameBiner(buatFrameDeck(11), AMBANG_AWAL),
+    biner16: frameBiner(buatFrameDeck(16), AMBANG_AWAL),
+    biner60: frameBiner(buatFrameDeck(16), 60),
+    biner200: frameBiner(buatFrameDeck(16), 200),
+  };
+  document.querySelectorAll('.kisi').forEach((g) => {
+    const d = g.dataset, sel = Number(d.sel);
+    gambarKisi(g, {frame: FRAME[d.frame], x: Number(d.x), y: Number(d.y), sel, kolomAwal: Number(d.kolom), barisAwal: Number(d.baris),
+      lebar: Number(d.nk) * sel, tinggi: Number(d.nb) * sel, tulisNilai: d.nilai === 'ya', warna: d.warna === 'biner' ? warnaBiner : undefined,
+      yNomorKolom: d.nomorKolom ? Number(d.nomorKolom) : 0, barisPindai: d.pindai !== undefined ? Number(d.pindai) : undefined});
+  });
+
+  // ===== Salinan hitungRegionDariBiner pada engine/kamera.js =====
+  const JUMLAH_REGION = 8, ADC_MAKS = 1023;
+  function hitungRegionDeck(biner) {
+    const lebarRegion = biner[0].length / JUMLAH_REGION, hasil = [];
+    for (let r = 0; r < JUMLAH_REGION; r++) {
+      const kolomAwal = Math.floor(r * lebarRegion), kolomAkhir = Math.floor((r + 1) * lebarRegion);
+      let totalHitam = 0, jumlahPiksel = 0;
+      for (const baris of biner) for (let k = kolomAwal; k < kolomAkhir; k++) { totalHitam += baris[k]; jumlahPiksel += 1; }
+      hasil.push(Math.round((1 - totalHitam / jumlahPiksel) * ADC_MAKS));
+    }
+    return hasil;
+  }
+
+  // ===== SLIDE 5. Frame grayscale dengan pembatas region dan batang nilai region, tiga posisi garis =====
+  const grafikRegion = document.getElementById('grafikRegion');
+  const BIDANG = {x: 110, y: 6, sel: 15};                    // frame 480 × 300, satu region selebar 60
+  const URAIAN = {
+    2: {nama: 'kiri', urai: 'Garis menutupi region 0 seluruhnya dan setengah region 1. Region 0 bernilai 0 dan region 1 bernilai 512.'},
+    16: {nama: 'tengah', urai: 'Garis menutupi region 3 dan region 4 seluruhnya. Kedua region bernilai 0 dan enam region lainnya bernilai 1023.'},
+    30: {nama: 'kanan', urai: 'Garis menutupi setengah region 6 dan region 7 seluruhnya. Region 6 bernilai 512 dan region 7 bernilai 0.'},
+  };
+  function tampilNilai(posisi) {
+    grafikRegion.replaceChildren();
+    const add = (tag, attr, isi) => grafikRegion.appendChild(elemen(tag, attr, isi));
+    const frame = buatFrameDeck(posisi), adc = hitungRegionDeck(frameBiner(frame, AMBANG_AWAL));
+    const {x, y, sel} = BIDANG, lebarRegion = sel * FRAME_LEBAR / JUMLAH_REGION, yBawahFrame = y + FRAME_TINGGI * sel;
+    gambarKisi(grafikRegion.appendChild(elemen('g', {})), {frame, x, y, sel, kolomAwal: 0, barisAwal: 0, lebar: FRAME_LEBAR * sel, tinggi: FRAME_TINGGI * sel});
+    let pembatas = '';
+    for (let r = 1; r < JUMLAH_REGION; r++) pembatas += 'M' + (x + r * lebarRegion) + ' ' + y + ' V' + yBawahFrame + ' ';
+    add('path', {d: pembatas.trim(), fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 2});
+    // Batang nilai region, dasar y 374, tinggi maksimum 40, sejajar dengan region di atasnya.
+    const yDasar = 374, tinggiMaks = 40, lebarBatang = 40;
+    add('path', {d: 'M' + x + ' ' + yDasar + ' H' + (x + FRAME_LEBAR * sel), fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    for (let r = 0; r < JUMLAH_REGION; r++) {
+      const xr = x + (r + 0.5) * lebarRegion, tinggi = adc[r] / ADC_MAKS * tinggiMaks, gelap = adc[r] < ADC_MAKS;
+      if (tinggi > 0) add('rect', {x: xr - lebarBatang / 2, y: (yDasar - tinggi).toFixed(1), width: lebarBatang, height: tinggi.toFixed(1), rx: 3, fill: gelap ? 'var(--oranye)' : 'var(--teks-lembut)'});
+      add('text', {x: xr, y: (yDasar - tinggi - 7).toFixed(1), 'text-anchor': 'middle', class: 'label-kecil' + (gelap ? ' oranye' : ''), 'font-weight': gelap ? 700 : 400}, String(adc[r]));
+      add('text', {x: xr, y: 394, 'text-anchor': 'middle', class: 'label-kecil ' + (gelap ? 'oranye' : 'lembut')}, 'R' + r);
+    }
+    const u = URAIAN[posisi];
+    document.getElementById('nilaiKini').textContent = u.nama;
+    document.getElementById('uraiKini').textContent = u.urai;
+    document.querySelectorAll('.pilihan [data-nilai]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.nilai) === posisi)));
+    grafikRegion.setAttribute('aria-label', 'Frame kamera dengan garis di posisi ' + u.nama + ' dan delapan batang nilai region di bawahnya. Nilai region R0 sampai R7 adalah ' + adc.join(', ') + '.');
+  }
+  document.querySelectorAll('.pilihan [data-nilai]').forEach((b) => b.addEventListener('click', () => tampilNilai(Number(b.dataset.nilai))));
+  tampilNilai(16);
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>

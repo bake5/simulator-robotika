@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 2. Aktif High dan Aktif Low</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
+
+/* ===== BAGIAN B. POLA TATA LETAK ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
+
+/* ===== BAGIAN C. KHUSUS LAB INI ===== */
+/* Pertanyaan pengamatan hanya tampil pada render video data-video="observation" */
+.pertanyaan{font-weight:700}
+/* Istilah bertanda hubung tidak dipatahkan di akhir baris */
+.utuh{white-space:nowrap}
+</style>
+</head>
+<body>
+<main id="panggung" aria-label="Presentasi Lab 2, Aktif high dan aktif low">
+
+<!-- SLIDE 1. P1 pembuka. Deret floating berasal dari output/deck-lab02/data-engine.json -->
+<section class="slide aktif" aria-labelledby="judul1">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 2 · Modul 1</p>
+      <h1 id="judul1">Aktif high<br><span class="oranye">aktif low</span></h1>
+      <p class="ringkas">Membaca keadaan tombol melalui pin masukan.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Pin masukan membaca tegangan 5 V sebagai HIGH dan 0 V sebagai LOW.</p>
+    </div>
+    <div class="intro-visual">
+      <h3>Bacaan pin sinyal selama 2 s</h3>
+      <svg id="bacaanPin" viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Dua deret bacaan pin sinyal selama 2 detik pada model simulator. Tanpa resistor, nilai berganti antara HIGH dan LOW sebanyak 8 kali tanpa pola. Dengan resistor pull-up dan tombol dilepas, nilai tetap HIGH 5 volt."></svg>
+      <p class="simpulan-visual">Tanpa resistor, pin masukan tidak memiliki acuan tegangan. Resistor <span class="utuh">pull-up</span> atau <span class="utuh">pull-down</span> memberi nilai yang tetap.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2. P3 floating -->
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Pin tanpa acuan tegangan</p><h2 id="judul2">Kondisi floating pada pin</h2></header>
+  <div class="isi terbagi">
+    <svg class="pin" id="pinFloating" data-resistor="lepas" data-tombol="gnd" data-ditekan="tidak" viewBox="0 0 490 352" width="700" height="450" role="img" aria-label="Mode Rakit Pull-Up tanpa resistor. Kedua slot resistor kosong sehingga pin sinyal tidak tersambung ke VCC maupun GND. Tombol dari pin ke GND dilepas. Pin floating dan nilainya tidak stabil."></svg>
+    <div class="teks-samping">
+      <h3>Pin tidak tersambung ke VCC maupun GND.</h3>
+      <p>Gangguan listrik kecil sudah mengubah bacaan pin. Nilai berganti antara HIGH dan LOW tanpa pola.</p>
+      <p>Program dapat mengira tombol ditekan, padahal tombol tidak disentuh.</p>
+      <p class="catatan lembut">Simulator menampilkan HIGH dan LOW bertanda tanya secara bergantian. Model mengacak nilai setiap 0,05 sampai 0,17 s.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3. P4 dua acuan tegangan, tanpa tombol -->
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Resistor sebagai acuan tegangan</p><h2 id="judul3">Pull-up dan pull-down</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Pull-up</h3>
+        <svg class="pin" id="pinAcuanAtas" data-resistor="vcc" data-tombol="tanpa" data-ditekan="tidak" viewBox="0 0 490 352" role="img" aria-label="Resistor 10 kiloohm menghubungkan pin sinyal ke VCC 5 volt. Slot bawah kosong. Pin sinyal HIGH 5 volt."></svg>
+        <p><strong>Resistor ke VCC.</strong><br>Pin ditarik ke atas menjadi HIGH, 5 V.</p>
+      </div>
+      <div>
+        <h3>Pull-down</h3>
+        <svg class="pin" id="pinAcuanBawah" data-resistor="gnd" data-tombol="tanpa" data-ditekan="tidak" viewBox="0 0 490 352" role="img" aria-label="Resistor 10 kiloohm menghubungkan pin sinyal ke GND 0 volt. Slot atas kosong. Pin sinyal LOW 0 volt."></svg>
+        <p><strong>Resistor ke GND.</strong><br>Pin ditarik ke bawah menjadi LOW, 0 V.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4. P4 pull-up dengan tombol. Video merender dua tahap -->
+<section class="slide" aria-labelledby="judul4" hidden data-video="steps=2">
+  <header class="judul"><p class="kicker">Resistor ke VCC, tombol ke GND</p><h2 id="judul4">Tombol pada rangkaian pull-up</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Tombol dilepas</h3>
+        <svg class="pin" id="pinAtasLepas" data-resistor="vcc" data-tombol="gnd" data-ditekan="tidak" viewBox="0 0 490 352" role="img" aria-label="Rangkaian pull-up. Resistor 10 kiloohm dari pin sinyal ke VCC 5 volt. Tombol dari pin ke GND dilepas dan terbuka. Pin sinyal HIGH 5 volt."></svg>
+        <p><strong>Tidak ada jalur dari pin ke GND.</strong><br>Resistor menahan pin pada HIGH, 5 V.</p>
+      </div>
+      <div data-tahap="2">
+        <h3>Tombol ditekan</h3>
+        <svg class="pin" id="pinAtasTekan" data-resistor="vcc" data-tombol="gnd" data-ditekan="ya" viewBox="0 0 490 352" role="img" aria-label="Rangkaian pull-up. Resistor 10 kiloohm dari pin sinyal ke VCC 5 volt. Tombol dari pin ke GND ditekan dan tertutup. Pin sinyal LOW 0 volt."></svg>
+        <p><strong>Pin tersambung langsung ke GND.</strong><br>Pin LOW, 0 V. Resistor mencegah hubung singkat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5. P3 diagram waktu aktif low -->
+<section class="slide" aria-labelledby="judul5" hidden>
+  <header class="judul"><p class="kicker">Makna keadaan aktif</p><h2 id="judul5">Tombol aktif low pada pull-up</h2></header>
+  <div class="isi terbagi">
+    <svg id="waktuPullUp" viewBox="0 0 700 380" width="700" height="380" role="img" aria-label="Diagram waktu rangkaian pull-up. Tombol dilepas, ditekan, lalu dilepas lagi. Pin sinyal HIGH 5 volt, LOW 0 volt selama tombol ditekan, lalu HIGH lagi. Keadaan aktif saat tombol ditekan bernilai LOW."></svg>
+    <div class="teks-samping">
+      <h3>Tombol ditekan menghasilkan sinyal LOW.</h3>
+      <p>Keadaan aktif adalah nilai sinyal saat aksi terjadi, yaitu saat tombol ditekan.</p>
+      <p>Tombol pada rangkaian pull-up disebut aktif low. Program membaca LOW sebagai tanda tombol ditekan.</p>
+      <p class="catatan lembut">Nilai pada diagram sama dengan indikator Pin sinyal pada simulator.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6. P4 pull-down dengan tombol, sejajar slide 4 -->
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Resistor ke GND, tombol ke VCC</p><h2 id="judul6">Tombol pada rangkaian pull-down</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Tombol dilepas</h3>
+        <svg class="pin" id="pinBawahLepas" data-resistor="gnd" data-tombol="vcc" data-ditekan="tidak" viewBox="0 0 490 352" role="img" aria-label="Rangkaian pull-down. Resistor 10 kiloohm dari pin sinyal ke GND 0 volt. Tombol dari pin ke VCC dilepas dan terbuka. Pin sinyal LOW 0 volt."></svg>
+        <p><strong>Tidak ada jalur dari pin ke VCC.</strong><br>Resistor menahan pin pada LOW, 0 V.</p>
+      </div>
+      <div>
+        <h3>Tombol ditekan</h3>
+        <svg class="pin" id="pinBawahTekan" data-resistor="gnd" data-tombol="vcc" data-ditekan="ya" viewBox="0 0 490 352" role="img" aria-label="Rangkaian pull-down. Resistor 10 kiloohm dari pin sinyal ke GND 0 volt. Tombol dari pin ke VCC ditekan dan tertutup. Pin sinyal HIGH 5 volt."></svg>
+        <p><strong>Pin tersambung langsung ke VCC.</strong><br>Pin HIGH, 5 V. Resistor mencegah hubung singkat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7. P2 grafik lebar, dua rangkaian pada urutan tombol yang sama -->
+<section class="slide" aria-labelledby="judul7" hidden>
+  <header class="judul"><p class="kicker">Perbandingan kedua rangkaian</p><h2 id="judul7">Posisi resistor menentukan makna tombol</h2></header>
+  <div class="isi">
+    <svg id="waktuDua" viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Diagram waktu dua rangkaian dengan urutan tombol yang sama, dilepas, ditekan, dilepas. Pull-up dengan resistor ke VCC memberi HIGH, LOW, HIGH sehingga aktif low. Pull-down dengan resistor ke GND memberi LOW, HIGH, LOW sehingga aktif high."></svg>
+    <p class="catatan lembut bawah">Program perlu mengetahui rangkaian yang digunakan agar keadaan tombol terbaca dengan benar.</p>
+  </div>
+</section>
+
+<!-- SLIDE 8. P3 salah rakit. Video memakai mode observation: hasil disembunyikan, pertanyaan ditampilkan -->
+<section class="slide" aria-labelledby="judul8" hidden data-video="observation">
+  <header class="judul"><p class="kicker">Posisi resistor yang salah</p><h2 id="judul8">Pull-up dengan resistor ke GND</h2></header>
+  <div class="isi terbagi">
+    <svg class="pin" id="pinSalah" data-resistor="gnd" data-tombol="gnd" data-ditekan="tidak" data-salah="ya" viewBox="0 0 490 352" width="700" height="450" role="img" aria-label="Mode Rakit Pull-Up dengan resistor 10 kiloohm dari pin sinyal ke GND, ditandai merah sebagai posisi yang salah. Tombol dari pin ke GND dilepas. Pin sinyal LOW 0 volt."></svg>
+    <div class="teks-samping">
+      <p class="pertanyaan" hidden>Pada mode Rakit Pull-Up, pasang resistor ke GND. Amati nilai Pin sinyal saat tombol ditekan dan dilepas.</p>
+      <h3 class="merah spoiler">Pin tetap LOW saat tombol ditekan maupun dilepas.</h3>
+      <p class="spoiler">Resistor dan tombol sama-sama tersambung ke GND, sehingga pin tidak pernah terhubung ke VCC.</p>
+      <p class="catatan lembut spoiler">Pada mode Rakit Pull-Down, resistor ke VCC membuat pin tetap HIGH. Checklist tidak tercentang pada kedua susunan ini.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 9. P7 kegiatan simulator -->
+<section class="slide" aria-labelledby="judul9" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 2</p><h2 id="judul9">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Floating</h3><p>Pilih Lepas pada Pasang resistor ke.<br>Amati indikator Pin sinyal saat tombol dilepas.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Pull-up</h3><p>Pilih tab Rakit Pull-Up dan VCC (atas).<br>Gunakan Tahan tombol, lalu catat nilai Pin sinyal.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Pull-down</h3><p>Pilih tab Rakit Pull-Down dan GND (bawah). Uji tombol.<br>Pasang resistor ke VCC (atas), lalu amati perbedaannya.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>Rangkaian pull-up telah dirakit dan diuji, ditekan LOW dan dilepas HIGH.<br>Rangkaian pull-down telah dirakit dan diuji, ditekan HIGH dan dilepas LOW.</p></div>
+  </div>
+</section>
+
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 2 · Aktif high dan aktif low</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 9</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab02-pullupdown.js, engine/rangkaian.js buatRangkaianPull, render/rangkaianView.js gambarRangkaianPull.
+  // Nilai pin dihitung dengan logika output engine. Gaya rangkaian dan warna pin mengikuti kanvas simulator
+  // (rail VCC di atas, GND di bawah, pin oranye saat HIGH, abu saat LOW, merah saat floating, tombol ditekan oranye).
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+
+  // Salinan logika getter output pada buatRangkaianPull. Rail tombol menggantikan mode:
+  // tombol ke GND berarti mode Rakit Pull-Up, tombol ke VCC berarti Rakit Pull-Down.
+  function nilaiPin(resistor, tombol, ditekan) {
+    if (tombol !== 'tanpa' && ditekan) return tombol === 'gnd' ? 'LOW' : 'HIGH';
+    if (resistor === 'vcc') return 'HIGH';
+    if (resistor === 'gnd') return 'LOW';
+    return 'AMBANG';
+  }
+
+  // Resistor zigzag enam ruas, lebar 24, tinggi 72, mulai y0 pada kawat x 176.
+  const zigzag = y0 => ' L188 ' + (y0 + 6) + ' L164 ' + (y0 + 18) + ' L188 ' + (y0 + 30) + ' L164 ' + (y0 + 42) + ' L188 ' + (y0 + 54) + ' L164 ' + (y0 + 66) + ' L176 ' + (y0 + 72);
+
+  // Satu rangkaian pin sinyal dalam viewBox 490 × 352.
+  function gambarPin(svg) {
+    const resistor = svg.dataset.resistor, tombol = svg.dataset.tombol, ditekan = svg.dataset.ditekan === 'ya';
+    const salah = svg.dataset.salah === 'ya';
+    const nilai = nilaiPin(resistor, tombol, ditekan);
+    const warnaNilai = salah ? 'var(--teks)' : nilai === 'HIGH' ? 'var(--oranye)' : nilai === 'AMBANG' ? 'var(--merah)' : 'var(--teks-lembut)';
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const yV = 40, yG = 312, yP = 176, xPin = 176, xT = 268, xB = 338;
+    // Rail
+    add('path', {d: 'M108 ' + yV + ' H320 M108 ' + yG + ' H320', fill: 'none', stroke: 'var(--teks)', 'stroke-width': 4, 'stroke-linecap': 'round'});
+    add('text', {x: 96, y: yV + 6, 'text-anchor': 'end', class: 'label-kecil lembut', 'font-weight': 700}, 'VCC · 5 V');
+    add('text', {x: 96, y: yG + 6, 'text-anchor': 'end', class: 'label-kecil lembut', 'font-weight': 700}, 'GND · 0 V');
+    // Slot kosong putus-putus seperti kanvas simulator, atau resistor terpasang
+    const slot = (y1, y2) => add('rect', {x: 166, y: y1, width: 20, height: y2 - y1, fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 1.5, 'stroke-dasharray': '5 6'});
+    const warnaResistor = salah ? 'var(--merah)' : 'var(--teks)';
+    if (resistor === 'vcc') add('path', {d: 'M176 ' + yV + ' V72' + zigzag(72) + ' V' + yP, fill: 'none', stroke: warnaResistor, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+    else slot(54, 158);
+    if (resistor === 'gnd') add('path', {d: 'M176 ' + yP + ' V208' + zigzag(208) + ' V' + yG, fill: 'none', stroke: warnaResistor, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+    else slot(194, 298);
+    if (resistor === 'vcc') add('text', {x: 200, y: 114, class: 'label-kecil lembut'}, '10 kΩ');
+    if (resistor === 'gnd') add('text', {x: 200, y: 250, class: salah ? 'label-kecil merah' : 'label-kecil lembut'}, '10 kΩ');
+    // Kawat pin menuju indikator. Putus-putus merah saat floating, seperti kanvas.
+    const kawatPin = {d: 'M' + xPin + ' ' + yP + ' H' + xB, fill: 'none', stroke: warnaNilai, 'stroke-width': 4, 'stroke-linecap': 'round'};
+    if (nilai === 'AMBANG') kawatPin['stroke-dasharray'] = '8 8';
+    add('path', kawatPin);
+    // Tombol dari kawat pin ke rail lawan. Tuas berangkat dari kontak bawah.
+    if (tombol !== 'tanpa') {
+      const keGnd = tombol === 'gnd';
+      const yAtas = keGnd ? 216 : 80, yBawah = yAtas + 56;
+      const warnaTombol = ditekan ? 'var(--oranye)' : 'var(--teks-lembut)';
+      add('path', {d: keGnd ? 'M' + xT + ' ' + yP + ' V' + yAtas + ' M' + xT + ' ' + yBawah + ' V' + yG : 'M' + xT + ' ' + yV + ' V' + yAtas + ' M' + xT + ' ' + yBawah + ' V' + yP, class: 'kawat'});
+      add('line', {x1: xT, y1: yBawah, x2: ditekan ? xT : xT + 34, y2: yAtas, stroke: warnaTombol, 'stroke-width': ditekan ? 6 : 4, 'stroke-linecap': 'round'});
+      for (const y of [yAtas, yBawah]) add('circle', {cx: xT, cy: y, r: 5, fill: 'var(--putih)', stroke: warnaTombol, 'stroke-width': 3});
+      add('circle', {cx: xT, cy: yP, r: 5, fill: 'var(--teks)'});
+      add('text', {x: xT + 48, y: (yAtas + yBawah) / 2 + 6, class: ditekan ? 'oranye' : 'lembut', 'font-weight': ditekan ? 700 : 400}, 'Tombol');
+    }
+    // Titik pin sinyal
+    add('circle', {cx: xPin, cy: yP, r: 8, fill: warnaNilai});
+    add('text', {x: 152, y: yP + 6, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'Pin sinyal');
+    // Indikator nilai, meniru indikator Pin sinyal pada kartu Kontrol
+    const gaya = {HIGH: ['var(--oranye-muda)', 'oranye', 'HIGH', 'Pin sinyal · 5 V'], LOW: ['var(--abu-muda)', 'lembut', 'LOW', 'Pin sinyal · 0 V'], AMBANG: ['var(--merah-muda)', 'merah', 'Floating', 'Nilai tidak stabil']}[nilai];
+    const g = svg.appendChild(elemen('g', salah ? {class: 'spoiler'} : {}));
+    const idKotak = svg.id + 'Indikator';
+    g.appendChild(elemen('rect', {id: idKotak, x: xB, y: 136, width: 148, height: 80, rx: 10, fill: gaya[0]}));
+    g.appendChild(elemen('text', {x: xB + 74, y: 178, 'text-anchor': 'middle', 'font-weight': 700, class: gaya[1], style: nilai === 'AMBANG' ? 'font-size:26px' : 'font-size:30px', 'data-qa-within': '#' + idKotak}, gaya[2]));
+    g.appendChild(elemen('text', {x: xB + 74, y: 203, 'text-anchor': 'middle', class: 'label-kecil ' + gaya[1], 'data-qa-within': '#' + idKotak}, gaya[3]));
+  }
+  document.querySelectorAll('.pin').forEach(gambarPin);
+
+  // Slide 1. Deret nilai floating hasil engine berbenih (output/deck-lab02/data-engine.json, benih 5, 120 sampel 1/60 s).
+  // Setiap ruas berisi [nilai, jumlah sampel]. 1 berarti HIGH.
+  const RUAS_FLOATING = [[1, 4], [0, 10], [1, 4], [0, 17], [1, 17], [0, 22], [1, 36], [0, 8], [1, 2]];
+  function gambarBacaan(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const x0 = 64, x1 = 676, perSampel = (x1 - x0) / 120;
+    const baris = [
+      {judul: 'Tanpa resistor', nilai: 'Tidak stabil', kelas: 'merah', warna: 'var(--merah)', yJudul: 22, yH: 48, yL: 104},
+      {judul: 'Resistor pull-up, tombol dilepas', nilai: 'HIGH 5 V', kelas: 'oranye', warna: 'var(--oranye)', yJudul: 150, yH: 176, yL: 232},
+    ];
+    for (const b of baris) {
+      add('text', {x: 0, y: b.yJudul}, b.judul);
+      add('text', {x: x1, y: b.yJudul, 'text-anchor': 'end', 'font-weight': 700, class: b.kelas}, b.nilai);
+      add('path', {d: 'M' + x0 + ' ' + b.yH + ' H' + x1 + ' M' + x0 + ' ' + b.yL + ' H' + x1, fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1.5, 'stroke-dasharray': '4 6'});
+      add('text', {x: 52, y: b.yH + 6, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'HIGH');
+      add('text', {x: 52, y: b.yL + 6, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'LOW');
+    }
+    // Deret floating
+    let x = x0, d = 'M' + x0 + ' ' + (RUAS_FLOATING[0][0] ? baris[0].yH : baris[0].yL);
+    RUAS_FLOATING.forEach(([v, n], i) => {
+      x += n * perSampel;
+      d += ' H' + x.toFixed(1);
+      if (i < RUAS_FLOATING.length - 1) d += ' V' + (RUAS_FLOATING[i + 1][0] ? baris[0].yH : baris[0].yL);
+    });
+    add('path', {d, fill: 'none', stroke: baris[0].warna, 'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+    add('path', {d: 'M' + x0 + ' ' + baris[1].yH + ' H' + x1, fill: 'none', stroke: baris[1].warna, 'stroke-width': 4, 'stroke-linecap': 'round'});
+    add('text', {x: x0, y: 268, 'text-anchor': 'middle', class: 'label-kecil lembut'}, '0 s');
+    add('text', {x: x1, y: 268, 'text-anchor': 'end', class: 'label-kecil lembut'}, '2 s');
+    add('text', {x: 370, y: 268, 'text-anchor': 'middle', class: 'label-kecil lembut'}, 'Model pin pada simulator Lab 2');
+  }
+  gambarBacaan(document.getElementById('bacaanPin'));
+
+  // Baris tombol untuk diagram waktu: dilepas, ditekan, dilepas.
+  function barisTombol(add, batas, y, tinggi) {
+    ['Dilepas', 'Ditekan', 'Dilepas'].forEach((t, i) => {
+      const tekan = i === 1;
+      add('rect', {x: batas[i] + 3, y, width: batas[i + 1] - batas[i] - 6, height: tinggi, rx: 8, fill: tekan ? 'var(--oranye-muda)' : 'var(--abu-muda)', stroke: tekan ? 'var(--oranye)' : 'var(--abu-garis)', 'stroke-width': 2});
+      add('text', {x: (batas[i] + batas[i + 1]) / 2, y: y + tinggi / 2 + 7, 'text-anchor': 'middle', 'font-weight': tekan ? 700 : 400, class: tekan ? 'oranye' : ''}, t);
+    });
+  }
+  // Gelombang pin: nilai tiap ruas 1 (HIGH) atau 0 (LOW).
+  const gelombang = (batas, pola, yH, yL) => 'M' + batas[0] + ' ' + (pola[0] ? yH : yL) + ' H' + batas[1] + ' V' + (pola[1] ? yH : yL) + ' H' + batas[2] + ' V' + (pola[2] ? yH : yL) + ' H' + batas[3];
+
+  // Slide 5. Diagram waktu pull-up 700 × 380.
+  function gambarWaktuPullUp(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const batas = [190, 340, 540, 690], yH = 150, yL = 290;
+    add('text', {x: 0, y: 61, 'font-weight': 700}, 'Tombol');
+    barisTombol(add, batas, 24, 60);
+    add('text', {x: 0, y: 227, 'font-weight': 700}, 'Pin sinyal');
+    add('path', {d: 'M' + batas[0] + ' ' + yH + ' H' + batas[3] + ' M' + batas[0] + ' ' + yL + ' H' + batas[3], fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1.5, 'stroke-dasharray': '4 6'});
+    add('text', {x: 178, y: yH + 6, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'HIGH 5 V');
+    add('text', {x: 178, y: yL + 6, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'LOW 0 V');
+    add('path', {d: 'M340 96 V' + (yL + 16) + ' M540 96 V' + (yL + 16), fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-dasharray': '6 6'});
+    add('path', {d: gelombang(batas, [1, 0, 1], yH, yL), fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+    add('path', {d: 'M346 318 V330 H534 V318', fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 2, 'stroke-linejoin': 'round'});
+    add('text', {x: 440, y: 362, 'text-anchor': 'middle', 'font-weight': 700, class: 'oranye'}, 'Keadaan aktif');
+  }
+  gambarWaktuPullUp(document.getElementById('waktuPullUp'));
+
+  // Slide 7. Diagram waktu dua rangkaian 1152 × 366 dengan urutan tombol yang sama.
+  function gambarWaktuDua(svg) {
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const batas = [250, 469, 761, 980];
+    add('text', {x: 0, y: 45, 'font-weight': 700}, 'Tombol');
+    barisTombol(add, batas, 12, 52);
+    add('path', {d: 'M469 74 V350 M761 74 V350', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2, 'stroke-dasharray': '6 6'});
+    const baris = [
+      {nama: 'Pull-up', sub: 'Resistor ke VCC', pola: [1, 0, 1], yH: 122, yL: 196, warna: 'var(--oranye)', kelas: 'oranye', aktif: 'Aktif low'},
+      {nama: 'Pull-down', sub: 'Resistor ke GND', pola: [0, 1, 0], yH: 262, yL: 336, warna: 'var(--hijau)', kelas: 'hijau', aktif: 'Aktif high'},
+    ];
+    for (const b of baris) {
+      const tengah = (b.yH + b.yL) / 2;
+      add('text', {x: 0, y: tengah - 4, 'font-weight': 700}, b.nama);
+      add('text', {x: 0, y: tengah + 22, class: 'label-kecil lembut'}, b.sub);
+      add('path', {d: 'M250 ' + b.yH + ' H980 M250 ' + b.yL + ' H980', fill: 'none', stroke: 'var(--abu-garis)', 'stroke-width': 1.5, 'stroke-dasharray': '4 6'});
+      add('text', {x: 234, y: b.yH + 6, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'HIGH');
+      add('text', {x: 234, y: b.yL + 6, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'LOW');
+      add('path', {d: gelombang(batas, b.pola, b.yH, b.yL), fill: 'none', stroke: b.warna, 'stroke-width': 4, 'stroke-linejoin': 'round', 'stroke-linecap': 'round'});
+      add('text', {x: 1148, y: tengah + 9, 'text-anchor': 'end', 'font-weight': 700, class: b.kelas, style: 'font-size:26px'}, b.aktif);
+    }
+  }
+  gambarWaktuDua(document.getElementById('waktuDua'));
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
+  });
+  addEventListener('resize',ukuran);ukuran();tampil(0);
+})();
+</script>
+</body>
+</html>
