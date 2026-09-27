@@ -1,7 +1,7 @@
 /*
  * Lab 11 — Kendali Proporsional, PD, PID. Lab terbesar Modul 3.
  * Robot yang sama seperti Lab 10 (engine/simulasiLintasan.js), tapi kendalinya
- * naik satu tingkat: bukan cuma tiga keadaan (Lab 10), sekarang koreksinya
+ * naik satu tingkat: bukan cuma dua keadaan (Lab 10), sekarang koreksinya
  * SEBANDING dengan seberapa jauh melenceng (P), diredam supaya tidak
  * berosilasi (D), dan bisa mengoreksi bias menetap (I). Lihat rumus lengkap
  * di engine/kendali.js.
@@ -205,7 +205,7 @@ export default {
   tujuan: "Memahami pengaruh Kp, Kd, dan Ki serta membandingkan respons PID dengan kendali on-off.",
 
   panduan: [
-    "Kendali pada lab ini menghitung besar koreksi dari error. Berbeda dari tiga keadaan tetap pada Lab 10, komponen proporsional menghasilkan koreksi yang berubah mengikuti jarak garis dari posisi tengah.",
+    "Kendali pada lab ini menghitung besar koreksi dari error. Berbeda dari dua keadaan tetap pada Lab 10, komponen proporsional menghasilkan koreksi yang berubah mengikuti jarak garis dari posisi tengah.",
     "Mulai dengan Kp saja dan atur Kd serta Ki ke 0. Naikkan Kp secara bertahap sampai robot mulai berosilasi. Osilasi yang terus meningkat menunjukkan nilai Kp terlalu besar.",
     "Tambahkan Kd untuk meredam osilasi. Komponen turunan menggunakan laju perubahan error untuk mengurangi koreksi ketika robot bergerak cepat menuju posisi tengah.",
     "Ki mengakumulasi error dari waktu ke waktu. Nilai Ki yang terlalu besar dapat menyebabkan integral windup sehingga koreksi tetap besar meskipun kondisi robot sudah berubah.",

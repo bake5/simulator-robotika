@@ -10,20 +10,24 @@
 import { hitungErrorReferensi } from "./rangkaian.js";
 
 /**
- * Kendali on-off (bang-bang) — Lab 10. Cuma tiga keadaan mungkin: belok
- * kanan tajam, belok kiri tajam, atau lurus. Tidak ada tingkat "belok
- * sedikit" — makanya robot bergerak zigzag kasar, selalu mengoreksi
- * berlebihan lalu mengoreksi balik. Inilah yang jadi alasan Lab 11 perlu
- * kendali proporsional.
+ * Kendali on-off (bang-bang) — Lab 10. Hanya dua keadaan: belok kanan tajam
+ * atau belok kiri tajam. Tidak ada keadaan "lurus" dan tidak ada tingkat
+ * "belok sedikit" — error sekecil apa pun mendapat koreksi penuh, lalu
+ * koreksi balik setelah melewati garis. Inilah zigzag yang dibahas Lab 10
+ * dan alasan Lab 11 memerlukan kendali proporsional.
+ *
+ * Catatan sejarah: versi sebelumnya memakai daerah mati ±AMBANG_ONOFF dengan
+ * keadaan lurus. Dengan itu robot yang mulai tepat di tengah garis tidak
+ * pernah berzigzag, sehingga tidak selaras dengan materi LMS. Konstanta
+ * AMBANG_ONOFF dipertahankan hanya untuk kompatibilitas impor.
  */
-export const AMBANG_ONOFF = 15; // skala error sama seperti Lab 7, -100..100
+export const AMBANG_ONOFF = 0; // skala error sama seperti Lab 7, -100..100
 
 export function kendaliOnOffReferensi(sensor, kecepatanDasar) {
   const error = hitungErrorReferensi(sensor);
   const KECEPATAN_BELOK = kecepatanDasar * 0.15; // roda bagian dalam tetap diputar pelan, bukan nol, supaya tidak diam total
-  if (error > AMBANG_ONOFF) return [kecepatanDasar, KECEPATAN_BELOK]; // garis condong ke kanan → putar ke kanan
-  if (error < -AMBANG_ONOFF) return [KECEPATAN_BELOK, kecepatanDasar]; // garis condong ke kiri → putar ke kiri
-  return [kecepatanDasar, kecepatanDasar];
+  if (error >= 0) return [kecepatanDasar, KECEPATAN_BELOK]; // garis condong ke kanan (atau tepat di tengah) → putar ke kanan
+  return [KECEPATAN_BELOK, kecepatanDasar]; // garis condong ke kiri → putar ke kiri
 }
 
 /**

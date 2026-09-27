@@ -1,7 +1,7 @@
 /*
  * Lab 10 — Robot Mengikuti Garis dengan Kendali On Off.
  * Robot berjalan otomatis di lintasan memakai kendali on-off (bang-bang):
- * cuma tiga keadaan (belok kanan tajam, belok kiri tajam, lurus), makanya
+ * cuma dua keadaan (belok kanan tajam atau belok kiri tajam), makanya
  * gerakannya zigzag kasar. Inilah yang memunculkan kebutuhan kendali
  * proporsional di Lab 11.
  *
@@ -9,14 +9,15 @@
  * kecepatan dasar, tekan Jalankan, amati zigzagnya.
  * Level 2: peserta menulis kendali(sensor) sendiri (kontrak yang sama dipakai
  * di Lab 10, 11, 15, dan 16 lintas Modul 3-5, lihat CLAUDE.md). Begitu kode
- * dimuat dan diaktifkan, robot yang berjalan memanggil kode itu berulang
- * secara asinkron, dipanggil lagi sesegera panggilan sebelumnya selesai,
- * BUKAN satu panggilan per langkah fisika (120 Hz akan membanjiri worker
- * dengan pesan).
+ * dimuat dan diaktifkan, robot yang berjalan memanggil kode itu secara
+ * asinkron pada laju keputusan yang sama dengan kendali bawaan (5 Hz, lihat
+ * langkah() di bawah), BUKAN satu panggilan per langkah fisika (120 Hz akan
+ * membanjiri worker dengan pesan). Panggilan baru dilewati bila panggilan
+ * sebelumnya belum selesai.
  */
 
 import { buatSimulasiLintasan } from "../engine/simulasiLintasan.js";
-import { kendaliOnOffReferensi, AMBANG_ONOFF } from "../engine/kendali.js";
+import { kendaliOnOffReferensi } from "../engine/kendali.js";
 import { gambarRobotLintasan } from "../render/lintasanView.js";
 import { buatEditor } from "../coding/editor.js";
 import { buatRunner } from "../coding/runner.js";
@@ -46,9 +47,8 @@ const TEMPLATE_JS = `function kendali(sensor) {
   // baris "/*" dan baris "*/" di bawah ini (dua baris saja) supaya kode itu aktif.
 
   /*
-  if (error > 15) return [KECEPATAN, KECEPATAN_BELOK]; // garis condong ke kanan, belok kanan tajam
-  if (error < -15) return [KECEPATAN_BELOK, KECEPATAN]; // garis condong ke kiri, belok kiri tajam
-  return [KECEPATAN, KECEPATAN]; // di tengah, lurus, kedua roda sama cepat
+  if (error >= 0) return [KECEPATAN, KECEPATAN_BELOK]; // garis condong ke kanan, belok kanan tajam
+  return [KECEPATAN_BELOK, KECEPATAN]; // garis condong ke kiri, belok kiri tajam
   */
 }
 `;
@@ -61,7 +61,7 @@ export default {
   tujuan: "Memahami cara kendali on-off menggunakan error untuk mengatur arah robot serta penyebab gerak zigzag.",
 
   panduan: [
-    "Pada Level 1, pilih lintasan, atur kecepatan dasar, lalu tekan Jalankan. Kendali bawaan memiliki tiga keadaan tetap, yaitu belok kanan tajam, belok kiri tajam, dan lurus. Karena besar koreksinya tidak berubah mengikuti besar error, gerakan robot terlihat zigzag.",
+    "Pada Level 1, pilih lintasan, atur kecepatan dasar, lalu tekan Jalankan. Kendali bawaan hanya memiliki dua keadaan tetap, yaitu belok kanan tajam dan belok kiri tajam. Karena besar koreksinya tidak berubah mengikuti besar error, gerakan robot terlihat zigzag.",
     "Jejak hijau berarti robot masih membaca garis. Jejak merah berarti robot sempat kehilangan garis sepenuhnya.",
     "Gunakan lintasan 'Belokan halus' dengan kendali bawaan agar perubahan arah dan pola zigzag dapat diamati sebelum kode Level 2 diaktifkan.",
     "Pada Level 2, buka kartu kode di bawah kanvas. Fungsi kendali(sensor) sudah tersedia di dalam komentar. Baca kodenya, hapus baris '/*' dan '*/', lalu tekan 'Pakai kode ini'. Robot kemudian menggunakan fungsi tersebut sebagai pengganti kendali bawaan.",
@@ -69,7 +69,7 @@ export default {
   ],
 
   deskripsiKoding:
-    "Fungsi kendali(sensor) sudah disediakan di dalam komentar /* ... */. Hapus baris '/*' dan '*/' agar fungsi aktif. Fungsi menerima array delapan nilai ADC dan mengembalikan [kecepatanKiri, kecepatanKanan]. Setelah tombol 'Pakai kode ini' ditekan, fungsi dipanggil sekitar 10 kali per detik selama robot berjalan. Pengujian dilakukan langsung pada lintasan 'Belokan halus' tanpa tombol uji terpisah.",
+    "Fungsi kendali(sensor) sudah disediakan di dalam komentar /* ... */. Hapus baris '/*' dan '*/' agar fungsi aktif. Fungsi menerima array delapan nilai ADC dan mengembalikan [kecepatanKiri, kecepatanKanan]. Setelah tombol 'Pakai kode ini' ditekan, fungsi dipanggil 5 kali per detik selama robot berjalan, sama dengan laju keputusan kendali bawaan. Pengujian dilakukan langsung pada lintasan 'Belokan halus' tanpa tombol uji terpisah.",
 
   komponen: { simulasiLintasan: true },
 
@@ -112,9 +112,8 @@ export default {
       judul: "Kendali on-off (bang-bang)",
       baris: [
         { id: "error", simbol: "error = posisi garis relatif ke tengah, -100..100" },
-        { id: "kanan", simbol: `error > ${AMBANG_ONOFF} → belok kanan tajam` },
-        { id: "kiri", simbol: `error < -${AMBANG_ONOFF} → belok kiri tajam` },
-        { id: "lurus", simbol: "selain itu → lurus" },
+        { id: "kanan", simbol: "error ≥ 0 → belok kanan tajam" },
+        { id: "kiri", simbol: "error < 0 → belok kiri tajam" },
       ],
     },
     { jenis: "teks", id: "status" },
@@ -125,18 +124,20 @@ export default {
   buatState: () => Object.assign(buatSimulasiLintasan({ namaLintasanAwal: "lurus" }), { level2Lulus: false }),
 
   /**
-   * Keputusan kendali dibatasi ke sekitar 10 Hz (bukan mengikuti fisika 120 Hz)
-   * — meniru mikrokontroler sungguhan yang membaca sensor dan memutuskan pada
+   * Keputusan kendali dibatasi ke 5 Hz (bukan mengikuti fisika 120 Hz)
+   * — meniru mikrokontroler sederhana yang membaca sensor dan memutuskan pada
    * laju tertentu, bukan seketika di setiap langkah fisika. Tanpa pembatasan
-   * ini, kendali on-off "gemetar" sangat cepat di batas ambangnya sendiri dan
-   * hasilnya justru terlihat halus, bukan zigzag kasar seperti maksud lab ini.
+   * ini, kendali on-off "gemetar" sangat cepat di sekitar garis dan hasilnya
+   * justru terlihat halus, bukan zigzag kasar seperti maksud lab ini. Laju 5 Hz
+   * dipilih (lebih lambat dari 10 Hz pada Lab 11) supaya zigzag terlihat jelas
+   * dan makin lebar saat kecepatan dasar dinaikkan, sesuai materi LMS.
    */
   langkah(state, dt) {
     if (!state.berjalan) return;
 
     state._sisaWaktuKendali = (state._sisaWaktuKendali ?? 0) - dt;
     if (state._sisaWaktuKendali <= 0) {
-      state._sisaWaktuKendali += 1 / 10;
+      state._sisaWaktuKendali += 1 / 5;
       const sensor = state.sensorADC;
 
       if (state._kodeAktif && state._runner) {
