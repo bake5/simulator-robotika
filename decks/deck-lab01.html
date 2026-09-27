@@ -1,946 +1,439 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Deck Lab 1 — LED On Off</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Lab 1. LED ON/OFF</title>
 <link rel="stylesheet" href="../styles/tokens.css">
 <style>
-  * { box-sizing: border-box; }
+/* ===== BAGIAN A. DASAR. JANGAN DIUBAH. Sama persis dengan deck-lab08.html ===== */
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--font-utama);color:var(--teks);background:var(--abu-muda)}
+button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid var(--oranye);outline-offset:5px}
+#panggung{position:absolute;width:1280px;height:720px;transform-origin:top left;background:var(--putih);overflow:hidden}
+.slide{position:absolute;inset:0;padding:45px 64px 80px;visibility:hidden;pointer-events:none}
+.slide.aktif{visibility:visible;pointer-events:auto}.slide[hidden]{display:none}
+.kicker{margin:0 0 13px;font-size:15px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--teks-lembut)}
+h1,h2,h3,p{margin:0}h1{font-size:72px;line-height:1.04;letter-spacing:-.045em}
+h2{font-size:43px;line-height:1.14;letter-spacing:-.035em}
+h3{font-size:25px;line-height:1.25;letter-spacing:-.02em}
+p{font-size:22px;line-height:1.55}.lembut{color:var(--teks-lembut)}.oranye{color:var(--oranye)}.merah{color:var(--merah)}.hijau{color:var(--hijau)}
+.judul{height:105px;border-bottom:1px solid var(--abu-garis)}
+.isi{position:absolute;left:64px;right:64px;top:176px;bottom:87px}
+.catatan{font-size:17px;line-height:1.5}.bawah{position:absolute;bottom:0;left:0;right:0}
+svg{display:block;font-family:var(--font-utama);overflow:hidden}svg text{fill:var(--teks);font-size:20px}
+svg .label-kecil{font-size:17px}svg .lembut{fill:var(--teks-lembut)}svg .oranye{fill:var(--oranye)}svg .merah{fill:var(--merah)}svg .hijau{fill:var(--hijau)}
+svg .kawat{fill:none;stroke:var(--teks-lembut);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+svg .arus{fill:none;stroke:var(--oranye);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+svg .arus-balik{stroke:var(--hijau)}svg .arus-short{stroke:var(--merah)}
+svg .aliran{fill:none;stroke:var(--putih);stroke-width:2;stroke-dasharray:3 17;animation:alir 1.4s linear infinite;pointer-events:none}
+@keyframes alir{to{stroke-dashoffset:-40}}
+.paused *{animation-play-state:paused!important}
+.slide:not(.aktif) *{animation-play-state:paused!important}
+footer{position:absolute;left:64px;right:64px;bottom:16px;height:40px;border-top:1px solid var(--abu-garis);display:flex;align-items:end;gap:16px;font-size:14px;color:var(--teks-lembut)}
+footer .nama{margin-right:auto}footer button{border:0;background:transparent;color:var(--teks);padding:5px 11px;border-radius:4px;font-size:16px}
+footer button:disabled{opacity:.3;cursor:default}footer button:hover:not(:disabled){background:var(--abu-muda)}
+#nomorKini{font-variant-numeric:tabular-nums;min-width:46px;text-align:center}#jeda{font-size:13px;color:var(--teks-lembut);margin-right:12px}
+#kemajuan{position:absolute;left:0;bottom:0;height:4px;background:var(--oranye);width:12.5%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media print{html,body{height:auto;overflow:visible}#panggung{position:static;transform:none!important}section.slide{position:relative;display:block!important;visibility:visible;page-break-after:always;width:1280px;height:720px}footer,#kemajuan{display:none}}
 
-  html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: var(--putih);
-    font-family: var(--font-utama);
-    color: var(--teks);
-  }
+/* ===== BAGIAN B. POLA TATA LETAK ===== */
+/* P1 pembuka */
+.intro{display:grid;grid-template-columns:410px 1fr;gap:60px;height:100%;padding-top:75px;position:relative}
+.slide:first-child:before{content:"";position:absolute;left:0;top:0;width:474px;bottom:56px;background:var(--teks)}
+.intro>div:first-child{color:var(--putih)}.intro>div:first-child .lembut,.intro>div:first-child .kicker{color:var(--abu-garis)}
+.intro h1{margin:34px 0 28px}.intro .ringkas{max-width:370px;font-size:24px}
+.intro-visual{padding-top:20px}.intro-visual h3{margin-bottom:20px}
+.simpulan-visual{margin-top:28px;padding-top:22px;border-top:1px solid var(--abu-garis);font-size:20px}
+/* P2 diagram lebar penuh */
+.legend{display:flex;gap:28px;align-items:center;font-size:17px}.legend span{display:flex;gap:10px;align-items:center}.garis-legenda{width:34px;height:4px;background:var(--oranye)}.garis-legenda.sinyal{height:0;border-top:3px dashed var(--teks-lembut);background:none}
+/* P3 visual kiri 700 px, teks kanan */
+.terbagi{display:grid;grid-template-columns:700px 1fr;gap:56px}
+.teks-samping{padding-top:26px}.teks-samping p{margin-top:22px}.teks-samping .catatan{margin-top:26px}
+/* P4 dua kondisi berdampingan */
+.pasangan{display:grid;grid-template-columns:1fr 1fr;gap:80px}.pasangan>div{position:relative}.pasangan>div+div:before{content:"";position:absolute;left:-40px;top:8px;bottom:0;border-left:1px solid var(--abu-garis)}
+.pasangan h3{margin-bottom:4px}.pasangan svg{width:490px;height:352px;margin:4px auto 0}.pasangan p{font-size:19px;line-height:1.45}
+/* P7 penutup kegiatan simulator */
+.kegiatan{display:grid;grid-template-columns:56px 230px 1fr;align-items:center;column-gap:27px;min-height:123px;border-bottom:1px solid var(--abu-garis)}
+.kegiatan .urutan{font-size:35px;color:var(--oranye);font-weight:700}.kegiatan p{font-size:21px;line-height:1.5}
+.hasil{display:flex;gap:24px;align-items:baseline;margin-top:26px}.hasil strong{font-size:19px;white-space:nowrap}.hasil p{font-size:19px;line-height:1.45}
 
-  .deck {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-  }
-
-  /* ================= Kerangka tiga zona, sama di semua slide ================= */
-
-  .slide {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    padding: 5vh 8vw 100px;
-    text-align: center;
-    background: var(--putih);
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 300ms ease, transform 300ms ease;
-    pointer-events: none;
-  }
-
-  .slide.aktif {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-    z-index: 1;
-  }
-
-  .slide-oranye {
-    background: var(--oranye);
-    color: #ffffff;
-  }
-
-  .zona-judul {
-    flex: 0 1 auto;
-    max-height: 22vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-  }
-
-  .zona-ilustrasi {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-  }
-
-  .zona-keterangan {
-    flex: 0 1 auto;
-    max-height: 18vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-  }
-
-  .judul-slide {
-    font-size: clamp(2.1rem, 5vw, 3.6rem);
-    font-weight: 700;
-    line-height: 1.15;
-    margin: 0;
-  }
-
-  .keterangan-slide {
-    font-size: clamp(0.95rem, 1.8vw, 1.3rem);
-    line-height: 1.5;
-    max-width: 40em;
-    margin: 0;
-    color: var(--teks-lembut);
-  }
-
-  .slide-oranye .keterangan-slide {
-    color: rgba(255, 255, 255, 0.92);
-  }
-
-  .ilustrasi {
-    width: min(52vw, 520px);
-    max-height: 52vh;
-    height: auto;
-    display: block;
-  }
-
-  .ilustrasi-lebar {
-    width: min(64vw, 640px);
-  }
-
-  /* ---------- Navigasi, dengan safe area di bawah ---------- */
-
-  .tombol-nav {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    border: 1px solid var(--abu-garis);
-    background: var(--putih-kartu);
-    color: var(--teks);
-    box-shadow: var(--bayangan-tipis);
-    font-size: 1.5rem;
-    line-height: 1;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    z-index: 10;
-    transition: background var(--transisi), opacity var(--transisi);
-  }
-
-  .tombol-nav:hover { background: var(--abu-muda); }
-  .tombol-nav:disabled { opacity: 0.3; cursor: default; }
-  .tombol-nav.kiri { left: 26px; }
-  .tombol-nav.kanan { right: 26px; }
-
-  .indikator-slide {
-    position: fixed;
-    right: 26px;
-    bottom: 22px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    color: var(--teks-lembut);
-    background: var(--putih-kartu);
-    border: 1px solid var(--abu-garis);
-    border-radius: 999px;
-    padding: 5px 14px;
-    z-index: 10;
-  }
-
-  /* ================= Slide 1, LED berdenyut ================= */
-
-  .s1-glow { animation: s1Napas 4s ease-in-out infinite; transform-origin: 160px 160px; }
-  .s1-inti { animation: s1IntiNapas 4s ease-in-out infinite; transform-origin: 160px 160px; }
-
-  @keyframes s1Napas {
-    0%, 100% { opacity: 0.16; transform: scale(0.94); }
-    50% { opacity: 0.4; transform: scale(1.1); }
-  }
-  @keyframes s1IntiNapas {
-    0%, 100% { opacity: 0.78; transform: scale(0.98); }
-    50% { opacity: 1; transform: scale(1.04); }
-  }
-
-  /* ================= Slide 2, jari menekan lalu tuas berpindah ================= */
-  /* Siklus 7s. Jari menyentuh saat 22-30 persen dan 69-77 persen, tuas bergerak
-     DI DALAM rentang tekanan itu (26-persen dan 73-persen), lampu tiga lapis dan
-     label ikut fase yang sama supaya semuanya terasa satu akibat berantai. */
-
-  .s2-jari { animation: s2Jari 7s ease-in-out infinite; }
-  .s2-tuas { animation: s2Tuas 7s ease-in-out infinite; transform-origin: 150px 246px; }
-  .s2-bohlam-inti { animation: s2Inti 7s ease-in-out infinite; }
-  .s2-bohlam-cahaya { animation: s2Cahaya 7s ease-in-out infinite; }
-  .s2-bohlam-glow { animation: s2Glow 7s ease-in-out infinite; transform-origin: 150px 76px; }
-  .s2-label-nyala { animation: s2LabelNyala 7s ease-in-out infinite; }
-  .s2-label-mati { animation: s2LabelMati 7s ease-in-out infinite; }
-
-  @keyframes s2Jari {
-    0%, 17% { opacity: 0; transform: translate(30px, -26px) rotate(-18deg); }
-    22%, 30% { opacity: 1; transform: translate(0, 2px) rotate(0deg); }
-    35%, 64% { opacity: 0; transform: translate(30px, -26px) rotate(-18deg); }
-    69%, 77% { opacity: 1; transform: translate(0, 2px) rotate(0deg); }
-    82%, 100% { opacity: 0; transform: translate(30px, -26px) rotate(-18deg); }
-  }
-  @keyframes s2Tuas {
-    0%, 26% { transform: rotate(0deg); }
-    32%, 73% { transform: rotate(34deg); }
-    79%, 100% { transform: rotate(0deg); }
-  }
-  @keyframes s2Inti {
-    0%, 26% { opacity: 1; }
-    32%, 73% { opacity: 0.18; }
-    79%, 100% { opacity: 1; }
-  }
-  @keyframes s2Cahaya {
-    0%, 26% { opacity: 0.9; }
-    32%, 73% { opacity: 0.1; }
-    79%, 100% { opacity: 0.9; }
-  }
-  @keyframes s2Glow {
-    0%, 26% { opacity: 0.55; transform: scale(1.25); }
-    32%, 73% { opacity: 0; transform: scale(0.85); }
-    79%, 100% { opacity: 0.55; transform: scale(1.25); }
-  }
-  @keyframes s2LabelNyala {
-    0%, 26% { opacity: 1; transform: translateY(0); }
-    32% { opacity: 0; transform: translateY(-10px); }
-    73% { opacity: 0; transform: translateY(10px); }
-    79%, 100% { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes s2LabelMati {
-    0%, 26% { opacity: 0; transform: translateY(10px); }
-    32% { opacity: 1; transform: translateY(0); }
-    73% { opacity: 1; transform: translateY(0); }
-    79%, 100% { opacity: 0; transform: translateY(-10px); }
-  }
-
-  /* ================= Slide 3, kartu masuk berurutan lalu chip tegangan menyusul ================= */
-
-  .s3-kartu { opacity: 0; transform: translateY(26px); }
-  .slide.aktif .s3-kartu-high { animation: s3Masuk 550ms ease-in-out 150ms both; }
-  .slide.aktif .s3-kartu-low { animation: s3Masuk 550ms ease-in-out 850ms both; }
-  .s3-chip { opacity: 0; transform: scale(0.6); transform-box: fill-box; transform-origin: center; }
-  .slide.aktif .s3-chip-high { animation: s3ChipMasuk 400ms ease-in-out 950ms both; }
-  .slide.aktif .s3-chip-low { animation: s3ChipMasuk 400ms ease-in-out 1650ms both; }
-  .s3-penunjuk { stroke-dasharray: 20; stroke-dashoffset: 20; }
-  .slide.aktif .s3-penunjuk-high { animation: s3Penunjuk 350ms ease-in-out 900ms both; }
-  .slide.aktif .s3-penunjuk-low { animation: s3Penunjuk 350ms ease-in-out 1600ms both; }
-
-  @keyframes s3Masuk {
-    0% { opacity: 0; transform: translateY(26px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes s3ChipMasuk {
-    0% { opacity: 0; transform: scale(0.6); }
-    70% { opacity: 1; transform: scale(1.12); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-  @keyframes s3Penunjuk {
-    0% { stroke-dashoffset: 20; }
-    100% { stroke-dashoffset: 0; }
-  }
-
-  .s3-gelombang-jalan { animation: s3Geser 3s linear infinite; }
-  @keyframes s3Geser {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-32px); }
-  }
-
-  /* ================= Slide 4, jari menekan lalu rantai akibat sampai LED ================= */
-  /* Siklus 7s. Jari menekan 22-30 persen, tuas bergerak 22-26 (di dalam tekanan),
-     jeda 300ms, arus muncul 31-35, jeda 200ms, LED terang 38-42. Kebalikannya
-     simetris di paruh kedua siklus. */
-
-  .s4-jari { animation: s4Jari 7s ease-in-out infinite; }
-  .s4-tuas { animation: s4Tuas 7s ease-in-out infinite; transform-origin: 108px 60px; }
-  .s4-arus { animation: s4ArusTampak 7s ease-in-out infinite, s4ArusAlir 1s linear infinite; }
-  .s4-led-inti { animation: s4LedInti 7s ease-in-out infinite; }
-  .s4-led-glow { animation: s4LedGlow 7s ease-in-out infinite; transform-origin: 268px 125px; }
-
-  @keyframes s4Jari {
-    0%, 17% { opacity: 0; transform: translate(26px, -20px) rotate(-20deg); }
-    22%, 30% { opacity: 1; transform: translate(0, 3px) rotate(0deg); }
-    34%, 64% { opacity: 0; transform: translate(26px, -20px) rotate(-20deg); }
-    69%, 77% { opacity: 1; transform: translate(0, 3px) rotate(0deg); }
-    81%, 100% { opacity: 0; transform: translate(26px, -20px) rotate(-20deg); }
-  }
-  @keyframes s4Tuas {
-    0%, 22% { transform: rotate(-30deg); }
-    26%, 69% { transform: rotate(0deg); }
-    73%, 100% { transform: rotate(-30deg); }
-  }
-  @keyframes s4ArusAlir {
-    0% { stroke-dashoffset: 32; }
-    100% { stroke-dashoffset: 0; }
-  }
-  @keyframes s4ArusTampak {
-    0%, 31% { opacity: 0; }
-    35%, 78% { opacity: 1; }
-    82%, 100% { opacity: 0; }
-  }
-  @keyframes s4LedInti {
-    0%, 38% { opacity: 0.16; }
-    42%, 85% { opacity: 1; }
-    89%, 100% { opacity: 0.16; }
-  }
-  @keyframes s4LedGlow {
-    0%, 38% { opacity: 0; transform: scale(0.82); }
-    42%, 85% { opacity: 0.55; transform: scale(1.15); }
-    89%, 100% { opacity: 0; transform: scale(0.82); }
-  }
-
-  /* ================= Slide 5A, tiga zona pembacaan ================= */
-
-  .s5a-zona { opacity: 0; }
-  .slide.aktif .s5a-zona-high { animation: s5aZona 350ms ease-in-out 100ms both; }
-  .slide.aktif .s5a-zona-ragu { animation: s5aZona 350ms ease-in-out 700ms both; }
-  .slide.aktif .s5a-zona-low { animation: s5aZona 350ms ease-in-out 1300ms both; }
-  @keyframes s5aZona { 0% { opacity: 0; } 100% { opacity: 1; } }
-
-  .s5a-chip { opacity: 0; transform: scale(0.6); transform-box: fill-box; transform-origin: center; }
-  .slide.aktif .s5a-chip-high { animation: s3ChipMasuk 350ms ease-in-out 400ms both; }
-  .slide.aktif .s5a-chip-ragu { animation: s3ChipMasuk 350ms ease-in-out 1000ms both; }
-  .slide.aktif .s5a-chip-low { animation: s3ChipMasuk 350ms ease-in-out 1600ms both; }
-
-  .s5a-ambang { stroke-dasharray: 340; stroke-dashoffset: 340; }
-  .slide.aktif .s5a-ambang-atas { animation: s5aAmbang 500ms ease-in-out 500ms both; }
-  .slide.aktif .s5a-ambang-bawah { animation: s5aAmbang 500ms ease-in-out 1400ms both; }
-  @keyframes s5aAmbang { 0% { stroke-dashoffset: 340; } 100% { stroke-dashoffset: 0; } }
-
-  .s5a-label-ambang { opacity: 0; }
-  .slide.aktif .s5a-label-atas { animation: s5aZona 300ms ease-in-out 900ms both; }
-  .slide.aktif .s5a-label-bawah { animation: s5aZona 300ms ease-in-out 1800ms both; }
-
-  .s5a-gelombang { animation: s5aGeser 4s linear infinite; }
-  @keyframes s5aGeser { 0% { transform: translateX(0); } 100% { transform: translateX(-100px); } }
-
-  .s5a-strip-slot { fill: none; stroke: var(--abu-garis); stroke-width: 2; }
-
-  .s5a-huruf { opacity: 0; transform: scale(0.5); transform-box: fill-box; transform-origin: center; animation-duration: 7s; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
-  .s5a-h1 { animation-name: s5aHuruf; animation-delay: 0s; }
-  .s5a-h2 { animation-name: s5aHuruf; animation-delay: 0.8s; }
-  .s5a-h3 { animation-name: s5aHuruf; animation-delay: 1.6s; }
-  .s5a-h4 { animation-name: s5aHuruf; animation-delay: 2.4s; }
-  .s5a-h5 { animation-name: s5aHuruf; animation-delay: 3.2s; }
-  .s5a-h6 { animation-name: s5aHuruf; animation-delay: 4s; }
-  @keyframes s5aHuruf {
-    0%, 98.9% { opacity: 0; transform: scale(0.5); }
-    1.1%, 78% { opacity: 1; transform: scale(1); }
-    88%, 100% { opacity: 0; transform: scale(0.5); }
-  }
-
-  /* ================= Slide 5B, dua baris contoh ketahanan gangguan ================= */
-  /* Siklus 7.5s, satu garis waktu tunggal (bukan delay negatif) supaya tidak ada
-     dua aturan animation-shorthand yang bentrok di elemen yang sama. Baris kirim
-     dulu (berhenti di 33 persen), baris nol menyusul (mulai 38.7 persen), lalu
-     keduanya tampak bersamaan sampai memudar bareng di 92-100 persen. */
-
-  .s5b-elemen, .s5b-panah, .s5b-stempel { opacity: 0; }
-  .s5b-panah { stroke-dasharray: 40; }
-  .s5b-centang { stroke-dasharray: 34; stroke-dashoffset: 34; }
-
-  .s5b-a1 { animation: s5bA1 7.5s ease-in-out infinite; }
-  .s5b-panah1a { animation: s5bArrow1a 7.5s ease-in-out infinite; }
-  .s5b-b1 { animation: s5bB1 7.5s ease-in-out infinite; }
-  .s5b-panah2a { animation: s5bArrow2a 7.5s ease-in-out infinite; }
-  .s5b-c1 { animation: s5bC1 7.5s ease-in-out infinite; }
-  .s5b-centang1 { animation: s5bCentang1 7.5s ease-in-out infinite; }
-
-  .s5b-a2 { animation: s5bA2 7.5s ease-in-out infinite; }
-  .s5b-panah1b { animation: s5bArrow1b 7.5s ease-in-out infinite; }
-  .s5b-b2 { animation: s5bB2 7.5s ease-in-out infinite; }
-  .s5b-panah2b { animation: s5bArrow2b 7.5s ease-in-out infinite; }
-  .s5b-c2 { animation: s5bC2 7.5s ease-in-out infinite; }
-  .s5b-centang2 { animation: s5bCentang2 7.5s ease-in-out infinite; }
-
-  @keyframes s5bA1 {
-    0% { opacity: 0; transform: scale(0.7); }
-    4% { opacity: 1; transform: scale(1); }
-    92% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(0.7); }
-  }
-  @keyframes s5bArrow1a {
-    0%, 4% { opacity: 0; stroke-dashoffset: 40; }
-    8% { opacity: 1; stroke-dashoffset: 0; }
-    92% { opacity: 1; stroke-dashoffset: 0; }
-    100% { opacity: 0; stroke-dashoffset: 40; }
-  }
-  @keyframes s5bB1 {
-    0%, 8% { opacity: 0; transform: scale(0.7); }
-    12% { opacity: 1; transform: scale(1); }
-    92% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(0.7); }
-  }
-  @keyframes s5bArrow2a {
-    0%, 20% { opacity: 0; stroke-dashoffset: 40; }
-    24% { opacity: 1; stroke-dashoffset: 0; }
-    92% { opacity: 1; stroke-dashoffset: 0; }
-    100% { opacity: 0; stroke-dashoffset: 40; }
-  }
-  @keyframes s5bC1 {
-    0%, 24% { opacity: 0; transform: scale(0.5) rotate(-8deg); }
-    28% { opacity: 1; transform: scale(1) rotate(-4deg); }
-    92% { opacity: 1; transform: scale(1) rotate(-4deg); }
-    100% { opacity: 0; transform: scale(0.5) rotate(-8deg); }
-  }
-  @keyframes s5bCentang1 {
-    0%, 28% { stroke-dashoffset: 34; }
-    33.3%, 100% { stroke-dashoffset: 0; }
-  }
-
-  @keyframes s5bA2 {
-    0%, 38.7% { opacity: 0; transform: scale(0.7); }
-    42.7% { opacity: 1; transform: scale(1); }
-    92% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(0.7); }
-  }
-  @keyframes s5bArrow1b {
-    0%, 42.7% { opacity: 0; stroke-dashoffset: 40; }
-    46.7% { opacity: 1; stroke-dashoffset: 0; }
-    92% { opacity: 1; stroke-dashoffset: 0; }
-    100% { opacity: 0; stroke-dashoffset: 40; }
-  }
-  @keyframes s5bB2 {
-    0%, 46.7% { opacity: 0; transform: scale(0.7); }
-    50.7% { opacity: 1; transform: scale(1); }
-    92% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(0.7); }
-  }
-  @keyframes s5bArrow2b {
-    0%, 60% { opacity: 0; stroke-dashoffset: 40; }
-    64% { opacity: 1; stroke-dashoffset: 0; }
-    92% { opacity: 1; stroke-dashoffset: 0; }
-    100% { opacity: 0; stroke-dashoffset: 40; }
-  }
-  @keyframes s5bC2 {
-    0%, 64% { opacity: 0; transform: scale(0.5) rotate(-8deg); }
-    68% { opacity: 1; transform: scale(1) rotate(-4deg); }
-    92% { opacity: 1; transform: scale(1) rotate(-4deg); }
-    100% { opacity: 0; transform: scale(0.5) rotate(-8deg); }
-  }
-  @keyframes s5bCentang2 {
-    0%, 68% { stroke-dashoffset: 34; }
-    73.3%, 100% { stroke-dashoffset: 0; }
-  }
-
-  .s5b-grafik-goyang { animation: s5bGoyang 1.6s ease-in-out infinite; }
-  @keyframes s5bGoyang {
-    0%, 100% { transform: translateY(0); }
-    25% { transform: translateY(-3px); }
-    50% { transform: translateY(2px); }
-    75% { transform: translateY(-2px); }
-  }
-
-  /* ================= Slide 6, posisi sensor menentukan angka ================= */
-  /* Siklus 8s. 0-25 tertahan, 25-37.5 garis bergeser, 37.5-41 gelembung bertukar,
-     41-66.25 tertahan, 66.25-76.25 robot bereaksi, 76.25-88.75 tertahan,
-     88.75-100 garis dan sensor kembali, gelembung menyusul selesai tepat di 100 supaya sinkron. */
-
-  .s6-track { animation: s6Track 8s ease-in-out infinite; }
-  @keyframes s6Track {
-    0%, 25% { transform: translateX(0); }
-    37.5%, 88.75% { transform: translateX(40px); }
-    100% { transform: translateX(0); }
-  }
-
-  .s6-sensor-kiri { animation: s6SensorKiri 8s ease-in-out infinite; }
-  .s6-sensor-kanan { animation: s6SensorKanan 8s ease-in-out infinite; }
-  @keyframes s6SensorKiri {
-    0%, 25% { fill: var(--teks); }
-    37.5%, 88.75% { fill: var(--putih-kartu); }
-    100% { fill: var(--teks); }
-  }
-  @keyframes s6SensorKanan {
-    0%, 25% { fill: var(--putih-kartu); }
-    37.5%, 88.75% { fill: var(--teks); }
-    100% { fill: var(--putih-kartu); }
-  }
-
-  .s6-bubble-kiri, .s6-bubble-kanan { animation: s6BubblePop 8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-  @keyframes s6BubblePop {
-    0%, 36% { transform: scale(1); }
-    38.5% { transform: scale(1.3); }
-    41%, 95% { transform: scale(1); }
-    97.5% { transform: scale(1.3); }
-    100% { transform: scale(1); }
-  }
-
-  .s6-isi-kiri { animation: s6IsiKiri 8s ease-in-out infinite; }
-  .s6-isi-kanan { animation: s6IsiKanan 8s ease-in-out infinite; }
-  @keyframes s6IsiKiri {
-    0%, 37% { fill: var(--teks); }
-    40%, 97% { fill: var(--oranye); }
-    100% { fill: var(--teks); }
-  }
-  @keyframes s6IsiKanan {
-    0%, 37% { fill: var(--oranye); }
-    40%, 97% { fill: var(--teks); }
-    100% { fill: var(--oranye); }
-  }
-
-  .s6-kiri-nol { animation: s6KiriNol 8s ease-in-out infinite; }
-  .s6-kiri-satu { animation: s6KiriSatu 8s ease-in-out infinite; }
-  .s6-kanan-nol { animation: s6KananNol 8s ease-in-out infinite; }
-  .s6-kanan-satu { animation: s6KananSatu 8s ease-in-out infinite; }
-  @keyframes s6KiriNol { 0%, 37% { opacity: 1; } 40%, 97% { opacity: 0; } 100% { opacity: 1; } }
-  @keyframes s6KiriSatu { 0%, 37% { opacity: 0; } 40%, 97% { opacity: 1; } 100% { opacity: 0; } }
-  @keyframes s6KananNol { 0%, 37% { opacity: 0; } 40%, 97% { opacity: 1; } 100% { opacity: 0; } }
-  @keyframes s6KananSatu { 0%, 37% { opacity: 1; } 40%, 97% { opacity: 0; } 100% { opacity: 1; } }
-
-  .s6-robot { animation: s6Robot 8s ease-in-out infinite; transform-origin: 170px 90px; }
-  @keyframes s6Robot {
-    0%, 66.25% { transform: rotate(0deg); }
-    76.25%, 88.75% { transform: rotate(11deg); }
-    100% { transform: rotate(0deg); }
-  }
-
-  .s6-panah-koreksi { animation: s6Panah 8s ease-in-out infinite; }
-  @keyframes s6Panah {
-    0%, 63% { opacity: 0; }
-    68%, 86% { opacity: 1; }
-    91%, 100% { opacity: 0; }
-  }
-
-  /* ================= Slide 7 (dulu 6), kursor mengklik saklar ================= */
-
-  .s7-kursor { animation: s7Kursor 6s ease-in-out infinite; }
-  .s7-slider { animation: s7Slider 6s ease-in-out infinite; }
-  .s7-riak { animation: s7Riak 6s ease-in-out infinite; transform-origin: 150px 156px; }
-
-  @keyframes s7Kursor {
-    0%, 18% { transform: translate(-34px, -30px); }
-    32%, 70% { transform: translate(0, 0); }
-    84%, 100% { transform: translate(-34px, -30px); }
-  }
-  @keyframes s7Slider {
-    0%, 32% { fill: var(--abu-muda); }
-    37%, 70% { fill: var(--oranye); }
-    75%, 100% { fill: var(--abu-muda); }
-  }
-  @keyframes s7Riak {
-    0%, 32% { opacity: 0; transform: scale(0.6); }
-    37% { opacity: 0.7; transform: scale(1); }
-    55%, 100% { opacity: 0; transform: scale(1.6); }
-  }
-
-  /* ================= Gerak dihormati sesuai preferensi pengguna ================= */
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-    }
-  }
-
-  @media (max-width: 720px) {
-    .tombol-nav { width: 42px; height: 42px; font-size: 1.2rem; }
-    .tombol-nav.kiri { left: 12px; }
-    .tombol-nav.kanan { right: 12px; }
-    .ilustrasi, .ilustrasi-lebar { width: 78vw; }
-  }
+/* ===== BAGIAN C. KHUSUS LAB INI ===== */
+/* Gambar P4 Lab 1 memakai viewBox 490 × 300 agar tampil pada skala 1 dan catatan .bawah muat di bawah teks kolom. */
+.pasangan svg.pendek{height:300px}
 </style>
 </head>
 <body>
+<main id="panggung" aria-label="Presentasi Lab 1, LED ON/OFF">
 
-<div class="deck">
-
-  <!-- Slide 1 — Pembuka -->
-  <section class="slide slide-oranye aktif" data-slide="1">
-    <div class="zona-judul"><h1 class="judul-slide">Nyala mati, bahasa mesin</h1></div>
-    <div class="zona-ilustrasi">
-      <svg class="ilustrasi" style="aspect-ratio: 320/320" viewBox="0 0 320 320" role="img" aria-label="Lampu LED besar berdenyut pelan">
-        <g class="s1-glow"><circle cx="160" cy="160" r="118" fill="#ffffff" opacity="0.3"/></g>
-        <g stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.45">
-          <line x1="160" y1="24" x2="160" y2="50"/><line x1="244" y1="52" x2="226" y2="70"/>
-          <line x1="276" y1="160" x2="250" y2="160"/><line x1="244" y1="268" x2="226" y2="250"/>
-          <line x1="160" y1="296" x2="160" y2="270"/><line x1="76" y1="268" x2="94" y2="250"/>
-          <line x1="44" y1="160" x2="70" y2="160"/><line x1="76" y1="52" x2="94" y2="70"/>
-        </g>
-        <g class="s1-inti"><circle cx="160" cy="160" r="70" fill="var(--led-nyala)" stroke="#ffffff" stroke-width="6"/></g>
-        <g stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.9">
-          <line x1="138" y1="252" x2="138" y2="284"/><line x1="182" y1="252" x2="182" y2="284"/>
-        </g>
-      </svg>
+<section class="slide aktif" aria-labelledby="judul1">
+  <div class="intro">
+    <div>
+      <p class="kicker">Lab 1 · Modul 1</p>
+      <h1 id="judul1">LED<br><span class="oranye">ON/OFF</span></h1>
+      <p class="ringkas">Memahami sinyal digital HIGH dan LOW.</p>
+      <p class="catatan lembut" style="margin-top:32px;max-width:350px">Sinyal digital adalah sinyal yang hanya memiliki dua keadaan.</p>
     </div>
-    <div class="zona-keterangan"><p class="keterangan-slide">Sebelum bahas robot, kenalan dulu sama satu lampu kecil</p></div>
-  </section>
-
-  <!-- Slide 2 — Saklar lampu di rumah -->
-  <section class="slide" data-slide="2">
-    <div class="zona-judul"><h2 class="judul-slide">Kayak saklar lampu di rumah</h2></div>
-    <div class="zona-ilustrasi">
-      <svg class="ilustrasi" style="aspect-ratio: 300/390" viewBox="0 0 300 390" role="img" aria-label="Jari menekan saklar dinding, lampu bergantian nyala dan mati">
-        <g class="s2-bohlam-glow"><circle cx="150" cy="76" r="56" fill="var(--oranye-muda)"/></g>
-        <line x1="150" y1="12" x2="150" y2="38" stroke="var(--teks-lembut)" stroke-width="4" stroke-linecap="round"/>
-        <g class="s2-bohlam-cahaya"><circle cx="150" cy="76" r="34" fill="var(--led-nyala)"/></g>
-        <circle class="s2-bohlam-inti" cx="150" cy="76" r="34" fill="none" stroke="var(--teks)" stroke-width="3"/>
-
-        <rect x="90" y="176" width="120" height="150" rx="18" fill="var(--putih-kartu)" stroke="var(--abu-garis)" stroke-width="3"/>
-        <line x1="150" y1="200" x2="150" y2="290" stroke="var(--abu-muda)" stroke-width="10" stroke-linecap="round"/>
-        <circle cx="150" cy="246" r="6" fill="var(--teks-lembut)"/>
-        <line class="s2-tuas" x1="150" y1="246" x2="150" y2="206" stroke="var(--teks)" stroke-width="7" stroke-linecap="round"/>
-
-        <g class="s2-jari" style="transform-origin: 150px 206px;">
-          <rect x="140" y="150" width="20" height="56" rx="10" fill="var(--teks-lembut)"/>
-          <circle cx="150" cy="152" r="11" fill="var(--teks-lembut)"/>
-        </g>
-
-        <text class="s2-label-nyala" x="150" y="374" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="24" fill="var(--oranye)">NYALA</text>
-        <text class="s2-label-mati" x="150" y="374" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="24" fill="var(--teks-lembut)">MATI</text>
-      </svg>
+    <div class="intro-visual">
+      <h3>Level tegangan pada simulator</h3>
+      <svg id="grafikLevel" viewBox="0 0 680 280" width="680" height="280" role="img" aria-label="Batang berskala 0 sampai 5 volt. Saklar terbuka menghasilkan LOW dengan tegangan 0 volt. Saklar tertutup menghasilkan HIGH dengan tegangan 5 volt."></svg>
+      <p class="simpulan-visual">Saklar tertutup menghasilkan 5 V dan saklar terbuka menghasilkan 0 V. Kedua keadaan itu disebut HIGH dan LOW.</p>
     </div>
-    <div class="zona-keterangan"><p class="keterangan-slide">Cuma ada dua posisi, nyala atau mati. Nggak ada yang setengah nyala</p></div>
-  </section>
+  </div>
+</section>
 
-  <!-- Slide 3 — HIGH dan LOW -->
-  <section class="slide" data-slide="3">
-    <div class="zona-judul"><h2 class="judul-slide">Keduanya punya nama resmi</h2></div>
-    <div class="zona-ilustrasi">
-      <svg class="ilustrasi" style="aspect-ratio: 380/170" viewBox="0 0 380 170" role="img" aria-label="Kartu HIGH dengan gelombang berjalan dan chip lima volt, kartu LOW dengan garis datar dan chip nol volt">
-        <g class="s3-kartu s3-kartu-high">
-          <rect x="20" y="20" width="160" height="130" rx="16" fill="var(--oranye-muda)" stroke="var(--oranye)" stroke-width="2.5"/>
-          <svg x="36" y="38" width="128" height="36" viewBox="0 0 128 36">
-            <clipPath id="klipTinggi"><rect x="0" y="0" width="128" height="36"/></clipPath>
-            <g clip-path="url(#klipTinggi)">
-              <polyline class="s3-gelombang-jalan" points="-32,28 -32,8 -16,8 -16,28 0,28 0,8 16,8 16,28 32,28 32,8 48,8 48,28 64,28 64,8 80,8 80,28 96,28 96,8 112,8 112,28 128,28 128,8 144,8 144,28 160,28 160,8"
-                fill="none" stroke="var(--oranye)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-            </g>
-          </svg>
-          <text x="100" y="100" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="22" fill="var(--oranye)">HIGH</text>
-          <line class="s3-penunjuk s3-penunjuk-high" x1="100" y1="108" x2="100" y2="122" stroke="var(--oranye)" stroke-width="2"/>
-          <g class="s3-chip s3-chip-high">
-            <rect x="70" y="122" width="60" height="24" rx="12" fill="var(--oranye)"/>
-            <text x="100" y="138" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="13" fill="#ffffff">5 V</text>
-          </g>
-        </g>
+<section class="slide" aria-labelledby="judul2" hidden>
+  <header class="judul"><p class="kicker">Fungsi pin keluaran</p><h2 id="judul2">Dari keputusan program ke LED</h2></header>
+  <div class="isi">
+    <svg id="diagramFungsi" viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Di dalam mikrokontroler, program mengirim keputusan ke pin keluaran. Pin keluaran bernilai HIGH dengan tegangan 5 volt atau LOW dengan tegangan 0 volt. Tegangan pin menentukan LED menyala atau padam."></svg>
+    <div class="legend" style="margin-top:14px"><span><i class="garis-legenda sinyal"></i>Keputusan program</span><span><i class="garis-legenda"></i>Jalur arus LED</span></div>
+    <p class="catatan lembut bawah">Diagram fungsi disederhanakan. Resistor dan jalur kembali ke GND tidak ditampilkan.</p>
+  </div>
+</section>
 
-        <g class="s3-kartu s3-kartu-low">
-          <rect x="200" y="20" width="160" height="130" rx="16" fill="var(--abu-muda)" stroke="var(--abu-garis)" stroke-width="2.5"/>
-          <line x1="216" y1="56" x2="344" y2="56" stroke="var(--teks-lembut)" stroke-width="5" stroke-linecap="round"/>
-          <text x="280" y="100" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="22" fill="var(--teks-lembut)">LOW</text>
-          <line class="s3-penunjuk s3-penunjuk-low" x1="280" y1="108" x2="280" y2="122" stroke="var(--teks-lembut)" stroke-width="2"/>
-          <g class="s3-chip s3-chip-low">
-            <rect x="250" y="122" width="60" height="24" rx="12" fill="var(--teks-lembut)"/>
-            <text x="280" y="138" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="13" fill="#ffffff">0 V</text>
-          </g>
-        </g>
-      </svg>
+<section class="slide" aria-labelledby="judul3" hidden>
+  <header class="judul"><p class="kicker">Komponen pengatur jalur</p><h2 id="judul3">Dua posisi saklar</h2></header>
+  <div class="isi terbagi">
+    <svg id="gambarSaklar" viewBox="0 0 700 450" width="700" height="450" role="img" aria-label="Simbol saklar dalam dua posisi. Pada posisi terbuka, tuas terangkat sehingga jalur terputus. Pada posisi tertutup, tuas menempel pada kontak sehingga jalur tersambung."></svg>
+    <div class="teks-samping">
+      <h3>Saklar hanya memiliki dua posisi.</h3>
+      <p>Pada posisi terbuka, jalur arus terputus. Pada posisi tertutup, jalur arus tersambung.</p>
+      <p class="catatan lembut">Simbol mengikuti kanvas simulator. Tuas terangkat saat saklar terbuka.</p>
     </div>
-    <div class="zona-keterangan"><p class="keterangan-slide">Ada tegangan namanya HIGH, nggak ada tegangan namanya LOW</p></div>
-  </section>
+  </div>
+</section>
 
-  <!-- Slide 4 — Rangkaian pertama -->
-  <section class="slide" data-slide="4">
-    <div class="zona-judul"><h2 class="judul-slide">Rangkaian paling sederhana</h2></div>
-    <div class="zona-ilustrasi">
-      <svg class="ilustrasi" style="aspect-ratio: 360/220" viewBox="0 0 360 220" role="img" aria-label="Jari menekan saklar, arus mengalir sepanjang kabel, LED menyala membesar glownya">
-        <path d="M 40 165 L 40 60 L 108 60 M 148 60 L 268 60 L 268 165 L 40 165"
-          fill="none" stroke="var(--abu-garis)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-        <path class="s4-arus" d="M 40 165 L 40 60 L 108 60 M 148 60 L 268 60 L 268 165 L 40 165"
-          fill="none" stroke="var(--oranye)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 14"/>
-
-        <line x1="24" y1="118" x2="56" y2="118" stroke="var(--teks)" stroke-width="4" stroke-linecap="round"/>
-        <line x1="32" y1="132" x2="48" y2="132" stroke="var(--teks)" stroke-width="8" stroke-linecap="round"/>
-        <text x="40" y="197" text-anchor="middle" font-family="var(--font-utama)" font-weight="600" font-size="15" fill="var(--teks-lembut)">Baterai</text>
-
-        <circle cx="108" cy="60" r="5" fill="var(--teks)"/>
-        <circle cx="148" cy="60" r="5" fill="var(--teks)"/>
-        <line class="s4-tuas" x1="108" y1="60" x2="146" y2="60" stroke="var(--teks)" stroke-width="5" stroke-linecap="round"/>
-        <text x="128" y="34" text-anchor="middle" font-family="var(--font-utama)" font-weight="600" font-size="15" fill="var(--teks-lembut)">Saklar</text>
-
-        <g class="s4-jari" style="transform-origin: 108px 60px;">
-          <rect x="98" y="6" width="18" height="46" rx="9" fill="var(--teks-lembut)"/>
-          <circle cx="107" cy="8" r="9" fill="var(--teks-lembut)"/>
-        </g>
-
-        <g class="s4-led-glow"><circle cx="268" cy="125" r="40" fill="var(--oranye-muda)"/></g>
-        <g class="s4-led-inti"><circle cx="268" cy="125" r="24" fill="var(--led-nyala)"/></g>
-        <circle cx="268" cy="125" r="24" fill="none" stroke="var(--teks)" stroke-width="3"/>
-        <text x="268" y="197" text-anchor="middle" font-family="var(--font-utama)" font-weight="600" font-size="15" fill="var(--teks-lembut)">LED</text>
-      </svg>
+<section class="slide" aria-labelledby="judul4" hidden>
+  <header class="judul"><p class="kicker">Keluaran mikrokontroler 5 V</p><h2 id="judul4">Pin keluaran HIGH dan LOW</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>HIGH</h3>
+        <svg class="pin pendek" data-mode="high" viewBox="0 0 490 300" role="img" aria-label="Pin bernilai HIGH dengan tegangan 5 volt. Arus mengalir dari pin melalui resistor dan LED, lalu kembali ke mikrokontroler. LED menyala."></svg>
+        <p><strong>Pin bernilai HIGH, sekitar 5 V.</strong><br>Arus mengalir dan LED menyala.</p>
+      </div>
+      <div>
+        <h3>LOW</h3>
+        <svg class="pin pendek" data-mode="low" viewBox="0 0 490 300" role="img" aria-label="Pin bernilai LOW dengan tegangan 0 volt. Tidak ada arus melalui resistor dan LED. LED padam."></svg>
+        <p><strong>Pin bernilai LOW, 0 V.</strong><br>Arus tidak mengalir dan LED padam.</p>
+      </div>
     </div>
-    <div class="zona-keterangan"><p class="keterangan-slide">Waktu saklar tertutup, arus mengalir dan LED menyala. Begitu terbuka, LED langsung padam</p></div>
-  </section>
+    <p class="catatan lembut bawah">Contoh mikrokontroler 5 V. Resistor membatasi arus LED pada rangkaian fisik dan tidak dimuat rangkaian simulator.</p>
+  </div>
+</section>
 
-  <!-- Slide 5A — Tiga zona pembacaan -->
-  <section class="slide" data-slide="5">
-    <div class="zona-judul"><h2 class="judul-slide">Ada garis batasnya</h2></div>
-    <div class="zona-ilustrasi">
-      <svg class="ilustrasi ilustrasi-lebar" style="aspect-ratio: 420/260" viewBox="0 0 420 260" role="img" aria-label="Diagram tiga zona sinyal, zona HIGH di atas, zona ragu di tengah, zona LOW di bawah, sinyal berjalan menembus zona dan strip huruf membaca hasilnya">
-        <rect class="s5a-zona s5a-zona-high" x="40" y="20" width="340" height="45" fill="var(--hijau-muda)"/>
-        <rect class="s5a-zona s5a-zona-ragu" x="40" y="65" width="340" height="60" fill="var(--merah-muda)"/>
-        <rect class="s5a-zona s5a-zona-low" x="40" y="125" width="340" height="45" fill="var(--abu-muda)"/>
-        <rect x="40" y="20" width="340" height="150" fill="none" stroke="var(--abu-garis)" stroke-width="1.5"/>
-
-        <line class="s5a-ambang s5a-ambang-atas" x1="40" y1="65" x2="380" y2="65" stroke="var(--teks-lembut)" stroke-width="2" stroke-dasharray="6 6"/>
-        <line class="s5a-ambang s5a-ambang-bawah" x1="40" y1="125" x2="380" y2="125" stroke="var(--teks-lembut)" stroke-width="2" stroke-dasharray="6 6"/>
-        <text class="s5a-label-ambang s5a-label-atas" x="390" y="65" font-family="var(--font-utama)" font-weight="600" font-size="12" fill="var(--teks-lembut)">3,5 V</text>
-        <text class="s5a-label-ambang s5a-label-bawah" x="390" y="125" font-family="var(--font-utama)" font-weight="600" font-size="12" fill="var(--teks-lembut)">1,5 V</text>
-
-        <g class="s5a-chip s5a-chip-high">
-          <rect x="56" y="32" width="120" height="22" rx="11" fill="var(--hijau)"/>
-          <text x="116" y="47" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="12" fill="#ffffff">dibaca HIGH</text>
-        </g>
-        <g class="s5a-chip s5a-chip-ragu">
-          <rect x="56" y="84" width="168" height="22" rx="11" fill="var(--merah)"/>
-          <text x="140" y="99" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="12" fill="#ffffff">zona ragu, hindari</text>
-        </g>
-        <g class="s5a-chip s5a-chip-low">
-          <rect x="56" y="137" width="118" height="22" rx="11" fill="var(--teks-lembut)"/>
-          <text x="115" y="152" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="12" fill="#ffffff">dibaca LOW</text>
-        </g>
-
-        <clipPath id="klipZona"><rect x="248" y="20" width="132" height="150"/></clipPath>
-        <g clip-path="url(#klipZona)">
-          <g class="s5a-gelombang">
-            <polyline points="-100,155 -100,155 -50,155 -50,35 0,35 0,155 50,155 50,35 100,35 100,155 150,155 150,35
-              200,35 200,155 250,155 250,35 300,35 300,155 350,155 350,35 400,35 400,155 450,155 450,35 500,35 500,155"
-              fill="none" stroke="var(--oranye)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
-          </g>
-        </g>
-        <line x1="340" y1="20" x2="340" y2="170" stroke="var(--teks)" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.5"/>
-
-        <g font-family="var(--font-utama)" font-weight="700" font-size="18">
-          <rect class="s5a-strip-slot" x="70" y="200" width="34" height="34" rx="8"/>
-          <rect class="s5a-strip-slot" x="118" y="200" width="34" height="34" rx="8"/>
-          <rect class="s5a-strip-slot" x="166" y="200" width="34" height="34" rx="8"/>
-          <rect class="s5a-strip-slot" x="214" y="200" width="34" height="34" rx="8"/>
-          <rect class="s5a-strip-slot" x="262" y="200" width="34" height="34" rx="8"/>
-          <rect class="s5a-strip-slot" x="310" y="200" width="34" height="34" rx="8"/>
-          <text class="s5a-huruf s5a-h1" x="87" y="222" text-anchor="middle" fill="var(--teks-lembut)">L</text>
-          <text class="s5a-huruf s5a-h2" x="135" y="222" text-anchor="middle" fill="var(--hijau)">H</text>
-          <text class="s5a-huruf s5a-h3" x="183" y="222" text-anchor="middle" fill="var(--teks-lembut)">L</text>
-          <text class="s5a-huruf s5a-h4" x="231" y="222" text-anchor="middle" fill="var(--hijau)">H</text>
-          <text class="s5a-huruf s5a-h5" x="279" y="222" text-anchor="middle" fill="var(--teks-lembut)">L</text>
-          <text class="s5a-huruf s5a-h6" x="327" y="222" text-anchor="middle" fill="var(--hijau)">H</text>
-        </g>
-      </svg>
+<section class="slide" aria-labelledby="judul5" hidden>
+  <header class="judul"><p class="kicker">Rangkaian pada simulator</p><h2 id="judul5">Rangkaian tertutup dan terbuka</h2></header>
+  <div class="isi">
+    <div class="pasangan">
+      <div>
+        <h3>Saklar tertutup</h3>
+        <svg class="rangkaian pendek" data-mode="tertutup" viewBox="0 0 490 300" role="img" aria-label="Rangkaian baterai 5 volt, saklar, dan LED. Saklar tertutup sehingga jalur tersambung. Arus mengalir dari kutub positif baterai melalui saklar dan LED ke kutub negatif. LED menyala."></svg>
+        <p><strong>Jalur tersambung.</strong><br>Arus mengalir dan LED menyala.</p>
+      </div>
+      <div>
+        <h3>Saklar terbuka</h3>
+        <svg class="rangkaian pendek" data-mode="terbuka" viewBox="0 0 490 300" role="img" aria-label="Rangkaian yang sama dengan saklar terbuka. Tuas terangkat sehingga jalur terputus. Tidak ada arus dan LED padam."></svg>
+        <p><strong>Jalur terputus.</strong><br>Arus berhenti dan LED padam.</p>
+      </div>
     </div>
-    <div class="zona-keterangan"><p class="keterangan-slide">Di atas garis batas atas dibaca HIGH, di bawah batas bawah dibaca LOW</p></div>
-  </section>
+    <p class="catatan lembut bawah">Rangkaian simulator hanya memuat baterai, saklar, dan LED. Titik arus bergerak dari kutub positif ke kutub negatif.</p>
+  </div>
+</section>
 
-  <!-- Slide 5B — Contoh ketahanan gangguan -->
-  <section class="slide" data-slide="6">
-    <div class="zona-judul"><h2 class="judul-slide">Contohnya begini</h2></div>
-    <div class="zona-ilustrasi">
-      <svg class="ilustrasi ilustrasi-lebar" style="aspect-ratio: 460/210" viewBox="0 0 460 210" role="img" aria-label="Sinyal lima volt terganggu jadi 4,6 volt tetap dibaca HIGH, sinyal nol volt terganggu jadi 0,4 volt tetap dibaca LOW">
-        <g class="s5b-baris">
-          <g class="s5b-elemen s5b-a1">
-            <rect x="16" y="15" width="100" height="65" rx="12" fill="var(--putih-kartu)" stroke="var(--abu-garis)" stroke-width="2"/>
-            <text x="66" y="40" text-anchor="middle" font-family="var(--font-utama)" font-weight="600" font-size="11" fill="var(--teks-lembut)">dikirim</text>
-            <text x="66" y="62" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="18" fill="var(--teks)">5 V</text>
-          </g>
-          <path class="s5b-panah s5b-panah1a" d="M 120 47 L 154 47" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-linecap="round" marker-end="url(#panahUjung)"/>
+<section class="slide" aria-labelledby="judul6" hidden>
+  <header class="judul"><p class="kicker">Model pada simulator</p><h2 id="judul6">Saklar sebagai model pin</h2></header>
+  <div class="isi">
+    <svg id="tabelModel" viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Dua baris padanan. Pin HIGH 5 volt setara dengan saklar tertutup, indikator HIGH dengan Level tegangan 5 volt, dan LED menyala. Pin LOW 0 volt setara dengan saklar terbuka, indikator LOW dengan Level tegangan 0 volt, dan LED padam."></svg>
+    <p class="catatan lembut bawah">Simulator Lab 1 tidak memuat mikrokontroler. Posisi saklar diatur melalui toggle Saklar pada panel Kontrol.</p>
+  </div>
+</section>
 
-          <g class="s5b-elemen s5b-b1">
-            <rect x="158" y="15" width="140" height="65" rx="12" fill="var(--putih-kartu)" stroke="var(--abu-garis)" stroke-width="2"/>
-            <polyline class="s5b-grafik-goyang" points="170,30 180,24 190,32 200,22 210,30 220,25 230,31" fill="none" stroke="var(--oranye)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <text id="s5bAngka1" x="228" y="55" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="16" fill="var(--oranye)">5,0 V</text>
-            <text x="228" y="72" text-anchor="middle" font-family="var(--font-utama)" font-weight="600" font-size="10" fill="var(--teks-lembut)">karena gangguan</text>
-          </g>
-          <path class="s5b-panah s5b-panah2a" d="M 302 47 L 336 47" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-linecap="round" marker-end="url(#panahUjung)"/>
+<section class="slide" aria-labelledby="judul7" hidden>
+  <header class="judul"><p class="kicker">Penerapan pada robot line follower</p><h2 id="judul7">Dua keadaan pada robot</h2></header>
+  <div class="isi">
+    <svg id="penerapanRobot" viewBox="0 0 1152 366" width="1152" height="366" role="img" aria-label="Tiga bagian robot yang memakai dua keadaan. Lampu indikator menyala atau padam pada Lab 1. Sensor garis membedakan garis dan lantai pada Modul 2. Kecepatan motor diatur oleh HIGH dan LOW yang bergantian pada Modul 3."></svg>
+    <p class="catatan lembut bawah">Modul 2 membahas sensor garis. Modul 3 membahas PWM untuk mengatur kecepatan motor.</p>
+  </div>
+</section>
 
-          <g class="s5b-elemen s5b-stempel s5b-c1">
-            <rect x="340" y="15" width="104" height="65" rx="12" fill="var(--hijau-muda)" stroke="var(--hijau)" stroke-width="2.5"/>
-            <path class="s5b-centang s5b-centang1" d="M 378 33 L 388 43 L 406 21" fill="none" stroke="var(--hijau)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="392" y="64" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="12" fill="var(--hijau)">tetap HIGH</text>
-          </g>
-        </g>
+<section class="slide" aria-labelledby="judul8" hidden>
+  <header class="judul"><p class="kicker">Percobaan Lab 1</p><h2 id="judul8">Pengamatan pada simulator</h2></header>
+  <div class="isi">
+    <div class="kegiatan"><span class="urutan">01</span><h3>Saklar tertutup</h3><p>Aktifkan toggle Saklar pada panel Kontrol.<br>Amati tuas saklar, titik arus, LED, dan Level tegangan.</p></div>
+    <div class="kegiatan"><span class="urutan">02</span><h3>Saklar terbuka</h3><p>Nonaktifkan toggle Saklar.<br>Bandingkan kanvas dan Level tegangan dengan keadaan HIGH.</p></div>
+    <div class="kegiatan"><span class="urutan">03</span><h3>Target tiga kali</h3><p>Ulangi sampai teks hitungan mencapai Nyala 3× dan Mati 3×.<br>Jelaskan hubungan posisi saklar, LED, dan tegangan.</p></div>
+    <div class="hasil"><strong>Checklist selesai</strong><p>LED telah dinyalakan minimal 3 kali dan dipadamkan minimal 3 kali.</p></div>
+  </div>
+</section>
 
-        <g class="s5b-baris">
-          <g class="s5b-elemen s5b-a2">
-            <rect x="16" y="130" width="100" height="65" rx="12" fill="var(--putih-kartu)" stroke="var(--abu-garis)" stroke-width="2"/>
-            <text x="66" y="155" text-anchor="middle" font-family="var(--font-utama)" font-weight="600" font-size="11" fill="var(--teks-lembut)">dikirim</text>
-            <text x="66" y="177" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="18" fill="var(--teks)">0 V</text>
-          </g>
-          <path class="s5b-panah s5b-panah1b" d="M 120 162 L 154 162" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-linecap="round" marker-end="url(#panahUjung)"/>
-
-          <g class="s5b-elemen s5b-b2">
-            <rect x="158" y="130" width="140" height="65" rx="12" fill="var(--putih-kartu)" stroke="var(--abu-garis)" stroke-width="2"/>
-            <polyline class="s5b-grafik-goyang" points="170,145 180,139 190,147 200,137 210,145 220,140 230,146" fill="none" stroke="var(--teks-lembut)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <text id="s5bAngka2" x="228" y="170" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="16" fill="var(--teks-lembut)">0,0 V</text>
-            <text x="228" y="187" text-anchor="middle" font-family="var(--font-utama)" font-weight="600" font-size="10" fill="var(--teks-lembut)">karena gangguan</text>
-          </g>
-          <path class="s5b-panah s5b-panah2b" d="M 302 162 L 336 162" fill="none" stroke="var(--teks-lembut)" stroke-width="3" stroke-linecap="round" marker-end="url(#panahUjung)"/>
-
-          <g class="s5b-elemen s5b-stempel s5b-c2">
-            <rect x="340" y="130" width="104" height="65" rx="12" fill="var(--hijau-muda)" stroke="var(--hijau)" stroke-width="2.5"/>
-            <path class="s5b-centang s5b-centang2" d="M 378 148 L 388 158 L 406 136" fill="none" stroke="var(--hijau)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="392" y="179" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="12" fill="var(--hijau)">tetap LOW</text>
-          </g>
-        </g>
-
-        <defs>
-          <marker id="panahUjung" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-            <path d="M0,0 L8,4 L0,8 Z" fill="var(--teks-lembut)"/>
-          </marker>
-        </defs>
-      </svg>
-    </div>
-    <div class="zona-keterangan"><p class="keterangan-slide">Sinyal terganggu di jalan, tapi selama masih di zona yang benar hasilnya tetap sama</p></div>
-  </section>
-
-  <!-- Slide 6 (dulu Slide 6 lama) — Posisi sensor menentukan angka -->
-  <section class="slide" data-slide="7">
-    <div class="zona-judul"><h2 class="judul-slide">Nyambung ke robot line follower</h2></div>
-    <div class="zona-ilustrasi">
-      <svg class="ilustrasi" style="aspect-ratio: 340/280" viewBox="0 0 340 280" role="img" aria-label="Robot line follower tampak atas, sensor kiri di atas garis hitam bernilai nol, sensor kanan di lantai putih bernilai satu, garis bergeser lalu nilainya bertukar dan robot bereaksi">
-        <g class="s6-track">
-          <line x1="125" y1="145" x2="175" y2="145" stroke="var(--lintasan)" stroke-width="16" stroke-linecap="round"/>
-        </g>
-
-        <g class="s6-robot">
-          <g transform="translate(170, 60)">
-            <rect x="-38" y="-4" width="16" height="46" rx="6" fill="var(--robot-roda)"/>
-            <rect x="22" y="-4" width="16" height="46" rx="6" fill="var(--robot-roda)"/>
-            <rect x="-30" y="-26" width="60" height="66" rx="16" fill="var(--robot-badan)"/>
-          </g>
-          <path class="s6-panah-koreksi" d="M 208 60 Q 226 66 224 84" fill="none" stroke="var(--teks)" stroke-width="3" stroke-linecap="round" marker-end="url(#panahKoreksi)"/>
-        </g>
-
-        <circle class="s6-sensor-kiri" cx="150" cy="125" r="10" stroke="var(--teks)" stroke-width="3"/>
-        <circle class="s6-sensor-kanan" cx="190" cy="125" r="10" stroke="var(--teks)" stroke-width="3"/>
-
-        <g class="s6-bubble-kiri">
-          <circle class="s6-isi-kiri" cx="118" cy="125" r="13" />
-          <text class="s6-kiri-nol" x="118" y="130" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="14" fill="#ffffff">0</text>
-          <text class="s6-kiri-satu" x="118" y="130" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="14" fill="#ffffff">1</text>
-        </g>
-        <g class="s6-bubble-kanan">
-          <circle class="s6-isi-kanan" cx="222" cy="125" r="13" />
-          <text class="s6-kanan-nol" x="222" y="130" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="14" fill="#ffffff">0</text>
-          <text class="s6-kanan-satu" x="222" y="130" text-anchor="middle" font-family="var(--font-utama)" font-weight="700" font-size="14" fill="#ffffff">1</text>
-        </g>
-
-        <g font-family="var(--font-utama)" font-weight="600" font-size="11" fill="var(--teks-lembut)">
-          <rect x="14" y="230" width="14" height="14" rx="3" fill="var(--teks)"/>
-          <text x="34" y="241">garis hitam menghasilkan 0</text>
-          <rect x="14" y="250" width="14" height="14" rx="3" fill="var(--putih-kartu)" stroke="var(--abu-garis)" stroke-width="2"/>
-          <text x="34" y="261">lantai putih menghasilkan 1</text>
-        </g>
-
-        <defs>
-          <marker id="panahKoreksi" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-            <path d="M0,0 L7,3.5 L0,7 Z" fill="var(--teks)"/>
-          </marker>
-        </defs>
-      </svg>
-    </div>
-    <div class="zona-keterangan"><p class="keterangan-slide">Sensor di garis menghasilkan nol, sensor di lantai putih menghasilkan satu. Dari situ robot tahu arah koreksinya</p></div>
-  </section>
-
-  <!-- Slide 7 (dulu Slide 7) — Penutup -->
-  <section class="slide slide-oranye" data-slide="8">
-    <div class="zona-judul"><h1 class="judul-slide">Sekarang giliranmu</h1></div>
-    <div class="zona-ilustrasi">
-      <svg class="ilustrasi" style="aspect-ratio: 320/320" viewBox="0 0 320 320" role="img" aria-label="Kursor mengklik saklar untuk mencoba simulator">
-        <circle cx="150" cy="156" r="92" fill="#ffffff" opacity="0.12"/>
-        <rect x="96" y="114" width="108" height="84" rx="16" fill="#ffffff" opacity="0.95"/>
-        <rect x="118" y="132" width="64" height="48" rx="10" fill="var(--abu-muda)" stroke="var(--oranye)" stroke-width="3"/>
-        <rect class="s7-slider" x="130" y="142" width="40" height="28" rx="8" fill="var(--abu-muda)"/>
-        <g class="s7-riak"><circle cx="150" cy="156" r="28" fill="none" stroke="#ffffff" stroke-width="4"/></g>
-        <g class="s7-kursor"><path d="M 150 156 L 150 202 L 162 192 L 170 208 L 178 204 L 170 188 L 186 186 Z" fill="#ffffff" stroke="var(--teks)" stroke-width="2.5" stroke-linejoin="round"/></g>
-      </svg>
-    </div>
-    <div class="zona-keterangan"><p class="keterangan-slide">Buka simulator Lab 1, terus utak atik saklarnya sendiri</p></div>
-  </section>
-
-</div>
-
-<button class="tombol-nav kiri" id="tombolMundur" aria-label="Slide sebelumnya">‹</button>
-<button class="tombol-nav kanan" id="tombolMaju" aria-label="Slide berikutnya">›</button>
-<span class="indikator-slide"><span id="nomorSekarang">1</span> / <span id="totalSlide">8</span></span>
-
+<footer aria-label="Navigasi presentasi">
+  <span class="nama">Lab 1 · LED ON/OFF</span>
+  <button id="jeda" type="button" aria-pressed="false" title="Tombol spasi">Jeda animasi</button>
+  <button id="mundur" type="button" aria-label="Slide sebelumnya">←</button>
+  <span id="nomorKini" aria-live="polite">1 / 8</span>
+  <button id="maju" type="button" aria-label="Slide berikutnya">→</button>
+</footer>
+<div id="kemajuan" aria-hidden="true"></div>
+</main>
 <script>
-(function () {
-  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
-  var indeks = 0;
+(() => {
+  'use strict';
+  // Acuan konsep: labs/lab01-led.js, engine/rangkaian.js, render/rangkaianView.js, render/panel.js.
+  // Tegangan hanya 0 V atau 5 V (TEGANGAN_SUMBER). Rangkaian simulator memuat baterai, saklar, dan LED tanpa resistor.
+  // Susunan rangkaian, bentuk tuas (terangkat 0,62 rad saat terbuka), dan bentuk LED mengikuti gambarRangkaianLED.
+  const NS = 'http://www.w3.org/2000/svg';
+  function elemen(tag, atribut, isi) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(atribut)) node.setAttribute(key, value);
+    if (isi !== undefined) node.textContent = isi;
+    return node;
+  }
+  const bulat = (n) => Number(n.toFixed(1));
+  const SUDUT_TUAS = 0.62; // render/rangkaianView.js, tuas terangkat saat saklar terbuka
 
-  var tombolMundur = document.getElementById("tombolMundur");
-  var tombolMaju = document.getElementById("tombolMaju");
-  var nomorSekarang = document.getElementById("nomorSekarang");
-  var kurangiGerak = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  document.getElementById("totalSlide").textContent = slides.length;
-
-  /* Angka mengetik pelan dari satu nilai ke nilai lain, dipakai slide 5B. */
-  function animasiHitung(el, dari, ke, durasiMs) {
-    if (!el) return;
-    if (kurangiGerak) {
-      el.textContent = ke.toFixed(1).replace(".", ",") + " V";
-      return;
+  // LED seperti kanvas simulator. Menyala berarti lingkaran --led-nyala, cahaya --oranye-muda, dan delapan sinar pendek.
+  function gambarLED(add, cx, cy, r, menyala) {
+    if (menyala) {
+      add('circle', {cx, cy, r: bulat(r * 2.1), fill: 'var(--oranye-muda)'});
+      for (let i = 0; i < 8; i++) {
+        const sudut = (i / 8) * Math.PI * 2 + Math.PI / 8;
+        add('path', {d: 'M' + bulat(cx + r * 1.55 * Math.cos(sudut)) + ' ' + bulat(cy + r * 1.55 * Math.sin(sudut)) + ' L' + bulat(cx + r * 1.95 * Math.cos(sudut)) + ' ' + bulat(cy + r * 1.95 * Math.sin(sudut)), stroke: 'var(--led-nyala)', 'stroke-width': 3, 'stroke-linecap': 'round'});
+      }
     }
-    var mulai = null;
-    function bingkai(waktu) {
-      if (!mulai) mulai = waktu;
-      var progres = Math.min(1, (waktu - mulai) / durasiMs);
-      var halus = 1 - Math.pow(1 - progres, 3);
-      var nilai = dari + (ke - dari) * halus;
-      el.textContent = nilai.toFixed(1).replace(".", ",") + " V";
-      if (progres < 1) requestAnimationFrame(bingkai);
-    }
-    requestAnimationFrame(bingkai);
+    add('circle', {cx, cy, r, fill: menyala ? 'var(--led-nyala)' : 'var(--abu-muda)', stroke: menyala ? 'var(--led-nyala)' : 'var(--teks-lembut)', 'stroke-width': 3});
   }
 
-  var angka1 = document.getElementById("s5bAngka1");
-  var angka2 = document.getElementById("s5bAngka2");
-  var timerHitung = null;
+  // Saklar mendatar. Tuas berpangkal di kontak kiri. Tertutup berarti tuas mendatar menyentuh kontak kanan.
+  function gambarTuas(add, xPivot, y, panjang, tertutup) {
+    const ujungX = tertutup ? xPivot + panjang : xPivot + panjang * Math.cos(SUDUT_TUAS);
+    const ujungY = tertutup ? y : y - panjang * Math.sin(SUDUT_TUAS);
+    add('path', {d: 'M' + xPivot + ' ' + y + ' L' + bulat(ujungX) + ' ' + bulat(ujungY), stroke: 'var(--teks)', 'stroke-width': 5, 'stroke-linecap': 'round'});
+    for (const x of [xPivot, xPivot + panjang]) add('circle', {cx: x, cy: y, r: 6, fill: 'var(--teks)'});
+    return {x: bulat(ujungX), y: bulat(ujungY)};
+  }
 
-  function mulaiHitungSiklus() {
-    hentikanHitungSiklus();
-    function siklus() {
-      if (angka1) angka1.textContent = "5,0 V";
-      if (angka2) angka2.textContent = "0,0 V";
-      setTimeout(function () { animasiHitung(angka1, 5.0, 4.6, 700); }, 900);
-      setTimeout(function () { animasiHitung(angka2, 0.0, 0.4, 700); }, 3900);
+  function gambarGND(add, x, y) {
+    add('path', {d: 'M' + x + ' ' + (y - 10) + ' V' + y + ' M' + (x - 18) + ' ' + y + ' H' + (x + 18) + ' M' + (x - 11) + ' ' + (y + 9) + ' H' + (x + 11) + ' M' + (x - 5) + ' ' + (y + 18) + ' H' + (x + 5), class: 'kawat'});
+  }
+
+  // Slide 1. Batang berskala mutlak 0 sampai 5 V. 1 V = 120 satuan.
+  (function gambarLevel() {
+    const svg = document.getElementById('grafikLevel');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const baris = [
+      {y: 30, nama: 'Saklar terbuka', logika: 'LOW', volt: 0, kelas: 'lembut'},
+      {y: 113, nama: 'Saklar tertutup', logika: 'HIGH', volt: 5, kelas: 'oranye'},
+    ];
+    for (const b of baris) {
+      add('text', {x: 0, y: b.y}, b.nama);
+      add('text', {x: 545, y: b.y, 'text-anchor': 'end', 'font-weight': 700, class: b.kelas}, b.logika);
+      add('text', {x: 635, y: b.y, 'text-anchor': 'end', 'font-weight': 700, class: b.kelas}, b.volt + ' V');
+      add('rect', {x: 0, y: b.y + 15, width: 600, height: 22, rx: 3, fill: 'var(--abu-muda)'});
+      if (b.volt > 0) add('rect', {x: 0, y: b.y + 15, width: b.volt * 120, height: 22, rx: 3, fill: 'var(--oranye)'});
     }
-    siklus();
-    timerHitung = setInterval(siklus, 7500);
-  }
-
-  function hentikanHitungSiklus() {
-    if (timerHitung) { clearInterval(timerHitung); timerHitung = null; }
-  }
-
-  function tampilkan(indeksBaru) {
-    if (indeksBaru < 0 || indeksBaru >= slides.length) return;
-    slides[indeks].classList.remove("aktif");
-    indeks = indeksBaru;
-    slides[indeks].classList.add("aktif");
-    nomorSekarang.textContent = indeks + 1;
-    tombolMundur.disabled = indeks === 0;
-    tombolMaju.disabled = indeks === slides.length - 1;
-
-    if (slides[indeks].dataset.slide === "6") mulaiHitungSiklus();
-    else hentikanHitungSiklus();
-  }
-
-  function maju() { tampilkan(indeks + 1); }
-  function mundur() { tampilkan(indeks - 1); }
-
-  tombolMaju.addEventListener("click", maju);
-  tombolMundur.addEventListener("click", mundur);
-
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "ArrowRight" || e.key === "PageDown") {
-      e.preventDefault();
-      maju();
-    } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
-      e.preventDefault();
-      mundur();
+    add('path', {d: 'M0 190 H600', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    for (let v = 0; v <= 5; v++) {
+      add('path', {d: 'M' + (v * 120) + ' 184 V196', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+      const anchor = v === 0 ? 'start' : v === 5 ? 'end' : 'middle';
+      add('text', {x: v === 0 ? 0 : v * 120, y: 220, 'text-anchor': anchor, class: 'label-kecil lembut'}, v === 0 || v === 5 ? v + ' V' : String(v));
     }
+    add('text', {x: 0, y: 269, class: 'label-kecil lembut'}, 'Nilai dari panel Kontrol Lab 1');
+  })();
+
+  // Slide 2. Diagram fungsi program, pin keluaran, LED.
+  (function gambarFungsi() {
+    const svg = document.getElementById('diagramFungsi');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    // Kurung mikrokontroler di atas blok program dan pin keluaran
+    add('path', {d: 'M60 96 V82 H700 V96', fill: 'none', stroke: 'var(--teks)', 'stroke-width': 2});
+    add('text', {x: 380, y: 58, 'text-anchor': 'middle', 'font-weight': 700}, 'Di dalam mikrokontroler');
+    add('rect', {x: 60, y: 120, width: 240, height: 160, rx: 12, fill: 'var(--abu-muda)', stroke: 'var(--abu-garis)', 'stroke-width': 2});
+    add('text', {x: 180, y: 192, 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:28px'}, 'Program');
+    add('text', {x: 180, y: 228, 'text-anchor': 'middle', class: 'label-kecil lembut'}, 'Memutuskan nyala');
+    add('text', {x: 180, y: 250, 'text-anchor': 'middle', class: 'label-kecil lembut'}, 'atau padam');
+    // Garis keputusan program, putus putus dengan kepala panah manual
+    add('path', {d: 'M312 200 H440', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 3, 'stroke-dasharray': '8 6'});
+    add('path', {d: 'M432 193 L446 200 L432 207', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round'});
+    add('text', {x: 376, y: 180, 'text-anchor': 'middle', class: 'label-kecil'}, 'Keputusan');
+    add('rect', {x: 460, y: 110, width: 240, height: 180, rx: 12, fill: 'var(--oranye-muda)', stroke: 'var(--oranye)', 'stroke-width': 3});
+    add('text', {x: 580, y: 168, 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:28px'}, 'Pin keluaran');
+    add('text', {x: 555, y: 218, 'text-anchor': 'end', 'font-weight': 700, class: 'oranye'}, 'HIGH');
+    add('text', {x: 580, y: 218}, '5 V');
+    add('text', {x: 555, y: 256, 'text-anchor': 'end', 'font-weight': 700, class: 'lembut'}, 'LOW');
+    add('text', {x: 580, y: 256}, '0 V');
+    // Jalur arus dari pin ke LED
+    add('path', {d: 'M700 200 H964', class: 'arus'});
+    add('text', {x: 800, y: 180, 'text-anchor': 'middle', class: 'label-kecil'}, 'Tegangan pin');
+    gambarLED(add, 1010, 200, 46, true);
+    add('text', {x: 1010, y: 72, 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:28px'}, 'LED');
+    add('text', {x: 1010, y: 346, 'text-anchor': 'middle', class: 'label-kecil lembut'}, 'Menyala atau padam');
+  })();
+
+  // Slide 3. Simbol saklar terbuka dan tertutup, sama dengan kanvas simulator.
+  (function gambarDuaPosisi() {
+    const svg = document.getElementById('gambarSaklar');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    // Posisi terbuka
+    add('text', {x: 80, y: 62, 'font-weight': 700, style: 'font-size:24px'}, 'Terbuka');
+    add('path', {d: 'M80 140 H290 M410 140 H620', class: 'kawat'});
+    const ujung = gambarTuas(add, 290, 140, 120, false);
+    add('text', {x: ujung.x + 18, y: ujung.y + 2, class: 'label-kecil lembut'}, 'Tuas');
+    add('text', {x: 430, y: 118, class: 'label-kecil lembut'}, 'Kontak');
+    add('text', {x: 350, y: 192, 'text-anchor': 'middle', class: 'lembut'}, 'Jalur terputus');
+    add('path', {d: 'M80 232 H620', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    // Posisi tertutup
+    add('text', {x: 80, y: 290, 'font-weight': 700, style: 'font-size:24px'}, 'Tertutup');
+    add('path', {d: 'M80 350 H290 M410 350 H620', class: 'arus'});
+    gambarTuas(add, 290, 350, 120, true);
+    add('text', {x: 350, y: 404, 'text-anchor': 'middle', class: 'oranye'}, 'Jalur tersambung');
+  })();
+
+  // Slide 4. Pin keluaran, resistor, LED, kembali ke mikrokontroler. Resistor hanya pada rangkaian fisik.
+  const zigzag = (x, y0) => ' L' + (x + 14) + ' ' + (y0 + 5.8) + ' L' + (x - 14) + ' ' + (y0 + 17.5) + ' L' + (x + 14) + ' ' + (y0 + 29.2) + ' L' + (x - 14) + ' ' + (y0 + 40.8) + ' L' + (x + 14) + ' ' + (y0 + 52.5) + ' L' + (x - 14) + ' ' + (y0 + 64.2) + ' L' + x + ' ' + (y0 + 70);
+  function gambarPin(svg) {
+    const high = svg.dataset.mode === 'high';
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const jalur = 'M212 70 H380 V90' + zigzag(380, 90) + ' V262 H100 V220';
+    add('path', {d: jalur, class: 'kawat'});
+    if (high) add('path', {d: jalur, class: 'arus'});
+    gambarGND(add, 240, 272);
+    add('text', {x: 268, y: 290, class: 'label-kecil lembut'}, 'GND');
+    add('rect', {x: 10, y: 40, width: 180, height: 180, rx: 12, fill: 'var(--abu-muda)', stroke: 'var(--abu-garis)', 'stroke-width': 2});
+    add('text', {x: 100, y: 136, 'text-anchor': 'middle', 'font-weight': 700}, 'Mikrokontroler');
+    add('rect', {x: 190, y: 62, width: 22, height: 16, fill: high ? 'var(--oranye)' : 'var(--teks-lembut)'});
+    add('text', {x: 220, y: 52, class: 'label-kecil'}, 'Pin');
+    add('text', {x: 296, y: 50, 'text-anchor': 'middle', 'font-weight': 700, class: high ? 'oranye' : 'lembut'}, high ? '5 V' : '0 V');
+    add('text', {x: 408, y: 131, class: 'label-kecil'}, 'Resistor');
+    gambarLED(add, 380, 205, 24, high);
+    add('text', {x: 436, y: 211, class: 'label-kecil'}, 'LED');
+  }
+  document.querySelectorAll('.pin').forEach(gambarPin);
+
+  // Slide 5. Rangkaian kanvas simulator. Baterai kiri dengan kutub positif di atas, saklar di atas, LED di kanan.
+  function gambarRangkaian(svg) {
+    const tertutup = svg.dataset.mode === 'tertutup';
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const x0 = 60, x1 = 400, y0 = 50, y1 = 250, yPlus = 137, yMinus = 163, xPivot = 215, celah = 60, yLED = 150;
+    add('path', {d: 'M' + x0 + ' ' + yPlus + ' V' + y0 + ' H' + xPivot + ' M' + (xPivot + celah) + ' ' + y0 + ' H' + x1 + ' V' + y1 + ' H' + x0 + ' V' + yMinus, class: 'kawat'});
+    if (tertutup) {
+      // Arus konvensional: kutub positif, saklar, LED, kutub negatif. Sama dengan urutan titik arus pada kanvas.
+      const jalurArus = 'M' + x0 + ' ' + yPlus + ' V' + y0 + ' H' + x1 + ' V' + y1 + ' H' + x0 + ' V' + yMinus;
+      add('path', {d: jalurArus, class: 'arus'});
+      add('path', {d: jalurArus, class: 'aliran'});
+    }
+    // Baterai: pelat panjang tipis kutub positif, pelat pendek tebal kutub negatif
+    add('path', {d: 'M' + (x0 - 18) + ' ' + yPlus + ' H' + (x0 + 18), stroke: 'var(--teks)', 'stroke-width': 3});
+    add('path', {d: 'M' + (x0 - 9) + ' ' + yMinus + ' H' + (x0 + 9), stroke: 'var(--teks)', 'stroke-width': 8});
+    add('text', {x: x0 - 26, y: yPlus + 7, 'text-anchor': 'end', 'font-weight': 700}, '+');
+    add('text', {x: x0 - 26, y: yMinus + 7, 'text-anchor': 'end', 'font-weight': 700}, '−');
+    add('text', {x: x0 + 40, y: yMinus - 6, class: 'label-kecil'}, 'Baterai 5 V');
+    gambarTuas(add, xPivot, y0, celah, tertutup);
+    add('text', {x: xPivot + celah / 2, y: y0 + 40, 'text-anchor': 'middle', class: 'label-kecil'}, 'Saklar');
+    gambarLED(add, x1, yLED, 24, tertutup);
+    add('text', {x: x1 - 60, y: yLED + 6, 'text-anchor': 'end', class: 'label-kecil'}, 'LED');
+  }
+  document.querySelectorAll('.rangkaian').forEach(gambarRangkaian);
+
+  // Slide 6. Padanan pin, saklar, indikator Level tegangan pada panel Kontrol, dan LED.
+  (function gambarModel() {
+    const svg = document.getElementById('tabelModel');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    const kolom = [[20, 'Pin pada perangkat keras'], [330, 'Saklar pada kanvas'], [640, 'Indikator panel Kontrol'], [940, 'LED']];
+    for (const [x, t] of kolom) add('text', {x, y: 24, class: 'label-kecil lembut', 'font-weight': 700}, t);
+    add('path', {d: 'M0 42 H1152 M0 206 H1152', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    const baris = [
+      {cy: 124, high: true, logika: 'HIGH', volt: '5 V', saklar: 'Tertutup', led: 'Menyala'},
+      {cy: 288, high: false, logika: 'LOW', volt: '0 V', saklar: 'Terbuka', led: 'Padam'},
+    ];
+    for (const b of baris) {
+      const kelas = b.high ? 'oranye' : 'lembut';
+      add('text', {x: 20, y: b.cy + 12, 'font-weight': 700, style: 'font-size:36px', class: kelas}, b.logika);
+      add('text', {x: 150, y: b.cy + 10, 'font-weight': 700, style: 'font-size:26px'}, b.volt);
+      add('path', {d: 'M330 ' + b.cy + ' H380 M460 ' + b.cy + ' H510', class: b.high ? 'arus' : 'kawat'});
+      gambarTuas(add, 380, b.cy, 80, b.high);
+      add('text', {x: 420, y: b.cy + 48, 'text-anchor': 'middle', class: 'label-kecil'}, b.saklar);
+      add('rect', {x: 640, y: b.cy - 56, width: 250, height: 112, rx: 10, fill: b.high ? 'var(--oranye-muda)' : 'var(--abu-muda)'});
+      add('text', {x: 765, y: b.cy + 6, 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:38px', class: kelas}, b.logika);
+      add('text', {x: 765, y: b.cy + 38, 'text-anchor': 'middle', 'font-weight': 700, class: 'label-kecil ' + kelas}, 'Level tegangan · ' + b.volt);
+      gambarLED(add, 990, b.cy, 26, b.high);
+      add('text', {x: 1066, y: b.cy + 6, class: 'label-kecil'}, b.led);
+    }
+  })();
+
+  // Slide 7. Tiga bagian robot yang memakai dua keadaan.
+  (function gambarPenerapan() {
+    const svg = document.getElementById('penerapanRobot');
+    const add = (tag, attr, isi) => svg.appendChild(elemen(tag, attr, isi));
+    add('path', {d: 'M378 10 V350 M774 10 V350', stroke: 'var(--abu-garis)', 'stroke-width': 1});
+    const kepala = [[180, 'Lab 1', 'Lampu indikator'], [576, 'Modul 2', 'Sensor garis'], [972, 'Modul 3', 'Motor']];
+    for (const [x, tag, nama] of kepala) {
+      add('text', {x, y: 28, 'text-anchor': 'middle', class: 'label-kecil lembut'}, tag);
+      add('text', {x, y: 64, 'text-anchor': 'middle', 'font-weight': 700, style: 'font-size:24px'}, nama);
+    }
+    // Lampu indikator
+    gambarLED(add, 110, 190, 30, true);
+    gambarLED(add, 250, 190, 30, false);
+    add('text', {x: 110, y: 320, 'text-anchor': 'middle'}, 'Menyala');
+    add('text', {x: 250, y: 320, 'text-anchor': 'middle', class: 'lembut'}, 'Padam');
+    // Sensor garis: titik baca di atas garis gelap dan di atas lantai
+    for (const [cx, garis, label] of [[506, true, 'Garis'], [646, false, 'Lantai']]) {
+      add('rect', {x: cx - 58, y: 132, width: 116, height: 116, fill: 'var(--putih)', stroke: 'var(--abu-garis)', 'stroke-width': 2});
+      if (garis) add('rect', {x: cx - 22, y: 133, width: 44, height: 114, fill: 'var(--lintasan)'});
+      add('circle', {cx, cy: 190, r: 12, fill: garis ? 'var(--oranye)' : 'var(--putih)', stroke: garis ? 'var(--putih)' : 'var(--teks-lembut)', 'stroke-width': 3});
+      add('text', {x: cx, y: 320, 'text-anchor': 'middle', class: garis ? '' : 'lembut'}, label);
+    }
+    // Motor: HIGH dan LOW bergantian (PWM, Modul 3)
+    add('path', {d: 'M848 132 V250 H1130', fill: 'none', stroke: 'var(--teks-lembut)', 'stroke-width': 2});
+    add('text', {x: 834, y: 157, 'text-anchor': 'end', class: 'label-kecil lembut'}, '5 V');
+    add('text', {x: 834, y: 256, 'text-anchor': 'end', class: 'label-kecil lembut'}, '0 V');
+    let d = 'M848 250';
+    for (let i = 0; i < 3; i++) {
+      const x = 848 + i * 90;
+      add('rect', {x, y: 150, width: 45, height: 100, fill: 'var(--oranye-muda)'});
+      d += ' V150 H' + (x + 45) + ' V250 H' + (x + 90);
+    }
+    add('path', {d, fill: 'none', stroke: 'var(--oranye)', 'stroke-width': 4, 'stroke-linejoin': 'round'});
+    add('text', {x: 1130, y: 280, 'text-anchor': 'end', class: 'label-kecil lembut'}, 'Waktu');
+    add('text', {x: 972, y: 320, 'text-anchor': 'middle'}, 'HIGH dan LOW bergantian');
+  })();
+
+  // ===== NAVIGASI. JANGAN DIUBAH. Sama persis dengan deck-lab08.html =====
+  const slides=[...document.querySelectorAll('.slide')];
+  const panggung=document.getElementById('panggung');
+  const mundur=document.getElementById('mundur'),maju=document.getElementById('maju');
+  let kini=0;
+  function tampil(index){
+    kini=Math.max(0,Math.min(slides.length-1,index));
+    slides.forEach((slide,i)=>{slide.hidden=i!==kini;slide.classList.toggle('aktif',i===kini);});
+    document.getElementById('nomorKini').textContent=(kini+1)+' / '+slides.length;
+    document.getElementById('kemajuan').style.width=((kini+1)/slides.length*100)+'%';
+    mundur.disabled=kini===0;maju.disabled=kini===slides.length-1;
+  }
+  function ukuran(){
+    const skala=Math.min(innerWidth/1280,innerHeight/720);
+    panggung.style.transform='scale('+skala+')';
+    panggung.style.left=(innerWidth-1280*skala)/2+'px';
+    panggung.style.top=(innerHeight-720*skala)/2+'px';
+  }
+  const jeda=document.getElementById('jeda');
+  function jedakan(){const berhenti=panggung.classList.toggle('paused');jeda.setAttribute('aria-pressed',String(berhenti));jeda.textContent=berhenti?'Putar animasi':'Jeda animasi';}
+  jeda.addEventListener('click',jedakan);
+  mundur.addEventListener('click',()=>tampil(kini-1));
+  maju.addEventListener('click',()=>tampil(kini+1));
+  document.addEventListener('keydown',event=>{
+    if(event.target.matches('input,select,textarea')) return;
+    if(event.key===' ' && event.target.closest('button')) return;
+    if(['ArrowRight','PageDown','ArrowLeft','PageUp','Home','End',' '].includes(event.key)) event.preventDefault();
+    if(event.key==='ArrowRight'||event.key==='PageDown') tampil(kini+1);
+    if(event.key==='ArrowLeft'||event.key==='PageUp') tampil(kini-1);
+    if(event.key==='Home') tampil(0);
+    if(event.key==='End') tampil(slides.length-1);
+    if(event.key===' ') jedakan();
   });
-
-  tampilkan(0);
+  addEventListener('resize',ukuran);ukuran();tampil(0);
 })();
 </script>
-
 </body>
 </html>
