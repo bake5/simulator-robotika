@@ -9,10 +9,10 @@
  * Level 1: kendali bawaan (kendaliPID di engine/kendali.js), peserta atur
  * Kp/Kd/Ki lewat slider dan amati efeknya langsung, termasuk overshoot dan
  * osilasi kalau parameternya kebesaran.
- * Level 2: peserta menulis kendali(sensor) di JavaScript (template PID
- * isi-bagian-kosong).
- * Level 3: peserta menulis kendali(sensor) bebas di Python lewat Pyodide
- * (coding/worker-py.js), kontrak fungsinya identik dengan JavaScript.
+ * Level 2: kode PID JavaScript sudah lengkap di dalam komentar; peserta
+ * membacanya, menghapus baris penanda komentar, lalu memakainya.
+ * Level 3: kode yang sama dalam Python lewat Pyodide (coding/worker-py.js),
+ * kontrak fungsinya identik dengan JavaScript.
  */
 
 import { buatSimulasiLintasan } from "../engine/simulasiLintasan.js";
@@ -175,6 +175,12 @@ function buatStatePID() {
       this.jumlahOsilasi = 0;
       this._errorTandaSebelumnya = 0;
       this._sisaWaktuSampelGrafik = 0;
+      // Pewaktu keputusan dan kecepatan terakhir ikut dikosongkan supaya setiap
+      // percobaan (Reset, Jalankan sebagai A/B, Pakai kode ini) mulai dari keadaan
+      // yang sama. Tanpa ini, sisa waktu dan perintah roda dari percobaan
+      // sebelumnya terbawa sehingga perbandingan A/B tidak bisa diulang.
+      this._sisaWaktuKendali = 0;
+      this._kecepatanKodeTerakhir = null;
     },
 
     /** Dipanggil tiap langkah fisika setelah state.langkah(dt) — grafik error, overshoot, osilasi. */
@@ -206,8 +212,8 @@ export default {
 
   panduan: [
     "Kendali pada lab ini menghitung besar koreksi dari error. Berbeda dari dua keadaan tetap pada Lab 10, komponen proporsional menghasilkan koreksi yang berubah mengikuti jarak garis dari posisi tengah.",
-    "Mulai dengan Kp saja dan atur Kd serta Ki ke 0. Naikkan Kp secara bertahap sampai robot mulai berosilasi. Osilasi yang terus meningkat menunjukkan nilai Kp terlalu besar.",
-    "Tambahkan Kd untuk meredam osilasi. Komponen turunan menggunakan laju perubahan error untuk mengurangi koreksi ketika robot bergerak cepat menuju posisi tengah.",
+    "Mulai dengan Kp saja dan atur Kd serta Ki ke 0. Kp yang terlalu kecil membuat robot lamban di tikungan sampai kehilangan garis. Naikkan Kp bertahap dan amati Overshoot maks. Pada lintasan Halus robot tetap mulus sampai Kp 3, sedangkan pada lintasan Zigzag Kp yang besar membuat error bergoyang bolak balik dan angka Osilasi naik.",
+    "Kd menambah koreksi sebanding dengan laju perubahan error. Menurut teori kendali, suku ini meredam osilasi. Di simulator, bandingkan Kd 0 dan Kd 0,15 dengan tombol A dan B pada lintasan Halus dan Zigzag. Pengaruhnya tidak selalu sama pada setiap lintasan, dan Kd yang terlalu besar, misalnya 1, membuat robot bergetar.",
     "Ki mengakumulasi error dari waktu ke waktu. Nilai Ki yang terlalu besar dapat menyebabkan integral windup sehingga koreksi tetap besar meskipun kondisi robot sudah berubah.",
     "Grafik error di bawah kanvas serta nilai overshoot dan osilasi pada panel membantu menilai hasil tuning berdasarkan data, tidak hanya melalui pengamatan terhadap gerakan robot.",
     "Untuk membandingkan parameter, atur Kp, Kd, dan Ki, lalu tekan 'Jalankan sebagai A'. Ubah parameter dan tekan 'Jalankan sebagai B'. Jejak A ditampilkan sebagai garis putus-putus, sedangkan jejak B ditampilkan sebagai garis penuh pada kanvas yang sama.",

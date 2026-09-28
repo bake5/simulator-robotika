@@ -24,7 +24,7 @@ export default {
   judul: "Photodiode",
   singkat: "Photodiode",
   modul: 2,
-  tujuan: "Memahami hubungan intensitas cahaya dengan arus photodiode, tegangan keluaran, dan nilai ADC 0 sampai 1023.",
+  tujuan: "Memahami hubungan intensitas dan jarak cahaya dengan resistansi photodiode (R_PD), tegangan keluaran pembagi tegangan, dan nilai ADC 0 sampai 1023.",
 
   panduan: [
     "Klik dan seret sumber cahaya di kanvas. Makin dekat sumber cahaya ke photodiode, makin terang cahaya yang diterimanya. Slider di panel kanan mengatur seberapa terang sumber cahaya itu sendiri.",

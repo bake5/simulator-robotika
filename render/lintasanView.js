@@ -159,7 +159,11 @@ export function gambarRobotLintasan(ctx, state, ukuranPenuh, opsi = {}) {
   ctx.fillStyle = warnaTeks;
   ctx.font = `700 12px ${fontUtama}`;
   ctx.textAlign = "left";
-  ctx.fillText(`error ${state.error.toFixed(1)} · keluar jalur ${state.jumlahKeluarJalur}× · waktu ${state.waktuTempuh.toFixed(1)}s`, 10, 18);
+  // Bila tidak satu pun sensor atau region melihat garis (misalnya threshold kamera
+  // Lab 15 sangat rendah sehingga semua region terbaca lantai), rata-rata berbobot
+  // menjadi 0 ÷ 0. Tampilkan keterangan, bukan "NaN".
+  const teksError = Number.isFinite(state.error) ? state.error.toFixed(1) : "tidak terbaca (garis tidak terlihat)";
+  ctx.fillText(`error ${teksError} · keluar jalur ${state.jumlahKeluarJalur}× · waktu ${state.waktuTempuh.toFixed(1)}s`, 10, 18);
   if (lintasan.tertutup) {
     ctx.fillStyle = state.satuPutaranTercapai ? warnaHijau : warnaLabel;
     ctx.font = `600 11px ${fontUtama}`;

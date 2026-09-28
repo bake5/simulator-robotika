@@ -44,8 +44,8 @@ const TEMPLATE_JS = `function hitungRegion(frameBiner) {
       }
     }
 
-    // Contoh hitungan: kalau di region ini ada 20 piksel dan 15 di antaranya
-    // hitam, maka proporsiGelap = 15 / 20 = 0.75, dan
+    // Contoh hitungan: satu region berisi 4 kolom x 20 baris = 80 piksel. Kalau
+    // 60 di antaranya hitam, maka proporsiGelap = 60 / 80 = 0.75, dan
     // ADC = (1 - proporsiGelap) * 1023 = (1 - 0.75) * 1023 ≈ 256.
     // Semakin gelap regionnya, semakin kecil angka ADC-nya.
     const proporsiGelap = totalHitam / jumlahPiksel;
@@ -82,8 +82,8 @@ const TEMPLATE_PY = `def hitung_region(frame_biner):
                 total_hitam += baris[k]  # baris[k] bernilai 0 atau 1
                 jumlah_piksel += 1
 
-        # Contoh hitungan: kalau di region ini ada 20 piksel dan 15 di antaranya
-        # hitam, maka proporsi_gelap = 15 / 20 = 0.75, dan
+        # Contoh hitungan: satu region berisi 4 kolom x 20 baris = 80 piksel. Kalau
+        # 60 di antaranya hitam, maka proporsi_gelap = 60 / 80 = 0.75, dan
         # ADC = (1 - proporsi_gelap) * 1023 = (1 - 0.75) * 1023 ≈ 256.
         # Semakin gelap regionnya, semakin kecil angka ADC-nya.
         proporsi_gelap = total_hitam / jumlah_piksel
